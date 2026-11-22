@@ -1,10 +1,16 @@
-# darja-nlp-kit
+<div align="center">
+  <img src="https://raw.githubusercontent.com/test-bit-sys/darja-nlp-kit/main/assets/logo.jpg" alt="darja-nlp-kit logo" width="200" style="border-radius: 28px;" />
+  <h1>darja-nlp-kit</h1>
+  <p><strong>Zero-dependency, dual-language (TypeScript & Python) NLP toolkit for Algerian Darja</strong></p>
 
-[![CI](https://github.com/dz-open-suite/darja-nlp-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/dz-open-suite/darja-nlp-kit/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/@dz-open-suite/darja-nlp-kit.svg)](https://www.npmjs.com/package/@dz-open-suite/darja-nlp-kit)
-[![PyPI version](https://img.shields.io/pypi/v/darja-nlp-kit.svg)](https://pypi.org/project/darja-nlp-kit/)
-[![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](#)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+  <p>
+    <a href="https://github.com/test-bit-sys/darja-nlp-kit/actions/workflows/ci.yml"><img src="https://github.com/test-bit-sys/darja-nlp-kit/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+    <a href="https://www.npmjs.com/package/@dz-open-suite/darja-nlp-kit"><img src="https://img.shields.io/npm/v/@dz-open-suite/darja-nlp-kit.svg" alt="npm version" /></a>
+    <a href="https://pypi.org/project/darja-nlp-kit/"><img src="https://img.shields.io/pypi/v/darja-nlp-kit.svg" alt="PyPI version" /></a>
+    <a href="#"><img src="https://img.shields.io/badge/dependencies-0-brightgreen.svg" alt="Zero Dependencies" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" /></a>
+  </p>
+</div>
 
 Zero-dependency, dual-language (TypeScript & Python) NLP toolkit for **Algerian Darja** (Derja) — part of the **DZ Open Suite** ecosystem.
 
