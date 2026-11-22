@@ -40,6 +40,13 @@ def main() -> None:
 
     print('\n[DONE] All datasets synced successfully.')
 
+    root_readme = root / 'README.md'
+    if root_readme.exists():
+        for pkg in ['js', 'python']:
+            pkg_readme = root / 'packages' / pkg / 'README.md'
+            shutil.copyfile(root_readme, pkg_readme)
+            print(f'  [OK] README.md -> {pkg_readme.relative_to(root)}')
+
     for target_dir in targets:
         total_entries = 0
         for src_name in data_files:

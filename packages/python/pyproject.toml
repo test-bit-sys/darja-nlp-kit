@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "darja-nlp-kit"
 version = "1.0.0"
 description = "Zero-dependency NLP toolkit for Algerian Darja (Arabic/French/Arabizi code-switching)"
-readme = "../../README.md"
+readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.9"
 authors = [
