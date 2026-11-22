@@ -8,6 +8,8 @@ from darja_nlp.normalizer import normalize, NormalizeOptions
 from darja_nlp.arabizi import arabizi_to_arabic, ArabiziOptions
 from darja_nlp.stopwords import tokenize, remove_stopwords, is_stopword
 from darja_nlp.sentiment import analyze_sentiment
+from darja_nlp.entities import extract_entities, get_wilayas, get_wilaya_by_code
+from darja_nlp.dialect import detect_dialect
 
 
 class TestNormalize:
@@ -262,3 +264,75 @@ class TestAnalyzeSentiment:
     def test_no_sentiment_words(self) -> None:
         result = analyze_sentiment('المنتج وصل')
         assert result.label == 'NEUTRAL'
+
+
+class TestEntities:
+
+    def test_register_69_wilayas(self) -> None:
+        wilayas = get_wilayas()
+        assert len(wilayas) == 69
+
+    def test_find_wilaya_by_code(self) -> None:
+        alger = get_wilaya_by_code(16)
+        assert alger is not None
+        assert alger['name_fr'] == 'Alger'
+
+        bousaada = get_wilaya_by_code(68)
+        assert bousaada is not None
+        assert bousaada['name_ar'] == 'بوسعادة'
+
+        elabiodh = get_wilaya_by_code('69')
+        assert elabiodh is not None
+        assert elabiodh['name_fr'] == 'El Abiodh Sidi Cheikh'
+
+    def test_extract_wilaya_entities(self) -> None:
+        res1 = extract_entities('livraison l 16')
+        assert any(w.code == 16 for w in res1.wilayas)
+
+        res2 = extract_entities('حاب نشري في وهران و نبعث لسطيف')
+        assert any(w.code == 31 for w in res2.wilayas)
+        assert any(w.code == 19 for w in res2.wilayas)
+
+        res3 = extract_entities('توصيل لبوسعادة و البهجة')
+        assert any(w.code == 68 for w in res3.wilayas)
+        assert any(w.code == 16 for w in res3.wilayas)
+
+    def test_extract_payment_methods(self) -> None:
+        text = 'نخلصك عبر baridimob او كاش عند الاستلام او بالذهبية'
+        res = extract_entities(text)
+        assert any(p.type == 'BARIDIMOB' for p in res.payments)
+        assert any(p.type == 'COD' for p in res.payments)
+        assert any(p.type == 'EDAHABIA' for p in res.payments)
+
+    def test_extract_prices(self) -> None:
+        text1 = 'السعر 4500 DA و التوصيل بـ 500 دج'
+        res1 = extract_entities(text1)
+        assert any(p.amount == 4500.0 for p in res1.prices)
+        assert any(p.amount == 500.0 for p in res1.prices)
+
+        text2 = 'سلعة شريتها بـ زوج ملاين و بقاتلي مية الف'
+        res2 = extract_entities(text2)
+        assert any(p.amount == 20000.0 for p in res2.prices)
+        assert any(p.amount == 1000.0 for p in res2.prices)
+
+
+class TestDialect:
+
+    def test_western_dialect(self) -> None:
+        res = detect_dialect('شوالا راك باغي خوية غايا درك؟')
+        assert res.region == 'WEST'
+        assert res.confidence > 0.6
+
+    def test_eastern_dialect(self) -> None:
+        res = detect_dialect('واشنهي هادا قداش يدير ياسر باهي')
+        assert res.region == 'EAST'
+        assert res.confidence > 0.6
+
+    def test_central_dialect(self) -> None:
+        res = detect_dialect('واشنو هكداك حوايج العاصمة دروك')
+        assert res.region == 'CENTER'
+        assert res.confidence > 0.6
+
+    def test_general_dialect(self) -> None:
+        res = detect_dialect('سلام عليكم شكرا')
+        assert res.region == 'GENERAL_DARJA'

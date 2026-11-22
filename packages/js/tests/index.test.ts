@@ -4,6 +4,8 @@ import { normalize } from '../src/normalizer';
 import { arabiziToArabic } from '../src/arabizi';
 import { tokenize, removeStopwords, isStopword } from '../src/stopwords';
 import { analyzeSentiment } from '../src/sentiment';
+import { extractEntities, getWilayas, getWilayaByCode } from '../src/entities';
+import { detectDialect } from '../src/dialect';
 
 describe('normalize', () => {
   it('should unify alef variants', () => {
@@ -298,5 +300,81 @@ describe('analyzeSentiment', () => {
   it('should return NEUTRAL for text with no sentiment words', () => {
     const result = analyzeSentiment('المنتج وصل');
     assert.equal(result.label, 'NEUTRAL');
+  });
+});
+
+describe('wilayas & entities', () => {
+  it('should register exactly 69 wilayas according to latest reform', () => {
+    const all = getWilayas();
+    assert.equal(all.length, 69);
+  });
+
+  it('should find wilaya by code including new wilayas (59-69)', () => {
+    const alger = getWilayaByCode(16);
+    assert.equal(alger?.name_fr, 'Alger');
+
+    const bousaada = getWilayaByCode(68);
+    assert.equal(bousaada?.name_ar, 'بوسعادة');
+
+    const elabiodh = getWilayaByCode('69');
+    assert.equal(elabiodh?.name_fr, 'El Abiodh Sidi Cheikh');
+  });
+
+  it('should extract wilaya by code, name, and alias', () => {
+    const res1 = extractEntities('livraison l 16');
+    assert.ok(res1.wilayas.some((w) => w.code === 16));
+
+    const res2 = extractEntities('حاب نشري في وهران و نبعث لسطيف');
+    assert.ok(res2.wilayas.some((w) => w.code === 31));
+    assert.ok(res2.wilayas.some((w) => w.code === 19));
+
+    const res3 = extractEntities('توصيل لبوسعادة و البهجة');
+    assert.ok(res3.wilayas.some((w) => w.code === 68));
+    assert.ok(res3.wilayas.some((w) => w.code === 16));
+  });
+
+  it('should extract Algerian payment methods', () => {
+    const text = 'نخلصك عبر baridimob او كاش عند الاستلام او بالذهبية';
+    const res = extractEntities(text);
+    assert.ok(res.payments.some((p) => p.type === 'BARIDIMOB'));
+    assert.ok(res.payments.some((p) => p.type === 'COD'));
+    assert.ok(res.payments.some((p) => p.type === 'EDAHABIA'));
+  });
+
+  it('should extract numeric and colloquial Darja prices', () => {
+    const text1 = 'السعر 4500 DA و التوصيل بـ 500 دج';
+    const res1 = extractEntities(text1);
+    assert.ok(res1.prices.some((p) => p.amount === 4500));
+    assert.ok(res1.prices.some((p) => p.amount === 500));
+
+    const text2 = 'سلعة شريتها بـ زوج ملاين و بقاتلي مية الف';
+    const res2 = extractEntities(text2);
+    assert.ok(res2.prices.some((p) => p.amount === 20000));
+    assert.ok(res2.prices.some((p) => p.amount === 1000));
+  });
+});
+
+describe('detectDialect', () => {
+  it('should detect Western Algerian dialect', () => {
+    const res = detectDialect('شوالا راك باغي خوية غايا درك؟');
+    assert.equal(res.region, 'WEST');
+    assert.ok(res.confidence > 0.6);
+  });
+
+  it('should detect Eastern Algerian dialect', () => {
+    const res = detectDialect('واشنهي هادا قداش يدير ياسر باهي');
+    assert.equal(res.region, 'EAST');
+    assert.ok(res.confidence > 0.6);
+  });
+
+  it('should detect Central Algerian dialect', () => {
+    const res = detectDialect('واشنو هكداك حوايج العاصمة دروك');
+    assert.equal(res.region, 'CENTER');
+    assert.ok(res.confidence > 0.6);
+  });
+
+  it('should return GENERAL_DARJA when no regional markers found', () => {
+    const res = detectDialect('سلام عليكم شكرا');
+    assert.equal(res.region, 'GENERAL_DARJA');
   });
 });

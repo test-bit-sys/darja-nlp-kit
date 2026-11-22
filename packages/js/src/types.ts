@@ -47,3 +47,49 @@ export interface ArabiziRules {
   french_suffixes: string[];
   overrides: Record<string, string>;
 }
+
+export interface WilayaRaw {
+  code: number;
+  code_str: string;
+  name_ar: string;
+  name_fr: string;
+  aliases: string[];
+  communes_sample?: string[];
+  communes_fr_sample?: string[];
+}
+
+export interface WilayaEntity {
+  code: number;
+  codeStr: string;
+  nameAr: string;
+  nameFr: string;
+  matchedText: string;
+}
+
+export type PaymentMethodType = 'BARIDIMOB' | 'EDAHABIA' | 'CCP' | 'COD';
+
+export interface PaymentEntity {
+  type: PaymentMethodType;
+  label: string;
+  matchedText: string;
+}
+
+export interface PriceEntity {
+  raw: string;
+  amount: number | null;
+  currency: 'DZD';
+}
+
+export interface EntitiesResult {
+  wilayas: WilayaEntity[];
+  payments: PaymentEntity[];
+  prices: PriceEntity[];
+}
+
+export type DialectRegion = 'WEST' | 'EAST' | 'CENTER' | 'SOUTH' | 'GENERAL_DARJA';
+
+export interface DialectResult {
+  region: DialectRegion;
+  confidence: number;
+  detectedMarkers: string[];
+}

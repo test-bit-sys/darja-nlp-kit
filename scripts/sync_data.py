@@ -14,7 +14,7 @@ def main() -> None:
         root / 'packages' / 'python' / 'darja_nlp' / 'data',
     ]
 
-    data_files = ['stopwords.json', 'lexicon.json', 'arabizi_rules.json']
+    data_files = ['stopwords.json', 'lexicon.json', 'arabizi_rules.json', 'wilayas.json']
 
     for src_name in data_files:
         src_path = data_dir / src_name
@@ -70,6 +70,8 @@ def main() -> None:
                 overrides = len(data.get('overrides', {}))
                 french = len(data.get('french_whitelist', []))
                 print(f'  [STATS] {src_name}: {overrides} overrides, {french} French whitelist entries')
+            elif src_name == 'wilayas.json':
+                print(f'  [STATS] {src_name}: {len(data)} wilayas registered')
 
 
 if __name__ == '__main__':

@@ -23,6 +23,8 @@ Handles Arabic script, Arabizi (Latin transliteration with numbers), and French/
 - **Stopword Removal** — 500+ categorized Algerian Darja stopwords (Arabic script + Arabizi) with prefix stripping
 - **Tokenization** — Mixed-script tokenization with circumfix negation detection (ما...ش / ma...ch)
 - **Sentiment Analysis** — Score-based analysis with negation inversion, double negation, intensifier scaling, and code-switching support
+- **Algerian Geo & Entity Extraction** — Full coverage of all 69 wilayas (Law 26-06 reform), Algerian payment methods (BaridiMob, Edahabia, CCP, COD), and Darja prices
+- **Regional Dialect Identification** — Detect regional dialects: WEST (Oran), EAST (Constantine/Setif), CENTER (Algiers), SOUTH, or GENERAL_DARJA
 
 ## Installation
 
@@ -265,14 +267,75 @@ result = analyze_sentiment('المنتوج هايل')
 # result.score == 0.9
 ```
 
+---
+
+### `extractEntities(text)` / `extract_entities(text)`
+
+Extracts Algerian entities:
+- **Wilayas (69 Provinces)**: Matches by postal codes (`16`, `31`, `w16`), Arabic/French names (`الجزائر`, `Alger`, `بوسعادة`), and popular aliases (`البهجة`, `الباهية`, `سيرتا`). Fully compliant with the 69-wilaya administrative reform (Law 26-06).
+- **Payment Methods**: `BARIDIMOB`, `EDAHABIA` (البطاقة الذهبية), `CCP`, `COD` (الدفع عند الاستلام).
+- **Prices & Colloquial Amounts**: `4500 DA`, `مية الف` (1,000 DZD), `زوج ملاين` (20,000 DZD).
+
+**TypeScript:**
+```typescript
+import { extractEntities } from '@dz-open-suite/darja-nlp-kit';
+
+const res = extractEntities('توصيل لبوسعادة و نخلصك بـ baridimob السعر زوج ملاين');
+// res.wilayas => [{ code: 68, codeStr: '68', nameAr: 'بوسعادة', nameFr: 'Bou Saâda', matchedText: 'بوسعادة' }]
+// res.payments => [{ type: 'BARIDIMOB', label: 'BaridiMob (بريدي موب)', matchedText: 'baridimob' }]
+// res.prices => [{ raw: 'زوج ملاين', amount: 20000, currency: 'DZD' }]
+```
+
+**Python:**
+```python
+from darja_nlp import extract_entities
+
+res = extract_entities('توصيل لبوسعادة و نخلصك بـ baridimob السعر زوج ملاين')
+# res.wilayas[0].code == 68
+# res.payments[0].type == 'BARIDIMOB'
+# res.prices[0].amount == 20000.0
+```
+
+---
+
+### `detectDialect(text)` / `detect_dialect(text)`
+
+Identifies regional Algerian dialect variants based on distinctive vocabulary:
+- `WEST`: Oran, Tlemcen, Mostaganem (شوالا، شاكاين، غايا، باغي، حرز، درك، شراكم...)
+- `EAST`: Constantine, Setif, Batna, Annaba (واشنهي، قداش، ياسر، ضرك، زي، باهي...)
+- `CENTER`: Algiers, Blida, Tipaza, Boumerdes (واشنو، حكاية، دروك، هكدا، حوايج...)
+- `SOUTH`: Adrar, Ghardaia, Ouargla, Bechar (واه، لاه، حتة...)
+- `GENERAL_DARJA`: Neutral or common Algerian text
+
+**TypeScript:**
+```typescript
+import { detectDialect } from '@dz-open-suite/darja-nlp-kit';
+
+detectDialect('شوالا راك باغي خوية غايا؟');
+// => { region: 'WEST', confidence: 0.9, detectedMarkers: ['شوالا', 'باغي', 'غايا'] }
+
+detectDialect('واشنهي هادا قداش يدير ياسر باهي');
+// => { region: 'EAST', confidence: 0.9, detectedMarkers: ['واشنهي', 'قداش', 'ياسر', 'باهي'] }
+```
+
+**Python:**
+```python
+from darja_nlp import detect_dialect
+
+res = detect_dialect('شوالا راك باغي خوية غايا؟')
+# res.region == 'WEST'
+# res.confidence >= 0.9
+```
+
 ## Data Files
 
 All linguistic data lives in `/data` and is synced to both packages:
 
 | File | Description |
 |---|---|
-| `stopwords.json` | 500+ categorized stopwords (prepositions, pronouns, conjunctions, adverbs, etc.) |
-| `lexicon.json` | Sentiment dictionary with positive/negative scores, negators, intensifiers |
+| `wilayas.json` | All 69 Algerian Wilayas with Arabic/French names, codes, and popular aliases |
+| `stopwords.json` | 500+ categorized regional and general stopwords |
+| `lexicon.json` | Algerian sentiment dictionary with 230+ phrases, idioms, negators, and intensifiers |
 | `arabizi_rules.json` | Transliteration rules, French whitelist, and irregular overrides |
 
 ## Running Tests
