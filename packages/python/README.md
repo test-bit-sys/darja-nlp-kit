@@ -5,10 +5,14 @@
 
   <p>
     <a href="https://github.com/test-bit-sys/darja-nlp-kit/actions/workflows/ci.yml"><img src="https://github.com/test-bit-sys/darja-nlp-kit/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+    <a href="https://test-bit-sys.github.io/darja-nlp-kit/"><img src="https://img.shields.io/badge/Live_Demo-Playground-10b981.svg" alt="Live Demo" /></a>
     <a href="https://www.npmjs.com/package/@dz-open-suite/darja-nlp-kit"><img src="https://img.shields.io/npm/v/@dz-open-suite/darja-nlp-kit.svg" alt="npm version" /></a>
     <a href="https://pypi.org/project/darja-nlp-kit/"><img src="https://img.shields.io/pypi/v/darja-nlp-kit.svg" alt="PyPI version" /></a>
     <a href="#"><img src="https://img.shields.io/badge/dependencies-0-brightgreen.svg" alt="Zero Dependencies" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" /></a>
+  </p>
+  <p>
+    <strong><a href="https://test-bit-sys.github.io/darja-nlp-kit/">Interactive Web Playground &rarr;</a></strong>
   </p>
 </div>
 
