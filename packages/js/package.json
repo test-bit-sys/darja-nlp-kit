@@ -1,0 +1,36 @@
+{
+  "name": "@dz-open-suite/darja-nlp-kit",
+  "version": "1.0.0",
+  "description": "Zero-dependency NLP toolkit for Algerian Darja (Arabic/French/Arabizi code-switching)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "data"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "npx tsx --test tests/index.test.ts",
+    "clean": "rmdir /s /q dist 2>nul || true"
+  },
+  "keywords": [
+    "nlp",
+    "arabic",
+    "darja",
+    "algerian",
+    "arabizi",
+    "sentiment",
+    "tokenizer",
+    "stopwords",
+    "code-switching"
+  ],
+  "author": "DZ Open Suite",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
