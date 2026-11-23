@@ -7,6 +7,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional
 
+from .quantities import (
+    QuantityEntity,
+    ProductAttributes,
+    extract_quantities,
+    extract_product_attributes,
+)
+
 
 _DATA_DIR = Path(__file__).parent / 'data'
 _wilayas: Optional[List[Dict[str, Any]]] = None
@@ -47,10 +54,17 @@ class DeliveryModeEntity:
     matched_text: str
 
 
+TelecomOperator = Literal['MOBILIS', 'DJEZZY', 'OOREDOO', 'ALGERIE_TELECOM']
+
+
 @dataclass
 class PhoneEntity:
     raw: str
     normalized: str
+    operator: Optional[TelecomOperator] = None
+    operator_label: Optional[str] = None
+    formatted: Optional[str] = None
+    whatsapp_url: Optional[str] = None
 
 
 @dataclass
@@ -68,6 +82,8 @@ class EntitiesResult:
     deliveries: List[DeliveryEntity] = field(default_factory=list)
     delivery_mode: Optional[DeliveryModeEntity] = None
     phones: List[PhoneEntity] = field(default_factory=list)
+    quantities: List[QuantityEntity] = field(default_factory=list)
+    attributes: Optional[ProductAttributes] = None
 
 
 def load_wilayas() -> List[Dict[str, Any]]:
@@ -170,7 +186,9 @@ _DELIVERY_MODE_PATTERNS = [
     ),
 ]
 
-_PHONE_PATTERN = re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])((?:\+213|00213|0)\s*(?:[5-7]|2[0-9]|3[0-9]|4[0-9])(?:[\s.-]?\d){8})(?=$|\s|[^\w\u0600-\u06FF])')
+_PHONE_PATTERN = re.compile(
+    r'(?:^|\s|[^\w\u0600-\u06FF])((?:\+213|00213|0)\s*(?:[5-7](?:[\s.-]?\d){8}|(?:2[0-9]|3[0-9]|4[0-9])(?:[\s.-]?\d){6}))(?=$|\s|[^\w\u0600-\u06FF])'
+)
 
 _DARJA_MILLIONS_WORDS: Dict[str, float] = {
     'زوج': 2.0, 'تلات': 3.0, 'تلاتة': 3.0, 'ربع': 4.0, 'ربعة': 4.0,
@@ -427,6 +445,36 @@ def _extract_delivery_mode(text: str) -> Optional[DeliveryModeEntity]:
     return None
 
 
+def _detect_telecom_operator(phone: str) -> tuple[Optional[TelecomOperator], Optional[str]]:
+    """Detect Algerian telecom operator from normalized phone number."""
+    if not phone or len(phone) < 3:
+        return None, None
+    prefix = phone[:2]
+    if prefix == '06':
+        return 'MOBILIS', 'Mobilis (موبيليس)'
+    elif prefix == '07':
+        return 'DJEZZY', 'Djezzy (جيزي)'
+    elif prefix == '05':
+        return 'OOREDOO', 'Ooredoo (أوريدو)'
+    elif prefix in ('02', '03', '04'):
+        return 'ALGERIE_TELECOM', 'Algérie Télécom (اتصالات الجزائر)'
+    return None, None
+
+
+def _format_algerian_phone(phone: str) -> tuple[Optional[str], Optional[str]]:
+    """Format Algerian phone into readable format (+213 661 23 45 67) and WhatsApp URL."""
+    if not phone:
+        return None, None
+    if len(phone) == 10 and phone.startswith(('05', '06', '07')):
+        formatted = f"+213 {phone[1:4]} {phone[4:6]} {phone[6:8]} {phone[8:10]}"
+        whatsapp_url = f"https://wa.me/213{phone[1:]}"
+        return formatted, whatsapp_url
+    elif len(phone) == 9 and phone.startswith(('02', '03', '04')):
+        formatted = f"+213 {phone[1:3]} {phone[3:5]} {phone[5:7]} {phone[7:9]}"
+        return formatted, None
+    return None, None
+
+
 def _extract_phones(text: str) -> List[PhoneEntity]:
     results: List[PhoneEntity] = []
     added_nums: set[str] = set()
@@ -441,16 +489,22 @@ def _extract_phones(text: str) -> List[PhoneEntity]:
 
         if cleaned not in added_nums:
             added_nums.add(cleaned)
+            op, op_label = _detect_telecom_operator(cleaned)
+            formatted, wa_url = _format_algerian_phone(cleaned)
             results.append(PhoneEntity(
                 raw=raw_val,
                 normalized=cleaned,
+                operator=op,
+                operator_label=op_label,
+                formatted=formatted,
+                whatsapp_url=wa_url,
             ))
 
     return results
 
 
 def extract_entities(text: str) -> EntitiesResult:
-    """Extract Algerian Wilayas, Payment Methods, Prices, Deliveries, and Phones from text."""
+    """Extract Algerian Wilayas, Payments, Prices, Logistics, Phones, Quantities, and Attributes."""
     if not text:
         return EntitiesResult()
 
@@ -462,4 +516,6 @@ def extract_entities(text: str) -> EntitiesResult:
         deliveries=_extract_deliveries(text),
         delivery_mode=_extract_delivery_mode(text),
         phones=_extract_phones(text),
+        quantities=extract_quantities(text),
+        attributes=extract_product_attributes(text),
     )

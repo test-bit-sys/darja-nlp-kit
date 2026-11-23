@@ -96,9 +96,26 @@ export interface DeliveryModeEntity {
   matchedText: string;
 }
 
+export type TelecomOperator = 'MOBILIS' | 'DJEZZY' | 'OOREDOO' | 'ALGERIE_TELECOM';
+
 export interface PhoneEntity {
   raw: string;
   normalized: string;
+  operator?: TelecomOperator | null;
+  operatorLabel?: string | null;
+  formatted?: string | null;
+  whatsappUrl?: string | null;
+}
+
+export interface QuantityEntity {
+  raw: string;
+  value: number;
+  unit: string;
+}
+
+export interface ProductAttributes {
+  colors: string[];
+  sizes: string[];
 }
 
 export interface EntitiesResult {
@@ -108,6 +125,8 @@ export interface EntitiesResult {
   deliveries?: DeliveryEntity[];
   deliveryMode?: DeliveryModeEntity | null;
   phones?: PhoneEntity[];
+  quantities?: QuantityEntity[];
+  attributes?: ProductAttributes | null;
 }
 
 export type DialectRegion = 'WEST' | 'EAST' | 'CENTER' | 'SOUTH' | 'GENERAL_DARJA';
@@ -131,4 +150,15 @@ export interface IntentResult {
   intent: IntentType;
   confidence: number;
   matchedKeywords: string[];
+}
+
+export type EscalationUrgency = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE';
+export type EscalationReason = 'ANGRY_CUSTOMER' | 'HUMAN_REQUESTED' | 'DISPUTE' | 'LEGAL_THREAT';
+
+export interface EscalationResult {
+  needsEscalation: boolean;
+  urgency: EscalationUrgency;
+  reason?: EscalationReason | null;
+  matchedTriggers: string[];
+  guideline: string;
 }

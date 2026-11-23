@@ -4,6 +4,9 @@
   "description": "Zero-dependency NLP toolkit for Algerian Darja (Arabic/French/Arabizi code-switching)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "darja-nlp": "./dist/cli.js"
+  },
   "files": [
     "dist",
     "data"

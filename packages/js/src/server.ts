@@ -1,0 +1,294 @@
+/**
+ * Zero-dependency HTTP Microservice Server for Algerian Darja NLP.
+ * Ideal for n8n, Make.com, Flowise, local Docker containers, and webhooks.
+ * Uses standard Node.js http module only.
+ */
+
+import http from 'http';
+import { parse as parseUrl } from 'url';
+import { normalize } from './normalizer';
+import { arabiziToArabic } from './arabizi';
+import { analyzeSentiment } from './sentiment';
+import { extractEntities, getWilayas, getWilayaByCode } from './entities';
+import { extractQuantities, extractProductAttributes } from './quantities';
+import { detectEscalation } from './escalation';
+import { detectDialect } from './dialect';
+import { identifyIntent } from './intent';
+import { buildAgentContext, formatAgentSystemPrompt } from './agent';
+
+export interface ServerOptions {
+  host?: string;
+  port?: number;
+}
+
+export function startServer(options: ServerOptions = {}): http.Server {
+  const host = options.host || '0.0.0.0';
+  const port = options.port || 8080;
+
+  const server = http.createServer((req, res) => {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
+    const parsedUrl = parseUrl(req.url || '', true);
+    const pathname = (parsedUrl.pathname || '').replace(/\/+$/, '');
+
+    const sendJson = (data: unknown, statusCode = 200) => {
+      res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(data, null, 2));
+    };
+
+    const sendError = (msg: string, statusCode = 400) => {
+      sendJson({ error: msg }, statusCode);
+    };
+
+    if (req.method === 'GET') {
+      if (pathname === '' || pathname === '/api' || pathname === '/api/health') {
+        sendJson({
+          service: 'darja-nlp-kit',
+          status: 'online',
+          version: '1.0.0',
+          endpoints: [
+            'POST /api/parse',
+            'POST /api/intent',
+            'POST /api/sentiment',
+            'POST /api/dialect',
+            'POST /api/escalation',
+            'POST /api/quantities',
+            'POST /api/agent-context',
+            'GET  /api/wilayas',
+            'GET  /api/wilayas/:code',
+          ],
+        });
+        return;
+      }
+
+      if (pathname === '/api/wilayas') {
+        const wilayas = getWilayas();
+        sendJson({
+          count: wilayas.length,
+          wilayas: wilayas.map((w) => ({
+            code: w.code,
+            code_str: w.code_str,
+            name_ar: w.name_ar,
+            name_fr: w.name_fr,
+            communes_sample: w.communes_sample,
+          })),
+        });
+        return;
+      }
+
+      if (pathname.startsWith('/api/wilayas/')) {
+        const param = pathname.split('/').pop() || '';
+        const codeNum = parseInt(param, 10);
+        if (!isNaN(codeNum)) {
+          const w = getWilayaByCode(codeNum);
+          if (w) {
+            sendJson({
+              code: w.code,
+              code_str: w.code_str,
+              name_ar: w.name_ar,
+              name_fr: w.name_fr,
+              communes_sample: w.communes_sample,
+              communes_fr_sample: w.communes_fr_sample,
+            });
+          } else {
+            sendError(`Wilaya ${codeNum} not found (must be 1-69)`, 404);
+          }
+        } else {
+          sendError('Invalid wilaya code (expected integer 1-69)', 400);
+        }
+        return;
+      }
+
+      sendError('Endpoint not found', 404);
+      return;
+    }
+
+    if (req.method === 'POST') {
+      let bodyStr = '';
+      req.on('data', (chunk) => {
+        bodyStr += chunk;
+      });
+
+      req.on('end', () => {
+        let body: Record<string, any> = {};
+        if (bodyStr) {
+          try {
+            body = JSON.parse(bodyStr);
+          } catch {
+            sendError('Invalid JSON body in request', 400);
+            return;
+          }
+        }
+
+        const text = typeof body.text === 'string' ? body.text : '';
+        if (!text && pathname !== '/api/agent-context') {
+          sendError("Field 'text' is required in JSON body", 400);
+          return;
+        }
+
+        if (pathname === '/api/parse') {
+          const entities = extractEntities(text);
+          sendJson({
+            input: text,
+            wilayas: entities.wilayas.map((w) => ({
+              code: w.code,
+              code_str: w.codeStr,
+              name_ar: w.nameAr,
+              name_fr: w.nameFr,
+              commune: w.commune,
+            })),
+            prices: entities.prices.map((p) => ({
+              raw: p.raw,
+              amount: p.amount,
+              currency: p.currency,
+            })),
+            phones: (entities.phones || []).map((ph) => ({
+              raw: ph.raw,
+              normalized: ph.normalized,
+              operator: ph.operator,
+              operator_label: ph.operatorLabel,
+              formatted: ph.formatted,
+              whatsapp_url: ph.whatsappUrl,
+            })),
+            payments: (entities.payments || []).map((p) => ({
+              method: p.type,
+              label: p.label,
+              matched_text: p.matchedText,
+            })),
+            deliveries: (entities.deliveries || []).map((d) => ({
+              company: d.company,
+              label: d.label,
+              matched_text: d.matchedText,
+            })),
+            delivery_mode: entities.deliveryMode
+              ? {
+                  mode: entities.deliveryMode.mode,
+                  label: entities.deliveryMode.label,
+                  matched_text: entities.deliveryMode.matchedText,
+                }
+              : null,
+            quantities: (entities.quantities || []).map((q) => ({
+              raw: q.raw,
+              value: q.value,
+              unit: q.unit,
+            })),
+            attributes: {
+              colors: entities.attributes?.colors || [],
+              sizes: entities.attributes?.sizes || [],
+            },
+          });
+          return;
+        }
+
+        if (pathname === '/api/intent') {
+          const res = identifyIntent(text);
+          sendJson({
+            input: text,
+            intent: res.intent,
+            confidence: res.confidence,
+            matched_keywords: res.matchedKeywords,
+          });
+          return;
+        }
+
+        if (pathname === '/api/sentiment') {
+          const res = analyzeSentiment(text);
+          sendJson({
+            input: text,
+            label: res.label,
+            score: res.score,
+            positive_tokens: res.positiveTokens,
+            negative_tokens: res.negativeTokens,
+          });
+          return;
+        }
+
+        if (pathname === '/api/dialect') {
+          const res = detectDialect(text);
+          sendJson({
+            input: text,
+            region: res.region,
+            confidence: res.confidence,
+            detected_markers: res.detectedMarkers,
+          });
+          return;
+        }
+
+        if (pathname === '/api/escalation') {
+          const res = detectEscalation(text);
+          sendJson({
+            input: text,
+            needs_escalation: res.needsEscalation,
+            reason: res.reason,
+            urgency: res.urgency,
+            matched_triggers: res.matchedTriggers,
+            guideline: res.guideline,
+          });
+          return;
+        }
+
+        if (pathname === '/api/quantities') {
+          const quants = extractQuantities(text);
+          const attrs = extractProductAttributes(text);
+          sendJson({
+            input: text,
+            quantities: quants.map((q) => ({ raw: q.raw, value: q.value, unit: q.unit })),
+            attributes: { colors: attrs.colors, sizes: attrs.sizes },
+          });
+          return;
+        }
+
+        if (pathname === '/api/agent-context') {
+          const storeName = body.store_name || body.storeName || 'Bazar El Djazair';
+          const ctx = buildAgentContext(text, storeName);
+          const systemPrompt = formatAgentSystemPrompt(ctx);
+          sendJson({
+            context: ctx,
+            formatted_system_prompt: systemPrompt,
+          });
+          return;
+        }
+
+        if (pathname === '/api/normalize') {
+          sendJson({ input: text, normalized: normalize(text) });
+          return;
+        }
+
+        if (pathname === '/api/arabizi') {
+          sendJson({ input: text, arabic: arabiziToArabic(text) });
+          return;
+        }
+
+        sendError(`Endpoint '${pathname}' not found`, 404);
+      });
+      return;
+    }
+
+    sendError(`Method ${req.method} not allowed`, 405);
+  });
+
+  server.listen(port, host, () => {
+    console.log(`🚀 darja-nlp-kit Microservice running on http://${host}:${port}`);
+    console.log(`📦 Ready for n8n, Make.com, webhooks, and local AI automations.`);
+    console.log(`Endpoints:`);
+    console.log(`  • GET  http://${host}:${port}/api/health`);
+    console.log(`  • GET  http://${host}:${port}/api/wilayas`);
+    console.log(`  • POST http://${host}:${port}/api/parse`);
+    console.log(`  • POST http://${host}:${port}/api/intent`);
+    console.log(`  • POST http://${host}:${port}/api/sentiment`);
+    console.log(`  • POST http://${host}:${port}/api/dialect`);
+    console.log(`  • POST http://${host}:${port}/api/escalation`);
+    console.log(`  • POST http://${host}:${port}/api/agent-context`);
+  });
+
+  return server;
+}

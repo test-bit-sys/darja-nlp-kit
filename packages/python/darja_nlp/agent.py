@@ -13,6 +13,7 @@ from .sentiment import analyze_sentiment
 from .entities import extract_entities, get_wilaya_by_code
 from .dialect import detect_dialect
 from .intent import identify_intent, IntentType
+from .escalation import detect_escalation
 
 
 INTENT_GUIDELINES: Dict[str, str] = {
@@ -25,6 +26,14 @@ INTENT_GUIDELINES: Dict[str, str] = {
     'UNKNOWN': 'استفسار عام. قدم المساعدة بطريقة واضحة ومباشرة.',
 }
 
+DIALECT_GUIDELINES: Dict[str, str] = {
+    "WEST": "لهجة الغرب الجزائري (وهران وتلمسان): استعمل كلمات خفيفة مثل (درك، غايا، مرحبا بيك خويا، ما تقلقش روحك).",
+    "EAST": "لهجة الشرق الجزائري (قسنطينة وسطيف وعنابة): استعمل كلمات دافئة مثل (عيشك، ضرك، وشبيك، على عيني، ما كاش مشكل).",
+    "CENTER": "لهجة الوسط والعاصمة (الجزائر والبليدة): استعمل أسلوب العاصمة السلس (واش خويا، مرحبا بيك، رانا هنا، كاش ما تسحق).",
+    "SOUTH": "لهجة الجنوب الجزائري الكريمة: استعمل كلمات الترحيب والأصالة (مرحبا بيك، ربي يحفظك، على راسنا وعينينا).",
+    "GENERAL_DARJA": "دارجة جزائرية عامة ومفهومة ومحترمة تجمع بين العفوية واللباقة المهنية."
+}
+
 
 def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> Dict[str, Any]:
     """
@@ -35,23 +44,18 @@ def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> D
     arabic_trans = arabizi_to_arabic(raw_message)
     normalized = normalize(raw_message)
 
-    # Intent, dialect, sentiment, and entity extraction
+    # Intent, dialect, sentiment, escalation, and entity extraction
     intent = identify_intent(raw_message)
+    escalation = detect_escalation(raw_message)
     dialect = detect_dialect(raw_message)
     sentiment = analyze_sentiment(raw_message)
     entities = extract_entities(raw_message)
 
-    # Dialect instructions mapping
-    dialect_guidelines = {
-        "WEST": "لهجة الغرب الجزائري (وهران وتلمسان): استعمل كلمات خفيفة مثل (درك، غايا، مرحبا بيك خويا، ما تقلقش روحك).",
-        "EAST": "لهجة الشرق الجزائري (قسنطينة وسطيف وعنابة): استعمل كلمات دافئة مثل (عيشك، ضرك، وشبيك، على عيني، ما كاش مشكل).",
-        "CENTER": "لهجة الوسط والعاصمة (الجزائر والبليدة): استعمل أسلوب العاصمة السلس (واش خويا، مرحبا بيك، رانا هنا، كاش ما تسحق).",
-        "SOUTH": "لهجة الجنوب الجزائري الكريمة: استعمل كلمات الترحيب والأصالة (مرحبا بيك، ربي يحفظك، على راسنا وعينينا).",
-        "GENERAL_DARJA": "دارجة جزائرية عامة ومفهومة ومحترمة تجمع بين العفوية واللباقة المهنية."
-    }
-
-    # Tone recommendation based on sentiment
-    if sentiment.label == "NEGATIVE":
+    # Tone recommendation based on escalation & sentiment
+    if escalation.needs_escalation:
+        tone = "CRITICAL_ESCALATION"
+        tone_instruction = f"🚨 تصعيد فوري: {escalation.guideline}"
+    elif sentiment.label == "NEGATIVE":
         tone = "APOLOGETIC_AND_REASSURING"
         tone_instruction = "⚠️ الزبون غاضب أو يشتكي! ابدأ بتطييب الخاطر والاعتذار ('حقك علينا خويا، ما تقلقش، المشكل نحلوه درك'). تجنب الجفاف والردود الآلية."
     elif sentiment.label == "POSITIVE":
@@ -70,7 +74,15 @@ def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> D
     prices_summary = [f"{p.amount:,.0f} دج ({p.raw})" for p in entities.prices if p.amount is not None]
     deliveries_summary = [d.label for d in entities.deliveries]
     delivery_mode_summary = entities.delivery_mode.label if entities.delivery_mode else None
-    phones_summary = [ph.normalized for ph in entities.phones]
+    phones_summary = [
+        f"{ph.normalized} ({ph.operator_label})" if ph.operator_label else ph.normalized
+        for ph in entities.phones
+    ]
+    quantities_summary = [f"{q.value} {q.unit} ({q.raw})" for q in (entities.quantities or [])]
+    product_attributes_summary = {
+        "colors": entities.attributes.colors if entities.attributes else [],
+        "sizes": entities.attributes.sizes if entities.attributes else [],
+    }
 
     return {
         "store_name": store_name,
@@ -83,11 +95,18 @@ def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> D
             "matched_keywords": intent.matched_keywords,
             "guideline": INTENT_GUIDELINES.get(intent.intent, INTENT_GUIDELINES["UNKNOWN"]),
         },
+        "escalation": {
+            "needs_escalation": escalation.needs_escalation,
+            "reason": escalation.reason,
+            "urgency": escalation.urgency,
+            "matched_triggers": escalation.matched_triggers,
+            "guideline": escalation.guideline,
+        },
         "dialect": {
             "region": dialect.region,
             "confidence": dialect.confidence,
             "detected_markers": dialect.detected_markers,
-            "guideline": dialect_guidelines.get(dialect.region, dialect_guidelines["GENERAL_DARJA"]),
+            "guideline": DIALECT_GUIDELINES.get(dialect.region, DIALECT_GUIDELINES["GENERAL_DARJA"]),
         },
         "sentiment": {
             "label": sentiment.label,
@@ -102,6 +121,8 @@ def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> D
             "delivery_companies": deliveries_summary,
             "delivery_mode": delivery_mode_summary,
             "phones": phones_summary,
+            "quantities": quantities_summary,
+            "product_attributes": product_attributes_summary,
         },
     }
 
@@ -110,13 +131,30 @@ def format_agent_system_prompt(context: Dict[str, Any]) -> str:
     """Format a system prompt for an LLM based on extracted agent context."""
     store = context.get("store_name", "المتجر")
     intent = context.get("intent", {"intent": "UNKNOWN", "guideline": "استفسار عام."})
+    escalation = context.get("escalation", {"needs_escalation": False, "reason": "NONE", "urgency": "LOW", "guideline": ""})
     dialect = context["dialect"]
     sentiment = context["sentiment"]
     facts = context["groundedFacts"] if "groundedFacts" in context else context["grounded_facts"]
 
-    prompt = f"""أنت مساعد خدمة عملاء ذكي وبشري جداً لمتجر إلكتروني جزائري '{store}'.
-مهمتك الرد على الزبون الجزائري بدارجة واقعية ومتقنة 100%، كأنك تاجر جزائري محترف ولطيف.
+    escalation_notice = ""
+    needs_esc = escalation.get("needs_escalation") or escalation.get("needsEscalation")
+    if needs_esc:
+        reason = escalation.get("reason", "")
+        urgency = escalation.get("urgency", "")
+        guideline = escalation.get("guideline", "")
+        escalation_notice = f"\n🚨 [تنبيه تصعيد عاجل - Escalation Triggered]:\n- السبب: {reason} (درجة الإلحاح: {urgency})\n- الإجراء: {guideline}\n"
 
+    quantities_list = facts.get("quantities", [])
+    quantities_str = ", ".join(quantities_list) if quantities_list else "غير محددة"
+
+    prod_attrs = facts.get("product_attributes") or facts.get("productAttributes") or {}
+    colors_list = prod_attrs.get("colors", [])
+    sizes_list = prod_attrs.get("sizes", [])
+    colors_str = ", ".join(colors_list) if colors_list else "غير محدد"
+    sizes_str = ", ".join(sizes_list) if sizes_list else "غير محدد"
+
+    prompt = f"""أنت مساعد خدمة عملاء ذكي وبشري جداً لمتجر إلكتروني جزائري '{store}'.
+مهمتك الرد على الزبون الجزائري بدارجة واقعية ومتقنة 100%، كأنك تاجر جزائري محترف ولطيف.{escalation_notice}
 [السياق المستخرج من رسالة الزبون]:
 - الرسالة: "{context['raw_message']}"
 - الترجمة التفسيرية (إذا كانت عربيزي): "{context['arabic_transliterated']}"
@@ -124,7 +162,9 @@ def format_agent_system_prompt(context: Dict[str, Any]) -> str:
 - المنطقة الجغرافية للهجة: {dialect['region']} ({dialect['guideline']})
 - حالة الزبون النفسية: {sentiment['label']} (الدرجة: {sentiment['score']})
 - إرشادات النبرة: {sentiment['tone_instruction']}
-- الولايات المؤكدة: {', '.join(facts['wilayas']) if facts['wilayas'] else 'غير محددة'}
+- الولايات والبلديات: {', '.join(facts['wilayas']) if facts['wilayas'] else 'غير محددة'}
+- الكمية المطلوبة: {quantities_str}
+- مواصفات المنتج (ألوان/مقاسات): ألوان: {colors_str} | مقاسات: {sizes_str}
 - المبالغ المذكورة بالدينار: {', '.join(facts['prices_dzd']) if facts['prices_dzd'] else 'غير محددة'}
 - وسائل الدفع المرصودة: {', '.join(facts['payments']) if facts['payments'] else 'غير محددة'}
 - شركات التوصيل: {', '.join(facts['delivery_companies']) if facts['delivery_companies'] else 'غير محددة'}
@@ -147,7 +187,7 @@ def get_openai_tool_definitions() -> List[Dict[str, Any]]:
             "type": "function",
             "function": {
                 "name": "parse_algerian_message",
-                "description": "Parse and extract Algerian entities (Wilayas, colloquial prices in DZD, payments, carriers, phones) and dialect from customer text.",
+                "description": "Parse and extract Algerian entities (Wilayas, colloquial prices in DZD, payments, carriers, phones with telecom operator, quantities, product attributes) and dialect from customer text.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -174,6 +214,23 @@ def get_openai_tool_definitions() -> List[Dict[str, Any]]:
                         }
                     },
                     "required": ["code"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "check_human_escalation",
+                "description": "Detect if customer is furious, making legal threats, or explicitly asking for a human agent.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "The customer's message text."
+                        }
+                    },
+                    "required": ["text"]
                 }
             }
         }

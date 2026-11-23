@@ -3,9 +3,13 @@ export { arabiziToArabic } from './arabizi';
 export { tokenize, removeStopwords, isStopword, getStopwords } from './stopwords';
 export { analyzeSentiment } from './sentiment';
 export { extractEntities, getWilayas, getWilayaByCode } from './entities';
+export { extractQuantities, extractProductAttributes } from './quantities';
+export { detectEscalation } from './escalation';
 export { detectDialect } from './dialect';
 export { identifyIntent } from './intent';
 export { buildAgentContext, formatAgentSystemPrompt } from './agent';
+export { startServer } from './server';
+export type { ServerOptions } from './server';
 export type { AgentContext } from './agent';
 export type {
   NormalizeOptions,
@@ -27,9 +31,15 @@ export type {
   DeliveryModeEntity,
   DeliveryModeType,
   PhoneEntity,
+  TelecomOperator,
+  QuantityEntity,
+  ProductAttributes,
   EntitiesResult,
   DialectRegion,
   DialectResult,
   IntentType,
   IntentResult,
+  EscalationResult,
+  EscalationUrgency,
+  EscalationReason,
 } from './types';

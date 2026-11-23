@@ -6,8 +6,10 @@ import {
   DeliveryEntity,
   DeliveryModeEntity,
   PhoneEntity,
+  TelecomOperator,
   EntitiesResult,
 } from './types';
+import { extractQuantities, extractProductAttributes } from './quantities';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -107,7 +109,8 @@ const DELIVERY_MODE_PATTERNS = [
   },
 ];
 
-const PHONE_PATTERN = /(?:^|\s|[^\w\u0600-\u06FF])((?:\+213|00213|0)\s*(?:[5-7]|2[0-9]|3[0-9]|4[0-9])(?:[\s.-]?\d){8})(?=$|\s|[^\w\u0600-\u06FF])/g;
+const PHONE_PATTERN =
+  /(?:^|\s|[^\w\u0600-\u06FF])((?:\+213|00213|0)\s*(?:[5-7](?:[\s.-]?\d){8}|(?:2[0-9]|3[0-9]|4[0-9])(?:[\s.-]?\d){6}))(?=$|\s|[^\w\u0600-\u06FF])/g;
 
 const DARJA_MILLIONS_WORDS: Record<string, number> = {
   زوج: 2, تلات: 3, تلاتة: 3, ربع: 4, ربعة: 4,
@@ -389,6 +392,30 @@ function extractDeliveryMode(text: string): DeliveryModeEntity | null {
   return null;
 }
 
+function detectTelecomOperator(phone: string): { operator: TelecomOperator | null; label: string | null } {
+  if (!phone || phone.length < 3) return { operator: null, label: null };
+  const prefix = phone.slice(0, 2);
+  if (prefix === '06') return { operator: 'MOBILIS', label: 'Mobilis (موبيليس)' };
+  if (prefix === '07') return { operator: 'DJEZZY', label: 'Djezzy (جيزي)' };
+  if (prefix === '05') return { operator: 'OOREDOO', label: 'Ooredoo (أوريدو)' };
+  if (['02', '03', '04'].includes(prefix))
+    return { operator: 'ALGERIE_TELECOM', label: 'Algérie Télécom (اتصالات الجزائر)' };
+  return { operator: null, label: null };
+}
+
+function formatAlgerianPhone(phone: string): { formatted: string | null; whatsappUrl: string | null } {
+  if (!phone) return { formatted: null, whatsappUrl: null };
+  if (phone.length === 10 && ['05', '06', '07'].includes(phone.slice(0, 2))) {
+    const formatted = `+213 ${phone.slice(1, 4)} ${phone.slice(4, 6)} ${phone.slice(6, 8)} ${phone.slice(8, 10)}`;
+    const whatsappUrl = `https://wa.me/213${phone.slice(1)}`;
+    return { formatted, whatsappUrl };
+  } else if (phone.length === 9 && ['02', '03', '04'].includes(phone.slice(0, 2))) {
+    const formatted = `+213 ${phone.slice(1, 3)} ${phone.slice(3, 5)} ${phone.slice(5, 7)} ${phone.slice(7, 9)}`;
+    return { formatted, whatsappUrl: null };
+  }
+  return { formatted: null, whatsappUrl: null };
+}
+
 function extractPhones(text: string): PhoneEntity[] {
   const results: PhoneEntity[] = [];
   const added = new Set<string>();
@@ -406,9 +433,15 @@ function extractPhones(text: string): PhoneEntity[] {
 
     if (!added.has(cleaned)) {
       added.add(cleaned);
+      const { operator, label } = detectTelecomOperator(cleaned);
+      const { formatted, whatsappUrl } = formatAlgerianPhone(cleaned);
       results.push({
         raw: rawVal,
         normalized: cleaned,
+        operator,
+        operatorLabel: label,
+        formatted,
+        whatsappUrl,
       });
     }
   }
@@ -425,6 +458,8 @@ export function extractEntities(text: string): EntitiesResult {
       deliveries: [],
       deliveryMode: null,
       phones: [],
+      quantities: [],
+      attributes: { colors: [], sizes: [] },
     };
   }
 
@@ -436,5 +471,7 @@ export function extractEntities(text: string): EntitiesResult {
     deliveries: extractDeliveries(text),
     deliveryMode: extractDeliveryMode(text),
     phones: extractPhones(text),
+    quantities: extractQuantities(text),
+    attributes: extractProductAttributes(text),
   };
 }

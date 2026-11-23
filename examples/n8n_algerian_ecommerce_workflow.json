@@ -1,0 +1,155 @@
+{
+  "name": "Algerian Darja E-Commerce AI Agent (n8n Workflow)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "algerian-lead-webhook",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Incoming WhatsApp/Lead Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8080/api/agent-context",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{ $json.body.message || $json.body.text }}\",\n  \"store_name\": \"Bazar El Djazair\"\n}",
+        "options": {}
+      },
+      "id": "2",
+      "name": "darja-nlp-kit Microservice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.context.escalation.needs_escalation }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "3",
+      "name": "Check Escalation?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "-100123456789",
+        "text": "=🚨 [تنبيه عاجل - متجر الجزائر]\nالزبون: {{ $('Incoming WhatsApp/Lead Webhook').item.json.body.phone || 'زبون' }}\nالرسالة: \"{{ $json.context.raw_message }}\"\nالسبب: {{ $json.context.escalation.reason }} (درجة الإلحاح: {{ $json.context.escalation.urgency }})\nالتوجيه: {{ $json.context.escalation.guideline }}\n\nالرجاء التدخل اليدوي الفوري!",
+        "additionalFields": {}
+      },
+      "id": "4",
+      "name": "Alert Store Manager (Telegram/WhatsApp)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [960, 200]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.formatted_system_prompt }}"
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.context.raw_message }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "id": "5",
+      "name": "OpenAI / Gemini Real Darja Agent",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [960, 420]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.whatsapp.com/v1/messages",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": \"{{ $('Incoming WhatsApp/Lead Webhook').item.json.body.phone }}\",\n  \"type\": \"text\",\n  \"text\": { \"body\": \"{{ $json.message.content }}\" }\n}",
+        "options": {}
+      },
+      "id": "6",
+      "name": "Send WhatsApp Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1200, 420]
+    }
+  ],
+  "connections": {
+    "Incoming WhatsApp/Lead Webhook": {
+      "main": [
+        [
+          {
+            "node": "darja-nlp-kit Microservice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "darja-nlp-kit Microservice": {
+      "main": [
+        [
+          {
+            "node": "Check Escalation?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Escalation?": {
+      "main": [
+        [
+          {
+            "node": "Alert Store Manager (Telegram/WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenAI / Gemini Real Darja Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI / Gemini Real Darja Agent": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

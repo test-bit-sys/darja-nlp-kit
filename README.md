@@ -29,6 +29,10 @@ Handles Arabic script, Arabizi (Latin transliteration with numbers), and French/
 - **Sentiment Analysis** — Score-based analysis with negation inversion, double negation, intensifier scaling, and code-switching support (330+ entries)
 - **Algerian Geo, Logistics & Entity Extraction** — Full coverage of all 69 wilayas (Law 26-06 reform), carriers (Yalidine, ZR Express, Maystro, Procolis, EMS, Kazitour, Guepex), delivery mode (Stop Desk / Home Delivery), Algerian phone numbers, payments (BaridiMob, Edahabia, CCP, COD), and Darja colloquial prices (`زوج ملاين` $\rightarrow$ 20,000 DZD, `3 mlayen` $\rightarrow$ 30,000 DZD)
 - **Regional Dialect Identification** — Detect regional dialects: WEST (Oran/Tlemcen), EAST (Constantine/Setif), CENTER (Algiers/Blida), SOUTH, or GENERAL_DARJA
+- **Colloquial Quantities & Product Attributes** — Extract colloquial quantities (`حبة`, `زوج حبات`, `شكارة`, `باكية`, `كرطونة`, `دوزينة` = 12), clothing sizes (XS–3XL), shoe sizes (35–48), and Algerian color names (`كحل / noir`, `بيض / blanc`, etc.)
+- **Telecom Operator Routing & Direct WhatsApp URLs** — Classify Algerian phone numbers by operator (`MOBILIS`, `DJEZZY`, `OOREDOO`, `ALGERIE_TELECOM`) and generate instant 1-click WhatsApp deep links (`https://wa.me/213...`)
+- **Smart Human Escalation Engine** — Detect angry customers (`حشيتوهالي`, `سراقين`), explicit requests for human agents (`احكي مع بنادم`, `appel moi`), and legal threats (`نشكي بيكم`, `لابوليس`) with urgency levels (CRITICAL, HIGH, MEDIUM)
+- **Zero-Dependency CLI & Local HTTP Microservice** — Instantly run a production-ready, CORS-enabled REST API and CLI commands with zero external packages for n8n, Make.com, webhooks, and local containers
 - **AI Agent & LLM Middleware** — Pre-packaged grounding engine & dialect-mirroring system prompt generator for AI Agents (GPT-4o, Claude, Gemini, Llama) to deliver ultra-realistic human responses to Algerian customers without hallucination
 
 ## Installation
@@ -413,6 +417,118 @@ const ctx = buildAgentContext(
 );
 const prompt = formatAgentSystemPrompt(ctx);
 ```
+
+### `detectEscalation(text)` — Smart Human Escalation & Agent Handoff
+
+Detects when an Algerian customer conversation requires human agent takeover, classifying urgency (`CRITICAL`, `HIGH`, `MEDIUM`, `NONE`) and reason (`LEGAL_THREAT`, `ANGRY_CUSTOMER`, `HUMAN_REQUESTED`, `DISPUTE`).
+
+```typescript
+import { detectEscalation } from '@dz-open-suite/darja-nlp-kit';
+
+detectEscalation('سراقين حشيتوهالي رجعولي دراهمي');
+// => {
+//   needsEscalation: true,
+//   urgency: 'HIGH',
+//   reason: 'ANGRY_CUSTOMER',
+//   matchedTriggers: ['سراقين', 'حشيتوهالي', 'رجعولي دراهمي'],
+//   guideline: '⚠️ الزبون غاضب جداً ويتهم المتجر بسوء النية أو السرقة. يجب تدخل عون بشري...'
+// }
+
+detectEscalation('نشكي بيكم للعدالة ولابوليس');
+// => { needsEscalation: true, urgency: 'CRITICAL', reason: 'LEGAL_THREAT', ... }
+```
+
+### `extractQuantities(text)` & `extractProductAttributes(text)`
+
+Extracts colloquial Algerian quantities and product specifications (colors, clothing sizes XS-3XL, shoe sizes 35-48).
+
+```typescript
+import { extractQuantities, extractProductAttributes } from '@dz-open-suite/darja-nlp-kit';
+
+extractQuantities('حاب زوج حبات و 3 شكاير و دوزينة');
+// => [
+//   { raw: 'زوج حبات', value: 2, unit: 'حبة' },
+//   { raw: '3 شكاير', value: 3, unit: 'شكارة' },
+//   { raw: 'دوزينة', value: 12, unit: 'دوزينة' }
+// ]
+
+extractProductAttributes('بيجاما كحلة وبيضا مقاس XL وبونتير 42');
+// => {
+//   colors: ['كحل / noir', 'بيض / blanc'],
+//   sizes: ['XL', '42']
+// }
+```
+
+### Telecom Operator Routing & WhatsApp Deep Links
+
+Automatically classifies Algerian phone numbers by telecom operator and creates 1-click WhatsApp chat links:
+
+```typescript
+import { extractEntities } from '@dz-open-suite/darja-nlp-kit';
+
+const res = extractEntities('اتصل بي على 0661234567');
+// res.phones[0]:
+// {
+//   normalized: '0661234567',
+//   operator: 'MOBILIS',
+//   operatorLabel: 'Mobilis (موبيليس)',
+//   formatted: '+213 661 23 45 67',
+//   whatsappUrl: 'https://wa.me/213661234567'
+// }
+```
+
+## Zero-Dependency CLI
+
+`darja-nlp-kit` comes with an instant command-line tool requiring zero extra dependencies:
+
+```bash
+# Parse all Algerian entities (Wilayas, communes, phones, prices, quantities)
+darja-nlp parse "نحوس على 2 حبات مقاس XL نبعثهم لوهران 0661234567"
+
+# Check human escalation status
+darja-nlp escalation "سراقين حشيتوهالي رجعولي دراهمي"
+
+# Intent classification
+darja-nlp intent "شحال التوصيل لسطيف؟"
+
+# Start local HTTP microservice server (for n8n, Make, Docker)
+darja-nlp server --port 8080
+```
+
+## Zero-Dependency HTTP Microservice (for n8n, Make.com, Webhooks)
+
+Run a high-performance local microservice using standard library HTTP servers:
+
+```bash
+# In Python
+python -m darja_nlp.server
+
+# Or in Node.js
+node dist/cli.js server --port 8080
+```
+
+### Endpoints:
+- `POST /api/agent-context` — Complete context & formatted prompt for LLMs (GPT-4o, Gemini)
+- `POST /api/parse` — Entities, wilayas, phones, operator, prices, quantities, and attributes
+- `POST /api/intent` — Customer intent classification
+- `POST /api/escalation` — Human takeover detection
+- `POST /api/quantities` — Algerian quantities & product attributes
+- `POST /api/sentiment` — Score and positive/negative token breakdown
+- `POST /api/dialect` — Regional dialect detection (WEST, EAST, CENTER, SOUTH)
+- `GET  /api/wilayas` — List all 69 official Algerian Wilayas
+- `GET  /api/wilayas/:code` — Wilaya details by code (1 to 69)
+
+## Algerian AI Automation Blueprints (`/examples`)
+
+Ready-to-use blueprints for Algerian developers and automation engineers:
+
+| Blueprint | Description |
+|---|---|
+| `examples/whatsapp_ecommerce_bot.py` | Production WhatsApp Cloud API webhook bot with human escalation and grounded Darja replies |
+| `examples/n8n_algerian_ecommerce_workflow.json` | Importable n8n workflow file connecting incoming leads, darja-nlp-kit, and Telegram/WhatsApp alerts |
+| `examples/langchain_agent_tools.py` | OpenAI & LangChain function calling definitions for Algerian NLP |
+| `examples/fastapi_ecommerce_service.py` | FastAPI microservice template |
+| `examples/express_ecommerce_service.ts` | Express.js microservice template |
 
 ## Running Tests
 

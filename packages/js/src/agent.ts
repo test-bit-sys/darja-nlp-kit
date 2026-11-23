@@ -4,7 +4,8 @@ import { analyzeSentiment } from './sentiment';
 import { extractEntities } from './entities';
 import { detectDialect } from './dialect';
 import { identifyIntent } from './intent';
-import { DialectRegion, IntentType, SentimentLabel } from './types';
+import { detectEscalation } from './escalation';
+import { DialectRegion, EscalationResult, IntentType, SentimentLabel } from './types';
 
 export interface AgentContext {
   storeName: string;
@@ -17,6 +18,7 @@ export interface AgentContext {
     matchedKeywords: string[];
     guideline: string;
   };
+  escalation: EscalationResult;
   dialect: {
     region: DialectRegion;
     confidence: number;
@@ -36,6 +38,8 @@ export interface AgentContext {
     deliveryCompanies: string[];
     deliveryMode: string | null;
     phones: string[];
+    quantities: string[];
+    productAttributes: { colors: string[]; sizes: string[] };
   };
 }
 
@@ -63,6 +67,7 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
   const normalized = normalize(rawMessage);
 
   const intent = identifyIntent(rawMessage);
+  const escalation = detectEscalation(rawMessage);
   const dialect = detectDialect(rawMessage);
   const sentiment = analyzeSentiment(rawMessage);
   const entities = extractEntities(rawMessage);
@@ -70,7 +75,10 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
   let tone = 'PROFESSIONAL_HELPFUL';
   let toneInstruction = '🤝 الزبون يستفسر. أجب بوضوح وسرعة ومهنية جزائرية عفوية.';
 
-  if (sentiment.label === 'NEGATIVE') {
+  if (escalation.needsEscalation) {
+    tone = 'CRITICAL_ESCALATION';
+    toneInstruction = `🚨 تصعيد فوري: ${escalation.guideline}`;
+  } else if (sentiment.label === 'NEGATIVE') {
     tone = 'APOLOGETIC_AND_REASSURING';
     toneInstruction = '⚠️ الزبون غاضب أو يشتكي! ابدأ بتطييب الخاطر والاعتذار (\'حقك علينا خويا، ما تقلقش، المشكل نحلوه درك\'). تجنب الجفاف والردود الآلية.';
   } else if (sentiment.label === 'POSITIVE') {
@@ -88,7 +96,15 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
     .map((p) => `${p.amount?.toLocaleString()} دج (${p.raw})`);
   const deliveriesSummary = (entities.deliveries || []).map((d) => d.label);
   const deliveryModeSummary = entities.deliveryMode?.label || null;
-  const phonesSummary = (entities.phones || []).map((ph) => ph.normalized);
+  const phonesSummary = (entities.phones || []).map((ph) => {
+    const op = ph.operatorLabel ? ` (${ph.operatorLabel})` : '';
+    return `${ph.normalized}${op}`;
+  });
+  const quantitiesSummary = (entities.quantities || []).map((q) => `${q.value} ${q.unit} (${q.raw})`);
+  const productAttributesSummary = {
+    colors: entities.attributes?.colors || [],
+    sizes: entities.attributes?.sizes || [],
+  };
 
   return {
     storeName,
@@ -101,6 +117,7 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
       matchedKeywords: intent.matchedKeywords,
       guideline: INTENT_GUIDELINES[intent.intent] || INTENT_GUIDELINES.UNKNOWN,
     },
+    escalation,
     dialect: {
       region: dialect.region,
       confidence: dialect.confidence,
@@ -120,6 +137,8 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
       deliveryCompanies: deliveriesSummary,
       deliveryMode: deliveryModeSummary,
       phones: phonesSummary,
+      quantities: quantitiesSummary,
+      productAttributes: productAttributesSummary,
     },
   };
 }
@@ -127,13 +146,21 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
 export function formatAgentSystemPrompt(context: AgentContext): string {
   const store = context.storeName || 'المتجر';
   const intent = context.intent;
+  const escalation = context.escalation;
   const dialect = context.dialect;
   const sentiment = context.sentiment;
   const facts = context.groundedFacts;
 
-  return `أنت مساعد خدمة عملاء ذكي وبشري جداً لمتجر إلكتروني جزائري '${store}'.
-مهمتك الرد على الزبون الجزائري بدارجة واقعية ومتقنة 100%، كأنك تاجر جزائري محترف ولطيف.
+  const escalationNotice = escalation.needsEscalation
+    ? `\n🚨 [تنبيه تصعيد عاجل - Escalation Triggered]:\n- السبب: ${escalation.reason} (درجة الإلحاح: ${escalation.urgency})\n- الإجراء: ${escalation.guideline}\n`
+    : '';
 
+  const quantitiesStr = facts.quantities.length > 0 ? facts.quantities.join(', ') : 'غير محددة';
+  const colorsStr = facts.productAttributes.colors.length > 0 ? facts.productAttributes.colors.join(', ') : 'غير محدد';
+  const sizesStr = facts.productAttributes.sizes.length > 0 ? facts.productAttributes.sizes.join(', ') : 'غير محدد';
+
+  return `أنت مساعد خدمة عملاء ذكي وبشري جداً لمتجر إلكتروني جزائري '${store}'.
+مهمتك الرد على الزبون الجزائري بدارجة واقعية ومتقنة 100%، كأنك تاجر جزائري محترف ولطيف.${escalationNotice}
 [السياق المستخرج من رسالة الزبون]:
 - الرسالة: "${context.rawMessage}"
 - الترجمة التفسيرية (إذا كانت عربيزي): "${context.arabicTransliterated}"
@@ -141,7 +168,9 @@ export function formatAgentSystemPrompt(context: AgentContext): string {
 - المنطقة الجغرافية للهجة: ${dialect.region} (${dialect.guideline})
 - حالة الزبون النفسية: ${sentiment.label} (الدرجة: ${sentiment.score})
 - إرشادات النبرة: ${sentiment.toneInstruction}
-- الولايات المؤكدة: ${facts.wilayas.length > 0 ? facts.wilayas.join(', ') : 'غير محددة'}
+- الولايات والبلديات: ${facts.wilayas.length > 0 ? facts.wilayas.join(', ') : 'غير محددة'}
+- الكمية المطلوبة: ${quantitiesStr}
+- مواصفات المنتج (ألوان/مقاسات): ألوان: ${colorsStr} | مقاسات: ${sizesStr}
 - المبالغ المذكورة بالدينار: ${facts.pricesDzd.length > 0 ? facts.pricesDzd.join(', ') : 'غير محددة'}
 - وسائل الدفع المرصودة: ${facts.payments.length > 0 ? facts.payments.join(', ') : 'غير محددة'}
 - شركات التوصيل: ${facts.deliveryCompanies.length > 0 ? facts.deliveryCompanies.join(', ') : 'غير محددة'}

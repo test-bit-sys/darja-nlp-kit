@@ -11,6 +11,8 @@ from darja_nlp.sentiment import analyze_sentiment
 from darja_nlp.entities import extract_entities, get_wilayas, get_wilaya_by_code
 from darja_nlp.dialect import detect_dialect
 from darja_nlp.intent import identify_intent
+from darja_nlp.quantities import extract_quantities, extract_product_attributes
+from darja_nlp.escalation import detect_escalation
 from darja_nlp.agent import build_agent_context, format_agent_system_prompt
 
 
@@ -415,7 +417,7 @@ class TestAIAgent:
         assert any('قسنطينة' in w for w in ctx['grounded_facts']['wilayas'])
         assert any('20,000' in p for p in ctx['grounded_facts']['prices_dzd'])
         assert any('BaridiMob' in p for p in ctx['grounded_facts']['payments'])
-        assert '0770112233' in ctx['grounded_facts']['phones']
+        assert any('0770112233' in p for p in ctx['grounded_facts']['phones'])
         assert ctx['dialect']['region'] == 'WEST'
         assert ctx['intent']['intent'] == 'ORDER'
         assert 'طلب شراء' in ctx['intent']['guideline']
@@ -425,8 +427,8 @@ class TestAIAgent:
         ctx = build_agent_context(msg)
         prompt = format_agent_system_prompt(ctx)
         assert 'NEGATIVE' in prompt
-        assert '⚠️ الزبون غاضب أو يشتكي' in prompt
         assert 'COMPLAINT' in prompt
+        assert 'Escalation Triggered' in prompt
 
 
 class TestDialect:
@@ -449,3 +451,109 @@ class TestDialect:
     def test_general_dialect(self) -> None:
         res = detect_dialect('سلام عليكم شكرا')
         assert res.region == 'GENERAL_DARJA'
+
+
+class TestTelecomOperators:
+
+    def test_mobilis_detection(self) -> None:
+        res = extract_entities('اتصل بي على 0661234567')
+        assert len(res.phones) == 1
+        ph = res.phones[0]
+        assert ph.operator == 'MOBILIS'
+        assert 'Mobilis' in ph.operator_label
+        assert ph.formatted == '+213 661 23 45 67'
+        assert ph.whatsapp_url == 'https://wa.me/213661234567'
+
+    def test_djezzy_detection(self) -> None:
+        res = extract_entities('mon numero 0770112233')
+        assert len(res.phones) == 1
+        ph = res.phones[0]
+        assert ph.operator == 'DJEZZY'
+        assert 'Djezzy' in ph.operator_label
+        assert ph.whatsapp_url == 'https://wa.me/213770112233'
+
+    def test_ooredoo_detection(self) -> None:
+        res = extract_entities('0550998877')
+        assert len(res.phones) == 1
+        ph = res.phones[0]
+        assert ph.operator == 'OOREDOO'
+        assert 'Ooredoo' in ph.operator_label
+        assert ph.whatsapp_url == 'https://wa.me/213550998877'
+
+    def test_landline_algerie_telecom(self) -> None:
+        res = extract_entities('fixe 021 23 45 67')
+        assert len(res.phones) == 1
+        ph = res.phones[0]
+        assert ph.operator == 'ALGERIE_TELECOM'
+        assert ph.whatsapp_url is None
+
+
+class TestQuantitiesAndAttributes:
+
+    def test_colloquial_arabic_quantities(self) -> None:
+        quants = extract_quantities('حاب 2 حبات و 3 شكاير و دوزينة')
+        assert len(quants) == 3
+        assert quants[0].value == 2 and quants[0].unit == 'حبة'
+        assert quants[1].value == 3 and quants[1].unit == 'شكارة'
+        assert quants[2].value == 12 and quants[2].unit == 'دوزينة'
+
+    def test_colloquial_arabizi_quantities(self) -> None:
+        quants = extract_quantities('zouj hbat w tlata boites w douzina')
+        assert len(quants) == 3
+        assert quants[0].value == 2 and quants[0].unit == 'حبة'
+        assert quants[1].value == 3 and quants[1].unit == 'باكية'
+        assert quants[2].value == 12 and quants[2].unit == 'دوزينة'
+
+    def test_product_attributes_colors_and_sizes(self) -> None:
+        attrs = extract_product_attributes('بيجاما كحلة وبيضا مقاس XL وبونتير 42')
+        assert any('كحل' in c for c in attrs.colors)
+        assert any('بيض' in c for c in attrs.colors)
+        assert 'XL' in attrs.sizes
+        assert '42' in attrs.sizes
+
+
+class TestEscalationDetection:
+
+    def test_legal_threat_escalation(self) -> None:
+        res = detect_escalation('نشكي بيكم للعدالة ولابوليس')
+        assert res.needs_escalation is True
+        assert res.urgency == 'CRITICAL'
+        assert res.reason == 'LEGAL_THREAT'
+
+    def test_angry_customer_escalation(self) -> None:
+        res = detect_escalation('سراقين حشيتوهالي رجعولي دراهمي')
+        assert res.needs_escalation is True
+        assert res.urgency == 'HIGH'
+        assert res.reason == 'ANGRY_CUSTOMER'
+
+    def test_human_requested_escalation(self) -> None:
+        res = detect_escalation('حاب نهدر مع بنادم عيطولي')
+        assert res.needs_escalation is True
+        assert res.urgency == 'HIGH'
+        assert res.reason == 'HUMAN_REQUESTED'
+
+    def test_no_escalation_on_normal_message(self) -> None:
+        res = detect_escalation('سلام عليكم متوفر هذا الموديل؟')
+        assert res.needs_escalation is False
+        assert res.urgency == 'NONE'
+        assert res.reason is None
+
+
+class TestAgentContextWithEscalation:
+
+    def test_agent_context_includes_new_features(self) -> None:
+        msg = 'حاب 2 حبات كحلة مقاس XL لوهران 0661234567'
+        ctx = build_agent_context(msg)
+        assert 'escalation' in ctx
+        assert ctx['escalation']['needs_escalation'] is False
+        assert any('Mobilis' in p for p in ctx['grounded_facts']['phones'])
+        assert any('2' in q and 'حبة' in q for q in ctx['grounded_facts']['quantities'])
+        assert any('كحل' in c for c in ctx['grounded_facts']['product_attributes']['colors'])
+        assert 'XL' in ctx['grounded_facts']['product_attributes']['sizes']
+
+    def test_system_prompt_escalation_alert(self) -> None:
+        msg = 'سراقين حشيتوهالي رجعولي دراهمي'
+        ctx = build_agent_context(msg)
+        prompt = format_agent_system_prompt(ctx)
+        assert 'Escalation Triggered' in prompt
+        assert 'ANGRY_CUSTOMER' in prompt

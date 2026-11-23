@@ -21,6 +21,19 @@ from .entities import (
     DeliveryEntity,
     DeliveryModeEntity,
     PhoneEntity,
+    TelecomOperator,
+)
+from .quantities import (
+    QuantityEntity,
+    ProductAttributes,
+    extract_quantities,
+    extract_product_attributes,
+)
+from .escalation import (
+    detect_escalation,
+    EscalationResult,
+    EscalationUrgency,
+    EscalationReason,
 )
 from .dialect import detect_dialect, DialectResult
 from .intent import identify_intent, IntentResult, IntentType
@@ -29,6 +42,7 @@ from .agent import (
     format_agent_system_prompt,
     get_openai_tool_definitions,
 )
+from .server import start_server
 
 __version__ = '1.0.0'
 
@@ -55,6 +69,15 @@ __all__ = [
     'DeliveryEntity',
     'DeliveryModeEntity',
     'PhoneEntity',
+    'TelecomOperator',
+    'QuantityEntity',
+    'ProductAttributes',
+    'extract_quantities',
+    'extract_product_attributes',
+    'detect_escalation',
+    'EscalationResult',
+    'EscalationUrgency',
+    'EscalationReason',
     'detect_dialect',
     'DialectResult',
     'identify_intent',
@@ -63,4 +86,5 @@ __all__ = [
     'build_agent_context',
     'format_agent_system_prompt',
     'get_openai_tool_definitions',
+    'start_server',
 ]

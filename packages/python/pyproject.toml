@@ -30,9 +30,12 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/dz-open-suite/darja-nlp-kit"
-Repository = "https://github.com/dz-open-suite/darja-nlp-kit"
-Issues = "https://github.com/dz-open-suite/darja-nlp-kit/issues"
+Homepage = "https://github.com/test-bit-sys/darja-nlp-kit"
+Repository = "https://github.com/test-bit-sys/darja-nlp-kit"
+Issues = "https://github.com/test-bit-sys/darja-nlp-kit/issues"
+
+[project.scripts]
+darja-nlp = "darja_nlp.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["darja_nlp*"]

@@ -5,6 +5,8 @@ import { arabiziToArabic } from '../src/arabizi';
 import { tokenize, removeStopwords, isStopword } from '../src/stopwords';
 import { analyzeSentiment } from '../src/sentiment';
 import { extractEntities, getWilayas, getWilayaByCode } from '../src/entities';
+import { extractQuantities, extractProductAttributes } from '../src/quantities';
+import { detectEscalation } from '../src/escalation';
 import { detectDialect } from '../src/dialect';
 import { identifyIntent } from '../src/intent';
 import { buildAgentContext, formatAgentSystemPrompt } from '../src/agent';
@@ -460,7 +462,7 @@ describe('AI Agent Integration', () => {
     assert.ok(ctx.groundedFacts.wilayas.some((w) => w.includes('قسنطينة')));
     assert.ok(ctx.groundedFacts.pricesDzd.some((p) => p.includes('20,000')));
     assert.ok(ctx.groundedFacts.payments.some((p) => p.includes('BaridiMob')));
-    assert.ok(ctx.groundedFacts.phones.includes('0770112233'));
+    assert.ok(ctx.groundedFacts.phones.some((p) => p.includes('0770112233')));
     assert.equal(ctx.dialect.region, 'WEST');
     assert.equal(ctx.intent.intent, 'ORDER');
     assert.ok(ctx.intent.guideline.includes('طلب شراء'));
@@ -471,8 +473,8 @@ describe('AI Agent Integration', () => {
     const ctx = buildAgentContext(msg);
     const prompt = formatAgentSystemPrompt(ctx);
     assert.ok(prompt.includes('NEGATIVE'));
-    assert.ok(prompt.includes('⚠️ الزبون غاضب أو يشتكي'));
     assert.ok(prompt.includes('COMPLAINT'));
+    assert.ok(prompt.includes('Escalation Triggered'));
   });
 });
 
@@ -498,5 +500,125 @@ describe('detectDialect', () => {
   it('should return GENERAL_DARJA when no regional markers found', () => {
     const res = detectDialect('سلام عليكم شكرا');
     assert.equal(res.region, 'GENERAL_DARJA');
+  });
+});
+
+describe('Telecom Operators Detection', () => {
+  it('should detect Mobilis operator, formatted number and WhatsApp URL', () => {
+    const res = extractEntities('اتصل بي على 0661234567');
+    assert.equal(res.phones?.length, 1);
+    const ph = res.phones![0];
+    assert.equal(ph.operator, 'MOBILIS');
+    assert.ok(ph.operatorLabel?.includes('Mobilis'));
+    assert.equal(ph.formatted, '+213 661 23 45 67');
+    assert.equal(ph.whatsappUrl, 'https://wa.me/213661234567');
+  });
+
+  it('should detect Djezzy operator', () => {
+    const res = extractEntities('mon numero 0770112233');
+    assert.equal(res.phones?.length, 1);
+    const ph = res.phones![0];
+    assert.equal(ph.operator, 'DJEZZY');
+    assert.ok(ph.operatorLabel?.includes('Djezzy'));
+    assert.equal(ph.whatsappUrl, 'https://wa.me/213770112233');
+  });
+
+  it('should detect Ooredoo operator', () => {
+    const res = extractEntities('0550998877');
+    assert.equal(res.phones?.length, 1);
+    const ph = res.phones![0];
+    assert.equal(ph.operator, 'OOREDOO');
+    assert.ok(ph.operatorLabel?.includes('Ooredoo'));
+    assert.equal(ph.whatsappUrl, 'https://wa.me/213550998877');
+  });
+
+  it('should detect Algérie Télécom landline without WhatsApp URL', () => {
+    const res = extractEntities('fixe 021 23 45 67');
+    assert.equal(res.phones?.length, 1);
+    const ph = res.phones![0];
+    assert.equal(ph.operator, 'ALGERIE_TELECOM');
+    assert.equal(ph.whatsappUrl, null);
+  });
+});
+
+describe('Quantities and Product Attributes', () => {
+  it('should extract colloquial Arabic quantities', () => {
+    const quants = extractQuantities('حاب 2 حبات و 3 شكاير و دوزينة');
+    assert.equal(quants.length, 3);
+    assert.equal(quants[0].value, 2);
+    assert.equal(quants[0].unit, 'حبة');
+    assert.equal(quants[1].value, 3);
+    assert.equal(quants[1].unit, 'شكارة');
+    assert.equal(quants[2].value, 12);
+    assert.equal(quants[2].unit, 'دوزينة');
+  });
+
+  it('should extract colloquial Arabizi quantities', () => {
+    const quants = extractQuantities('zouj hbat w tlata boites w douzina');
+    assert.equal(quants.length, 3);
+    assert.equal(quants[0].value, 2);
+    assert.equal(quants[0].unit, 'حبة');
+    assert.equal(quants[1].value, 3);
+    assert.equal(quants[1].unit, 'باكية');
+    assert.equal(quants[2].value, 12);
+    assert.equal(quants[2].unit, 'دوزينة');
+  });
+
+  it('should extract product colors and sizes', () => {
+    const attrs = extractProductAttributes('بيجاما كحلة وبيضا مقاس XL وبونتير 42');
+    assert.ok(attrs.colors.some((c) => c.includes('كحل')));
+    assert.ok(attrs.colors.some((c) => c.includes('بيض')));
+    assert.ok(attrs.sizes.includes('XL'));
+    assert.ok(attrs.sizes.includes('42'));
+  });
+});
+
+describe('Escalation Detection', () => {
+  it('should detect legal threats as CRITICAL escalation', () => {
+    const res = detectEscalation('نشكي بيكم للعدالة ولابوليس');
+    assert.equal(res.needsEscalation, true);
+    assert.equal(res.urgency, 'CRITICAL');
+    assert.equal(res.reason, 'LEGAL_THREAT');
+  });
+
+  it('should detect angry customer as HIGH escalation', () => {
+    const res = detectEscalation('سراقين حشيتوهالي رجعولي دراهمي');
+    assert.equal(res.needsEscalation, true);
+    assert.equal(res.urgency, 'HIGH');
+    assert.equal(res.reason, 'ANGRY_CUSTOMER');
+  });
+
+  it('should detect human takeover requests as HIGH escalation', () => {
+    const res = detectEscalation('حاب نهدر مع بنادم عيطولي');
+    assert.equal(res.needsEscalation, true);
+    assert.equal(res.urgency, 'HIGH');
+    assert.equal(res.reason, 'HUMAN_REQUESTED');
+  });
+
+  it('should not escalate on normal customer inquiries', () => {
+    const res = detectEscalation('سلام عليكم متوفر هذا الموديل؟');
+    assert.equal(res.needsEscalation, false);
+    assert.equal(res.urgency, 'NONE');
+    assert.equal(res.reason, null);
+  });
+});
+
+describe('Agent Context with Escalation and Attributes', () => {
+  it('should include escalation and attributes in agent context', () => {
+    const msg = 'حاب 2 حبات كحلة مقاس XL لوهران 0661234567';
+    const ctx = buildAgentContext(msg);
+    assert.equal(ctx.escalation.needsEscalation, false);
+    assert.ok(ctx.groundedFacts.phones.some((p) => p.includes('Mobilis')));
+    assert.ok(ctx.groundedFacts.quantities.some((q) => q.includes('2') && q.includes('حبة')));
+    assert.ok(ctx.groundedFacts.productAttributes.colors.some((c) => c.includes('كحل')));
+    assert.ok(ctx.groundedFacts.productAttributes.sizes.includes('XL'));
+  });
+
+  it('should include escalation notice in system prompt when triggered', () => {
+    const msg = 'سراقين حشيتوهالي رجعولي دراهمي';
+    const ctx = buildAgentContext(msg);
+    const prompt = formatAgentSystemPrompt(ctx);
+    assert.ok(prompt.includes('Escalation Triggered'));
+    assert.ok(prompt.includes('ANGRY_CUSTOMER'));
   });
 });
