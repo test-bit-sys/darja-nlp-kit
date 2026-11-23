@@ -12,6 +12,18 @@ from .arabizi import arabizi_to_arabic
 from .sentiment import analyze_sentiment
 from .entities import extract_entities, get_wilaya_by_code
 from .dialect import detect_dialect
+from .intent import identify_intent, IntentType
+
+
+INTENT_GUIDELINES: Dict[str, str] = {
+    'ORDER': '🛒 نية الزبون: طلب شراء/حجز. اطلب منه تأكيد الاسم، الولاية/البلدية، ورقم الهاتف لتسجيل طلبيته فورا.',
+    'PRICE_INQUIRY': '💰 نية الزبون: استفسار عن السعر. أعطه السعر بالدينار الجزائري مع توضيح مصاريف التوصيل.',
+    'AVAILABILITY_INQUIRY': '📦 نية الزبون: توفر السلعة. أكد التوفر وحفزه على الطلب فورا.',
+    'DELIVERY_INQUIRY': '🚚 نية الزبون: التوصيل والشحن. وضح سعر ومدة التوصيل لولايته (خدمة سريعة للدار أو المكتب).',
+    'COMPLAINT': '⚠️ نية الزبون: شكوى أو استرجاع. استوعب غضب الزبون بلطف واعتذر وقم بحل الإشكال باحترافية.',
+    'GREETING': '👋 نية الزبون: تحية وتواصل. رد بترحيب جزائري عفوي ومستعد للخدمة.',
+    'UNKNOWN': 'استفسار عام. قدم المساعدة بطريقة واضحة ومباشرة.',
+}
 
 
 def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> Dict[str, Any]:
@@ -23,7 +35,8 @@ def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> D
     arabic_trans = arabizi_to_arabic(raw_message)
     normalized = normalize(raw_message)
 
-    # Dialect, sentiment, and entity extraction
+    # Intent, dialect, sentiment, and entity extraction
+    intent = identify_intent(raw_message)
     dialect = detect_dialect(raw_message)
     sentiment = analyze_sentiment(raw_message)
     entities = extract_entities(raw_message)
@@ -48,7 +61,11 @@ def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> D
         tone = "PROFESSIONAL_HELPFUL"
         tone_instruction = "🤝 الزبون يستفسر. أجب بوضوح وسرعة ومهنية جزائرية عفوية."
 
-    wilayas_summary = [f"{w.name_ar} ({w.code_str})" for w in entities.wilayas]
+    wilayas_summary = []
+    for w in entities.wilayas:
+        commune_info = f" - بلدية {w.commune}" if w.commune else ""
+        wilayas_summary.append(f"{w.name_ar} ({w.code_str}){commune_info}")
+
     payments_summary = [p.label for p in entities.payments]
     prices_summary = [f"{p.amount:,.0f} دج ({p.raw})" for p in entities.prices if p.amount is not None]
     deliveries_summary = [d.label for d in entities.deliveries]
@@ -60,6 +77,12 @@ def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> D
         "raw_message": raw_message,
         "arabic_transliterated": arabic_trans,
         "normalized": normalized,
+        "intent": {
+            "intent": intent.intent,
+            "confidence": intent.confidence,
+            "matched_keywords": intent.matched_keywords,
+            "guideline": INTENT_GUIDELINES.get(intent.intent, INTENT_GUIDELINES["UNKNOWN"]),
+        },
         "dialect": {
             "region": dialect.region,
             "confidence": dialect.confidence,
@@ -86,9 +109,10 @@ def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> D
 def format_agent_system_prompt(context: Dict[str, Any]) -> str:
     """Format a system prompt for an LLM based on extracted agent context."""
     store = context.get("store_name", "المتجر")
+    intent = context.get("intent", {"intent": "UNKNOWN", "guideline": "استفسار عام."})
     dialect = context["dialect"]
     sentiment = context["sentiment"]
-    facts = context["grounded_facts"]
+    facts = context["groundedFacts"] if "groundedFacts" in context else context["grounded_facts"]
 
     prompt = f"""أنت مساعد خدمة عملاء ذكي وبشري جداً لمتجر إلكتروني جزائري '{store}'.
 مهمتك الرد على الزبون الجزائري بدارجة واقعية ومتقنة 100%، كأنك تاجر جزائري محترف ولطيف.
@@ -96,6 +120,7 @@ def format_agent_system_prompt(context: Dict[str, Any]) -> str:
 [السياق المستخرج من رسالة الزبون]:
 - الرسالة: "{context['raw_message']}"
 - الترجمة التفسيرية (إذا كانت عربيزي): "{context['arabic_transliterated']}"
+- النية الأساسية (Intent): {intent['intent']} ({intent['guideline']})
 - المنطقة الجغرافية للهجة: {dialect['region']} ({dialect['guideline']})
 - حالة الزبون النفسية: {sentiment['label']} (الدرجة: {sentiment['score']})
 - إرشادات النبرة: {sentiment['tone_instruction']}

@@ -49,7 +49,14 @@
     "9rab",
     "jnab",
     "wst",
-    "b7al"
+    "b7al",
+    "من جيهة",
+    "حتى لـ",
+    "مور",
+    "مورا",
+    "men jihet",
+    "mor",
+    "mora"
   ],
   "pronouns": [
     "أنا",
@@ -160,7 +167,16 @@
     "hdo",
     "dak",
     "dik",
-    "douk"
+    "douk",
+    "هاداك",
+    "هاديك",
+    "هادوك",
+    "هاذو",
+    "هاذوك",
+    "هاذي",
+    "hadak",
+    "hadik",
+    "hadouk"
   ],
   "question_words": [
     "واش",
@@ -217,7 +233,15 @@
     "esk",
     "eske",
     "chbik",
-    "washbik"
+    "washbik",
+    "وينتا",
+    "وقتاه",
+    "wektach",
+    "wenta",
+    "we9tah",
+    "3lech",
+    "wachnou",
+    "chkoune"
   ],
   "conjunctions": [
     "و",
@@ -258,7 +282,14 @@
     "balak",
     "ymkn",
     "ida",
-    "wakha"
+    "wakha",
+    "باشما",
+    "كاشما",
+    "باسكو",
+    "bachma",
+    "kachma",
+    "parce que",
+    "pask"
   ],
   "adverbs": [
     "برك",
@@ -567,5 +598,23 @@
     "lmouhim",
     "aya",
     "bel39el"
+  ],
+  "temporal": [
+    "ضرك",
+    "دروك",
+    "دوك",
+    "دك",
+    "البارح",
+    "غدوة",
+    "اليوم",
+    "دركا",
+    "دروكا",
+    "dork",
+    "dorka",
+    "drouk",
+    "drouka",
+    "lbarah",
+    "ghedwa",
+    "lyoum"
   ]
 }

@@ -10,6 +10,7 @@ from darja_nlp.stopwords import tokenize, remove_stopwords, is_stopword
 from darja_nlp.sentiment import analyze_sentiment
 from darja_nlp.entities import extract_entities, get_wilayas, get_wilaya_by_code
 from darja_nlp.dialect import detect_dialect
+from darja_nlp.intent import identify_intent
 from darja_nlp.agent import build_agent_context, format_agent_system_prompt
 
 
@@ -341,6 +342,70 @@ class TestEntities:
         assert any(p.normalized == '0661234567' for p in res.phones)
         assert any(p.normalized == '0555123456' for p in res.phones)
 
+    def test_resolve_algerian_communes(self) -> None:
+        res1 = extract_entities('livrili l Rouiba svp')
+        assert any(w.code == 16 and w.commune == 'Rouiba' for w in res1.wilayas)
+
+        res2 = extract_entities('حاب نشري سلعة في العلمة')
+        assert any(w.code == 19 and w.commune == 'العلمة' for w in res2.wilayas)
+
+        res3 = extract_entities('livraison l عين الترك')
+        assert any(w.code == 31 and w.commune == 'عين الترك' for w in res3.wilayas)
+
+        res4 = extract_entities('rani f حاسي مسعود')
+        assert any(w.code == 30 and w.commune == 'حاسي مسعود' for w in res4.wilayas)
+
+    def test_compound_darja_prices(self) -> None:
+        res1 = extract_entities('سومة هاذي زوج ملاين و خمسمية الف')
+        assert any(p.amount == 25000 for p in res1.prices)
+
+        res2 = extract_entities('chrit b 3 mlayen w 500 alf')
+        assert any(p.amount == 35000 for p in res2.prices)
+
+        res3 = extract_entities('حسابك زوج ملاين و خمسين الف')
+        assert any(p.amount == 20500 for p in res3.prices)
+
+        res4 = extract_entities('سعرها مليون و ميتين الف')
+        assert any(p.amount == 12000 for p in res4.prices)
+
+
+class TestIntent:
+
+    def test_order_intent(self) -> None:
+        res = identify_intent('سلام خاوتي حاب نكوموندي زوج حبات ابعثهالي للدار')
+        assert res.intent == 'ORDER'
+        assert res.confidence >= 0.7
+
+    def test_price_inquiry_intent(self) -> None:
+        res = identify_intent('بشحال هادي خاوة شحال السومة تاعها؟')
+        assert res.intent == 'PRICE_INQUIRY'
+        assert res.confidence >= 0.7
+
+    def test_availability_inquiry_intent(self) -> None:
+        res = identify_intent('سلام عليكم كاين منها هادي مازالت ديسبو عندكم؟')
+        assert res.intent == 'AVAILABILITY_INQUIRY'
+        assert res.confidence >= 0.7
+
+    def test_delivery_inquiry_intent(self) -> None:
+        res = identify_intent('شحال التوصيل لوهران و وقتاش تلحق؟')
+        assert res.intent == 'DELIVERY_INQUIRY'
+        assert res.confidence >= 0.7
+
+    def test_complaint_intent(self) -> None:
+        res = identify_intent('سلعة مكسرة ومفاتشة حشيتوهالي رجعولي دراهمي روتور')
+        assert res.intent == 'COMPLAINT'
+        assert res.confidence >= 0.7
+
+    def test_greeting_intent(self) -> None:
+        res = identify_intent('السلام عليكم واش راك خويا لعزيز')
+        assert res.intent == 'GREETING'
+        assert res.confidence >= 0.7
+
+    def test_unknown_intent(self) -> None:
+        res = identify_intent('طاولة خشبية زرقاء 123')
+        assert res.intent == 'UNKNOWN'
+        assert res.confidence == 0.0
+
 
 class TestAIAgent:
 
@@ -352,6 +417,8 @@ class TestAIAgent:
         assert any('BaridiMob' in p for p in ctx['grounded_facts']['payments'])
         assert '0770112233' in ctx['grounded_facts']['phones']
         assert ctx['dialect']['region'] == 'WEST'
+        assert ctx['intent']['intent'] == 'ORDER'
+        assert 'طلب شراء' in ctx['intent']['guideline']
 
     def test_format_system_prompt(self) -> None:
         msg = 'khedma 3ayana w sil3a khorda 7chawhali'
@@ -359,6 +426,7 @@ class TestAIAgent:
         prompt = format_agent_system_prompt(ctx)
         assert 'NEGATIVE' in prompt
         assert '⚠️ الزبون غاضب أو يشتكي' in prompt
+        assert 'COMPLAINT' in prompt
 
 
 class TestDialect:

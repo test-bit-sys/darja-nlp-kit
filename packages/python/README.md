@@ -277,28 +277,71 @@ result = analyze_sentiment('المنتوج هايل')
 ### `extractEntities(text)` / `extract_entities(text)`
 
 Extracts Algerian entities:
-- **Wilayas (69 Provinces)**: Matches by postal codes (`16`, `31`, `w16`), Arabic/French names (`الجزائر`, `Alger`, `بوسعادة`), and popular aliases (`البهجة`, `الباهية`, `سيرتا`). Fully compliant with the 69-wilaya administrative reform (Law 26-06).
+- **Wilayas (69 Provinces) & 550+ Communes**: Matches by postal codes (`16`, `31`, `w16`), Arabic/French names (`الجزائر`, `Alger`, `بوسعادة`), popular aliases (`البهجة`, `الباهية`, `سيرتا`), and **550+ major Algerian communes** (e.g. `Rouiba`, `El Eulma`, `Ain El Turk`, `Hassi Messaoud`) which automatically resolve to their parent Wilaya with a `commune` property. Fully compliant with Law 26-06.
 - **Payment Methods**: `BARIDIMOB`, `EDAHABIA` (البطاقة الذهبية), `CCP`, `COD` (الدفع عند الاستلام).
-- **Prices & Colloquial Amounts**: `4500 DA`, `مية الف` (1,000 DZD), `زوج ملاين` (20,000 DZD).
+- **Compound Colloquial Prices**: Accurately parses compound Algerian centimes and dinars:
+  - `زوج ملاين و خمسمية الف` / `2 mlayen w 500 alf` $\rightarrow$ 25,000 DZD
+  - `زوج ملاين و خمسين الف` $\rightarrow$ 20,500 DZD
+  - `مليون و ميتين الف` $\rightarrow$ 12,000 DZD
+- **Delivery Carriers & Modes**: `YALIDINE`, `ZR_EXPRESS`, `MAYSTRO`, `PROCOLIS`, `EMS`, `KAZITOUR`, `GUEPEX`, plus `STOP_DESK` (استلام من المكتب) vs `HOME_DELIVERY` (توصيل للدار).
+- **Phone Numbers**: Normalizes mobile/landline numbers (`05xx`, `06xx`, `07xx`, `+213`, `00213`) to standard 10-digit format.
 
 **TypeScript:**
 ```typescript
 import { extractEntities } from '@dz-open-suite/darja-nlp-kit';
 
-const res = extractEntities('توصيل لبوسعادة و نخلصك بـ baridimob السعر زوج ملاين');
-// res.wilayas => [{ code: 68, codeStr: '68', nameAr: 'بوسعادة', nameFr: 'Bou Saâda', matchedText: 'بوسعادة' }]
-// res.payments => [{ type: 'BARIDIMOB', label: 'BaridiMob (بريدي موب)', matchedText: 'baridimob' }]
-// res.prices => [{ raw: 'زوج ملاين', amount: 20000, currency: 'DZD' }]
+const res = extractEntities('livrili l Rouiba b 2 mlayen w 500 alf b yalidine stop desk num: 0555123456');
+// res.wilayas => [{ code: 16, codeStr: '16', nameAr: 'الجزائر', nameFr: 'Alger', commune: 'Rouiba', matchedText: 'Rouiba' }]
+// res.prices => [{ raw: '2 mlayen w 500 alf', amount: 25000, currency: 'DZD' }]
+// res.deliveries => [{ company: 'YALIDINE', label: 'Yalidine Express (ياليدين)', matchedText: 'yalidine' }]
+// res.deliveryMode => { mode: 'STOP_DESK', label: 'Stop Desk (استلام من المكتب)' }
+// res.phones => [{ raw: '0555123456', normalized: '0555123456' }]
 ```
 
 **Python:**
 ```python
 from darja_nlp import extract_entities
 
-res = extract_entities('توصيل لبوسعادة و نخلصك بـ baridimob السعر زوج ملاين')
-# res.wilayas[0].code == 68
-# res.payments[0].type == 'BARIDIMOB'
-# res.prices[0].amount == 20000.0
+res = extract_entities('livrili l Rouiba b 2 mlayen w 500 alf b yalidine stop desk num: 0555123456')
+# res.wilayas[0].code == 16
+# res.wilayas[0].commune == 'Rouiba'
+# res.prices[0].amount == 25000.0
+# res.deliveries[0].company == 'YALIDINE'
+# res.delivery_mode.mode == 'STOP_DESK'
+# res.phones[0].normalized == '0555123456'
+```
+
+---
+
+### `identifyIntent(text)` / `identify_intent(text)`
+
+Classifies the customer's operational intent in Algerian Arabic / Arabizi / French code-switching:
+- `ORDER`: طلب شراء أو حجز (e.g. *حاب نكوموندي*, *rani baghi nchri*, *ابعثوهالي للدار*)
+- `PRICE_INQUIRY`: استفسار عن السعر (e.g. *بشحال هادي*, *شحال السومة*, *bch7al*, *c combien*)
+- `AVAILABILITY_INQUIRY`: استفسار عن توفر السلعة والكمية (e.g. *كاينة منها*, *مازالت ديسبو*, *fih stock*)
+- `DELIVERY_INQUIRY`: استفسار عن التوصيل والشحن (e.g. *شحال ليفريزون*, *وقتاش تلحق*, *كاين توصيل للدار*)
+- `COMPLAINT`: شكوى أو استرجاع (e.g. *سلعة مكسرة*, *حشيتوهالي*, *روتور*, *سلعة عيانة*)
+- `GREETING`: تحية وتواصل (e.g. *السلام عليكم*, *واش راك خويا*, *salam*, *azul*)
+- `UNKNOWN`: غير محدد
+
+**TypeScript:**
+```typescript
+import { identifyIntent } from '@dz-open-suite/darja-nlp-kit';
+
+identifyIntent('سلام خاوتي حاب نكوموندي زوج حبات ابعثهالي للدار');
+// => { intent: 'ORDER', confidence: 0.9, matchedKeywords: ['حاب', 'ابعثهالي'] }
+
+identifyIntent('بشحال هاذي خاوة السومة تاعها؟');
+// => { intent: 'PRICE_INQUIRY', confidence: 0.9, matchedKeywords: ['بشحال', 'السومة'] }
+```
+
+**Python:**
+```python
+from darja_nlp import identify_intent
+
+res = identify_intent('سلام خاوتي حاب نكوموندي زوج حبات ابعثهالي للدار')
+# res.intent == 'ORDER'
+# res.confidence >= 0.8
 ```
 
 ---
@@ -338,10 +381,10 @@ All linguistic data lives in `/data` and is synced to both packages:
 
 | File | Description |
 |---|---|
-| `wilayas.json` | All 69 Algerian Wilayas with Arabic/French names, codes, and popular aliases |
-| `stopwords.json` | 500+ categorized regional and general stopwords |
-| `lexicon.json` | Algerian sentiment dictionary with 230+ phrases, idioms, negators, and intensifiers |
-| `arabizi_rules.json` | Transliteration rules, French whitelist, and irregular overrides |
+| `wilayas.json` | All 69 Algerian Wilayas with Arabic/French names, codes, popular aliases, and **550+ commercial communes** |
+| `stopwords.json` | 590+ categorized regional and general stopwords across 13 grammatical categories |
+| `lexicon.json` | Algerian sentiment dictionary with 410+ authentic positive/negative phrases, idioms, 33 negators, and 44 intensifiers |
+| `arabizi_rules.json` | Transliteration rules, 240+ French whitelist terms, and 130+ irregular Darja overrides |
 
 ### `buildAgentContext(message)` & `formatAgentSystemPrompt(context)`
 

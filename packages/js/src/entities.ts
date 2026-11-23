@@ -109,6 +109,34 @@ const DELIVERY_MODE_PATTERNS = [
 
 const PHONE_PATTERN = /(?:^|\s|[^\w\u0600-\u06FF])((?:\+213|00213|0)\s*(?:[5-7]|2[0-9]|3[0-9]|4[0-9])(?:[\s.-]?\d){8})(?=$|\s|[^\w\u0600-\u06FF])/g;
 
+const DARJA_MILLIONS_WORDS: Record<string, number> = {
+  زوج: 2, تلات: 3, تلاتة: 3, ربع: 4, ربعة: 4,
+  خمس: 5, خمسة: 5, ست: 6, ستة: 6, سبع: 7,
+  سبعة: 7, تمن: 8, تمنية: 8, تسع: 9, تسعة: 9,
+  عشر: 10, عشرة: 10,
+  zouj: 2, zoudj: 2, tlata: 3, tleta: 3, rab3a: 4, reb3a: 4,
+  khamsa: 5, setta: 6, seb3a: 7, tmenya: 8, tes3a: 9, '3achra': 10,
+};
+
+const DARJA_THOUSANDS_WORDS: Record<string, number> = {
+  مية: 100, ميتين: 200, تلمية: 300, تلتمية: 300, تلاتمية: 300,
+  ربعمية: 400, خمسمية: 500, ستمية: 600, سبعمية: 700, تمنمية: 800,
+  تسعمية: 900, عشرين: 20, تلاتين: 30, ربعين: 40, خمسين: 50,
+  ستين: 60, سبعين: 70, تمانين: 80, تسعين: 90,
+  mya: 100, myat: 100, mitin: 200, mitayn: 200, teltmya: 300,
+  rab3mya: 400, khamsmya: 500, settmya: 600, seb3mya: 700,
+  tmenmya: 800, tes3mya: 900, '3echrin': 20, tlatin: 30, rab3in: 40,
+  khamsin: 50, settin: 60, seb3in: 70, tmanin: 80, tes3in: 90,
+};
+
+const MILLIONS_WORDS_STR = 'زوج|تلات|تلاتة|ربع|ربعة|خمس|خمسة|ست|ستة|سبع|سبعة|تمن|تمنية|تسع|تسعة|عشر|عشرة|zouj|zoudj|tlata|tleta|rab3a|reb3a|khamsa|setta|seb3a|tmenya|tes3a|3achra';
+const THOUSANDS_WORDS_STR = 'مية|ميتين|تلمية|تلتمية|تلاتمية|ربعمية|خمسمية|ستمية|سبعمية|تمنمية|تسعمية|عشرين|تلاتين|ربعين|خمسين|ستين|سبعين|تمانين|تسعين|mya|myat|mitin|mitayn|teltmya|rab3mya|khamsmya|settmya|seb3mya|tmenmya|tes3mya|3echrin|tlatin|rab3in|khamsin|settin|seb3in|tmanin|tes3in';
+
+const COMPOUND_PRICE_PATTERN = new RegExp(
+  `(?:^|\\s|[^\\w\\u0600-\\u06FF])(\\d+(?:[.,]\\d+)?|${MILLIONS_WORDS_STR})?\\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)\\s*(?:و|\\+|et|w)\\s*(\\d+(?:[.,]\\d+)?|${THOUSANDS_WORDS_STR})?\\s*(?:الف|ألف|alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])`,
+  'gi',
+);
+
 const PRICE_NUMERIC_PATTERN = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(da|dzd|دج|دينار|الف|ألف|alf)(?=$|\s|[^\w\u0600-\u06FF])/gi;
 const DYNAMIC_MILLIONS_PATTERN = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)(?=$|\s|[^\w\u0600-\u06FF])/gi;
 const DARJA_AMOUNTS: Array<{ pattern: RegExp; value: number }> = [
@@ -165,12 +193,41 @@ function extractWilayas(text: string, wilayas: WilayaRaw[]): WilayaEntity[] {
           continue;
         }
         addedCodes.add(w.code);
+        const allCommunes = [...(w.communes_sample || []), ...(w.communes_fr_sample || [])];
+        const matchedCommune = allCommunes.find((c) => c.toLowerCase() === candLower) || null;
         results.push({
           code: w.code,
           codeStr: w.code_str,
           nameAr: w.name_ar,
           nameFr: w.name_fr,
           matchedText: cand,
+          commune: matchedCommune,
+        });
+        break;
+      }
+    }
+  }
+
+  // 3. Major Communes matching (550+ Algerian communes)
+  for (const w of wilayas) {
+    if (addedCodes.has(w.code)) continue;
+
+    const communes = [...(w.communes_sample || []), ...(w.communes_fr_sample || [])];
+    for (const com of communes) {
+      if (!com || com.length < 3) continue;
+      const comLower = com.toLowerCase();
+      const escaped = comLower.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+      const reg = new RegExp(`(^|\\s|[.,!?;:()])${escaped}($|\\s|[.,!?;:()])`, 'i');
+
+      if (reg.test(lowerText) || (comLower.length >= 4 && lowerText.includes(comLower))) {
+        addedCodes.add(w.code);
+        results.push({
+          code: w.code,
+          codeStr: w.code_str,
+          nameAr: w.name_ar,
+          nameFr: w.name_fr,
+          matchedText: com,
+          commune: com,
         });
         break;
       }
@@ -201,11 +258,54 @@ function extractPayments(text: string): PaymentEntity[] {
 
 function extractPrices(text: string): PriceEntity[] {
   const results: PriceEntity[] = [];
+  let maskedText = text;
 
-  // Match standard numbers with currency
-  let numMatch: RegExpExecArray | null;
+  // 1. Compound prices (e.g., "زوج ملاين و خمسمية الف", "3 mlayen w 500 alf")
+  const compRegex = new RegExp(COMPOUND_PRICE_PATTERN.source, 'gi');
+  let compMatch: RegExpExecArray | null;
+  while ((compMatch = compRegex.exec(text)) !== null) {
+    const rawM = compMatch[1];
+    const rawK = compMatch[2];
+    const rawFull = compMatch[0].trim();
+
+    let millionsVal = 1;
+    if (rawM) {
+      const mKey = rawM.toLowerCase();
+      if (DARJA_MILLIONS_WORDS[mKey] !== undefined) {
+        millionsVal = DARJA_MILLIONS_WORDS[mKey];
+      } else {
+        const parsed = parseFloat(mKey.replace(',', '.'));
+        millionsVal = isNaN(parsed) ? 1 : parsed;
+      }
+    }
+
+    let thousandsVal = 1;
+    if (rawK) {
+      const kKey = rawK.toLowerCase();
+      if (DARJA_THOUSANDS_WORDS[kKey] !== undefined) {
+        thousandsVal = DARJA_THOUSANDS_WORDS[kKey];
+      } else {
+        const parsed = parseFloat(kKey.replace(',', '.'));
+        thousandsVal = isNaN(parsed) ? 0 : parsed;
+      }
+    }
+
+    const totalDzd = (millionsVal * 10000) + (thousandsVal * 10);
+    results.push({
+      raw: rawFull,
+      amount: totalDzd,
+      currency: 'DZD',
+    });
+
+    const start = compMatch.index;
+    const len = compMatch[0].length;
+    maskedText = maskedText.slice(0, start) + ' '.repeat(len) + maskedText.slice(start + len);
+  }
+
+  // 2. Standard numbers with currency
   const numRegex = new RegExp(PRICE_NUMERIC_PATTERN.source, 'gi');
-  while ((numMatch = numRegex.exec(text)) !== null) {
+  let numMatch: RegExpExecArray | null;
+  while ((numMatch = numRegex.exec(maskedText)) !== null) {
     const rawVal = numMatch[1].replace(',', '.');
     const unit = numMatch[2].toLowerCase();
     let val = parseFloat(rawVal);
@@ -217,12 +317,15 @@ function extractPrices(text: string): PriceEntity[] {
       amount: val,
       currency: 'DZD',
     });
+    const start = numMatch.index;
+    const len = numMatch[0].length;
+    maskedText = maskedText.slice(0, start) + ' '.repeat(len) + maskedText.slice(start + len);
   }
 
-  // Match dynamic colloquial millions (e.g., 2 mlayen, 3 ملاين, 1.5 مليون)
-  let dynMatch: RegExpExecArray | null;
+  // 3. Dynamic colloquial millions
   const dynRegex = new RegExp(DYNAMIC_MILLIONS_PATTERN.source, 'gi');
-  while ((dynMatch = dynRegex.exec(text)) !== null) {
+  let dynMatch: RegExpExecArray | null;
+  while ((dynMatch = dynRegex.exec(maskedText)) !== null) {
     const rawVal = dynMatch[1].replace(',', '.');
     const val = parseFloat(rawVal) * 10000;
     results.push({
@@ -230,17 +333,23 @@ function extractPrices(text: string): PriceEntity[] {
       amount: val,
       currency: 'DZD',
     });
+    const start = dynMatch.index;
+    const len = dynMatch[0].length;
+    maskedText = maskedText.slice(0, start) + ' '.repeat(len) + maskedText.slice(start + len);
   }
 
-  // Match Darja fixed colloquial amounts
+  // 4. Fixed colloquial amounts
   for (const item of DARJA_AMOUNTS) {
-    const match = text.match(item.pattern);
+    const match = maskedText.match(item.pattern);
     if (match) {
       results.push({
         raw: match[0].trim(),
         amount: item.value,
         currency: 'DZD',
       });
+      const start = match.index || 0;
+      const len = match[0].length;
+      maskedText = maskedText.slice(0, start) + ' '.repeat(len) + maskedText.slice(start + len);
     }
   }
 

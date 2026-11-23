@@ -23,6 +23,7 @@ from .entities import (
     PhoneEntity,
 )
 from .dialect import detect_dialect, DialectResult
+from .intent import identify_intent, IntentResult, IntentType
 from .agent import (
     build_agent_context,
     format_agent_system_prompt,
@@ -56,6 +57,9 @@ __all__ = [
     'PhoneEntity',
     'detect_dialect',
     'DialectResult',
+    'identify_intent',
+    'IntentResult',
+    'IntentType',
     'build_agent_context',
     'format_agent_system_prompt',
     'get_openai_tool_definitions',

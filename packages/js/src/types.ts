@@ -64,6 +64,7 @@ export interface WilayaEntity {
   nameAr: string;
   nameFr: string;
   matchedText: string;
+  commune?: string | null;
 }
 
 export type PaymentMethodType = 'BARIDIMOB' | 'EDAHABIA' | 'CCP' | 'COD';
@@ -115,4 +116,19 @@ export interface DialectResult {
   region: DialectRegion;
   confidence: number;
   detectedMarkers: string[];
+}
+
+export type IntentType =
+  | 'ORDER'
+  | 'PRICE_INQUIRY'
+  | 'AVAILABILITY_INQUIRY'
+  | 'DELIVERY_INQUIRY'
+  | 'COMPLAINT'
+  | 'GREETING'
+  | 'UNKNOWN';
+
+export interface IntentResult {
+  intent: IntentType;
+  confidence: number;
+  matchedKeywords: string[];
 }

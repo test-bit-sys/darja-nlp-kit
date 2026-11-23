@@ -6,6 +6,7 @@ import { tokenize, removeStopwords, isStopword } from '../src/stopwords';
 import { analyzeSentiment } from '../src/sentiment';
 import { extractEntities, getWilayas, getWilayaByCode } from '../src/entities';
 import { detectDialect } from '../src/dialect';
+import { identifyIntent } from '../src/intent';
 import { buildAgentContext, formatAgentSystemPrompt } from '../src/agent';
 
 describe('normalize', () => {
@@ -378,6 +379,78 @@ describe('wilayas & entities', () => {
     assert.ok(res.phones?.some((p) => p.normalized === '0661234567'));
     assert.ok(res.phones?.some((p) => p.normalized === '0555123456'));
   });
+
+  it('should resolve Algerian communes to parent wilaya', () => {
+    const res1 = extractEntities('livrili l Rouiba svp');
+    assert.ok(res1.wilayas.some((w) => w.code === 16 && w.commune === 'Rouiba'));
+
+    const res2 = extractEntities('حاب نشري سلعة في العلمة');
+    assert.ok(res2.wilayas.some((w) => w.code === 19 && w.commune === 'العلمة'));
+
+    const res3 = extractEntities('livraison l عين الترك');
+    assert.ok(res3.wilayas.some((w) => w.code === 31 && w.commune === 'عين الترك'));
+
+    const res4 = extractEntities('rani f حاسي مسعود');
+    assert.ok(res4.wilayas.some((w) => w.code === 30 && w.commune === 'حاسي مسعود'));
+  });
+
+  it('should parse compound colloquial Darja prices', () => {
+    const res1 = extractEntities('سومة هاذي زوج ملاين و خمسمية الف');
+    assert.ok(res1.prices.some((p) => p.amount === 25000));
+
+    const res2 = extractEntities('chrit b 3 mlayen w 500 alf');
+    assert.ok(res2.prices.some((p) => p.amount === 35000));
+
+    const res3 = extractEntities('حسابك زوج ملاين و خمسين الف');
+    assert.ok(res3.prices.some((p) => p.amount === 20500));
+
+    const res4 = extractEntities('سعرها مليون و ميتين الف');
+    assert.ok(res4.prices.some((p) => p.amount === 12000));
+  });
+});
+
+describe('identifyIntent', () => {
+  it('should classify ORDER intent', () => {
+    const res = identifyIntent('سلام خاوتي حاب نكوموندي زوج حبات ابعثهالي للدار');
+    assert.equal(res.intent, 'ORDER');
+    assert.ok(res.confidence >= 0.7);
+  });
+
+  it('should classify PRICE_INQUIRY intent', () => {
+    const res = identifyIntent('بشحال هادي خاوة شحال السومة تاعها؟');
+    assert.equal(res.intent, 'PRICE_INQUIRY');
+    assert.ok(res.confidence >= 0.7);
+  });
+
+  it('should classify AVAILABILITY_INQUIRY intent', () => {
+    const res = identifyIntent('سلام عليكم كاين منها هادي مازالت ديسبو عندكم؟');
+    assert.equal(res.intent, 'AVAILABILITY_INQUIRY');
+    assert.ok(res.confidence >= 0.7);
+  });
+
+  it('should classify DELIVERY_INQUIRY intent', () => {
+    const res = identifyIntent('شحال التوصيل لوهران و وقتاش تلحق؟');
+    assert.equal(res.intent, 'DELIVERY_INQUIRY');
+    assert.ok(res.confidence >= 0.7);
+  });
+
+  it('should classify COMPLAINT intent', () => {
+    const res = identifyIntent('سلعة مكسرة ومفاتشة حشيتوهالي رجعولي دراهمي روتور');
+    assert.equal(res.intent, 'COMPLAINT');
+    assert.ok(res.confidence >= 0.7);
+  });
+
+  it('should classify GREETING intent', () => {
+    const res = identifyIntent('السلام عليكم واش راك خويا لعزيز');
+    assert.equal(res.intent, 'GREETING');
+    assert.ok(res.confidence >= 0.7);
+  });
+
+  it('should return UNKNOWN for empty or unrelated text', () => {
+    const res = identifyIntent('طاولة خشبية زرقاء 123');
+    assert.equal(res.intent, 'UNKNOWN');
+    assert.equal(res.confidence, 0);
+  });
 });
 
 describe('AI Agent Integration', () => {
@@ -389,6 +462,8 @@ describe('AI Agent Integration', () => {
     assert.ok(ctx.groundedFacts.payments.some((p) => p.includes('BaridiMob')));
     assert.ok(ctx.groundedFacts.phones.includes('0770112233'));
     assert.equal(ctx.dialect.region, 'WEST');
+    assert.equal(ctx.intent.intent, 'ORDER');
+    assert.ok(ctx.intent.guideline.includes('طلب شراء'));
   });
 
   it('should format realistic ground-truth system prompt', () => {
@@ -397,6 +472,7 @@ describe('AI Agent Integration', () => {
     const prompt = formatAgentSystemPrompt(ctx);
     assert.ok(prompt.includes('NEGATIVE'));
     assert.ok(prompt.includes('⚠️ الزبون غاضب أو يشتكي'));
+    assert.ok(prompt.includes('COMPLAINT'));
   });
 });
 

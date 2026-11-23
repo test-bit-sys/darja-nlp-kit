@@ -3,13 +3,20 @@ import { arabiziToArabic } from './arabizi';
 import { analyzeSentiment } from './sentiment';
 import { extractEntities } from './entities';
 import { detectDialect } from './dialect';
-import { DialectRegion, SentimentLabel } from './types';
+import { identifyIntent } from './intent';
+import { DialectRegion, IntentType, SentimentLabel } from './types';
 
 export interface AgentContext {
   storeName: string;
   rawMessage: string;
   arabicTransliterated: string;
   normalized: string;
+  intent: {
+    intent: IntentType;
+    confidence: number;
+    matchedKeywords: string[];
+    guideline: string;
+  };
   dialect: {
     region: DialectRegion;
     confidence: number;
@@ -32,6 +39,16 @@ export interface AgentContext {
   };
 }
 
+const INTENT_GUIDELINES: Record<IntentType, string> = {
+  ORDER: '🛒 نية الزبون: طلب شراء/حجز. اطلب منه تأكيد الاسم، الولاية/البلدية، ورقم الهاتف لتسجيل طلبيته فورا.',
+  PRICE_INQUIRY: '💰 نية الزبون: استفسار عن السعر. أعطه السعر بالدينار الجزائري مع توضيح مصاريف التوصيل.',
+  AVAILABILITY_INQUIRY: '📦 نية الزبون: توفر السلعة. أكد التوفر وحفزه على الطلب فورا.',
+  DELIVERY_INQUIRY: '🚚 نية الزبون: التوصيل والشحن. وضح سعر ومدة التوصيل لولايته (خدمة سريعة للدار أو المكتب).',
+  COMPLAINT: '⚠️ نية الزبون: شكوى أو استرجاع. استوعب غضب الزبون بلطف واعتذر وقم بحل الإشكال باحترافية.',
+  GREETING: '👋 نية الزبون: تحية وتواصل. رد بترحيب جزائري عفوي ومستعد للخدمة.',
+  UNKNOWN: 'استفسار عام. قدم المساعدة بطريقة واضحة ومباشرة.',
+};
+
 const DIALECT_GUIDELINES: Record<DialectRegion, string> = {
   WEST: 'لهجة الغرب الجزائري (وهران وتلمسان): استعمل كلمات خفيفة مثل (درك، غايا، مرحبا بيك خويا، ما تقلقش روحك).',
   EAST: 'لهجة الشرق الجزائري (قسنطينة وسطيف وعنابة): استعمل كلمات دافئة مثل (عيشك، ضرك، وشبيك، على عيني، ما كاش مشكل).',
@@ -45,6 +62,7 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
   const arabicTrans = arabiziToArabic(rawMessage);
   const normalized = normalize(rawMessage);
 
+  const intent = identifyIntent(rawMessage);
   const dialect = detectDialect(rawMessage);
   const sentiment = analyzeSentiment(rawMessage);
   const entities = extractEntities(rawMessage);
@@ -60,7 +78,10 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
     toneInstruction = '😊 الزبون مسرور وراضٍ. رد بابتماس وترحاب حار (\'ربي يحفظك، شهادة نعتزوا بيها، سلعة لوز لزبائننا\').';
   }
 
-  const wilayasSummary = entities.wilayas.map((w) => `${w.nameAr} (${w.codeStr})`);
+  const wilayasSummary = entities.wilayas.map((w) => {
+    const communeInfo = w.commune ? ` - بلدية ${w.commune}` : '';
+    return `${w.nameAr} (${w.codeStr})${communeInfo}`;
+  });
   const paymentsSummary = entities.payments.map((p) => p.label);
   const pricesSummary = entities.prices
     .filter((p) => p.amount !== null)
@@ -74,6 +95,12 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
     rawMessage,
     arabicTransliterated: arabicTrans,
     normalized,
+    intent: {
+      intent: intent.intent,
+      confidence: intent.confidence,
+      matchedKeywords: intent.matchedKeywords,
+      guideline: INTENT_GUIDELINES[intent.intent] || INTENT_GUIDELINES.UNKNOWN,
+    },
     dialect: {
       region: dialect.region,
       confidence: dialect.confidence,
@@ -99,6 +126,7 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
 
 export function formatAgentSystemPrompt(context: AgentContext): string {
   const store = context.storeName || 'المتجر';
+  const intent = context.intent;
   const dialect = context.dialect;
   const sentiment = context.sentiment;
   const facts = context.groundedFacts;
@@ -109,6 +137,7 @@ export function formatAgentSystemPrompt(context: AgentContext): string {
 [السياق المستخرج من رسالة الزبون]:
 - الرسالة: "${context.rawMessage}"
 - الترجمة التفسيرية (إذا كانت عربيزي): "${context.arabicTransliterated}"
+- النية الأساسية (Intent): ${intent.intent} (${intent.guideline})
 - المنطقة الجغرافية للهجة: ${dialect.region} (${dialect.guideline})
 - حالة الزبون النفسية: ${sentiment.label} (الدرجة: ${sentiment.score})
 - إرشادات النبرة: ${sentiment.toneInstruction}

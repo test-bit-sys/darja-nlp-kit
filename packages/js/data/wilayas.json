@@ -8,8 +8,24 @@
       "بلاد التمور",
       "adrar"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "أدرار",
+      "تيميمون",
+      "رقان",
+      "أولف",
+      "زاوية كنتة",
+      "تسابيت",
+      "فنوغيل"
+    ],
+    "communes_fr_sample": [
+      "Adrar",
+      "Timimoun",
+      "Reggane",
+      "Aoulef",
+      "Zaouiet Kounta",
+      "Tsabit",
+      "Fenoughil"
+    ]
   },
   {
     "code": 2,
@@ -17,8 +33,28 @@
     "name_ar": "الشلف",
     "name_fr": "Chlef",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "الشلف",
+      "تنس",
+      "بوقادير",
+      "وادي الفضة",
+      "الشطية",
+      "عين مران",
+      "أولاد فارس",
+      "تاوقريت",
+      "زبوجة"
+    ],
+    "communes_fr_sample": [
+      "Chlef",
+      "Tenes",
+      "Boukadir",
+      "Oued Fodda",
+      "Chettia",
+      "Ain Merane",
+      "Ouled Fares",
+      "Taougrit",
+      "Zeboudja"
+    ]
   },
   {
     "code": 3,
@@ -26,8 +62,24 @@
     "name_ar": "الأغواط",
     "name_fr": "Laghouat",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "الأغواط",
+      "حاسي الرمل",
+      "آفلو",
+      "قصر الحيران",
+      "عين ماضي",
+      "سيدي مخلوف",
+      "البيضاء"
+    ],
+    "communes_fr_sample": [
+      "Laghouat",
+      "Hassi R'Mel",
+      "Aflou",
+      "Ksar El Hirane",
+      "Ain Madhi",
+      "Sidi Makhlouf",
+      "El Beidha"
+    ]
   },
   {
     "code": 4,
@@ -35,8 +87,24 @@
     "name_ar": "أم البواقي",
     "name_fr": "Oum El Bouaghi",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "أم البواقي",
+      "عين فكرون",
+      "عين البيضاء",
+      "عين مليلة",
+      "مسكيانة",
+      "قصر الصبيحي",
+      "سيقوس"
+    ],
+    "communes_fr_sample": [
+      "Oum El Bouaghi",
+      "Ain Fakroun",
+      "Ain Beida",
+      "Ain M'lila",
+      "Meskiana",
+      "Ksar Sbahi",
+      "Sigus"
+    ]
   },
   {
     "code": 5,
@@ -49,8 +117,30 @@
       "الأوراس",
       "عاصمة الأوراس"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "باتنة",
+      "بريكة",
+      "عين التوتة",
+      "مروانة",
+      "تازولت",
+      "نقاوص",
+      "أريس",
+      "المعذر",
+      "رأس العيون",
+      "سريانة"
+    ],
+    "communes_fr_sample": [
+      "Batna",
+      "Barika",
+      "Ain Touta",
+      "Merouana",
+      "Tazoult",
+      "N'Gaous",
+      "Arris",
+      "El Madher",
+      "Ras El Aioun",
+      "Seriana"
+    ]
   },
   {
     "code": 6,
@@ -66,8 +156,32 @@
       "صالداي",
       "لؤلؤة الجزائر"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "بجاية",
+      "أقبو",
+      "القصر",
+      "أميزور",
+      "خراطة",
+      "تيشي",
+      "صدوق",
+      "سيدي عيش",
+      "أوقاس",
+      "إغيل علي",
+      "تازمالت"
+    ],
+    "communes_fr_sample": [
+      "Bejaia",
+      "Akbou",
+      "El Kseur",
+      "Amizour",
+      "Kherrata",
+      "Tichy",
+      "Seddouk",
+      "Sidi Aich",
+      "Aokas",
+      "Ighil Ali",
+      "Tazmalt"
+    ]
   },
   {
     "code": 7,
@@ -82,8 +196,28 @@
       "عاصمة التمور",
       "عروس الزيبان"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "بسكرة",
+      "طولقة",
+      "سيدي عقبة",
+      "أولاد جلال",
+      "الدوسن",
+      "القنطرة",
+      "فوغالة",
+      "جمورة",
+      "أورلال"
+    ],
+    "communes_fr_sample": [
+      "Biskra",
+      "Tolga",
+      "Sidi Okba",
+      "Ouled Djellal",
+      "Doucen",
+      "El Kantara",
+      "Foughala",
+      "Djemorah",
+      "Ourlal"
+    ]
   },
   {
     "code": 8,
@@ -91,8 +225,22 @@
     "name_ar": "بشار",
     "name_fr": "Béchar",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "بشار",
+      "القنادسة",
+      "بني ونيف",
+      "تاغيت",
+      "العبادلة",
+      "تبلبالة"
+    ],
+    "communes_fr_sample": [
+      "Bechar",
+      "Kenadsa",
+      "Beni Ounif",
+      "Taghit",
+      "Abadla",
+      "Tabelbala"
+    ]
   },
   {
     "code": 9,
@@ -106,8 +254,34 @@
       "بوفاريك",
       "مدينة الورود"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "البليدة",
+      "بوفاريك",
+      "أولاد يعيش",
+      "العفرون",
+      "موزاية",
+      "بوقرة",
+      "وادي العلايق",
+      "الصومعة",
+      "الشبلي",
+      "بوعرفة",
+      "الأربعاء",
+      "مفتاح"
+    ],
+    "communes_fr_sample": [
+      "Blida",
+      "Boufarik",
+      "Ouled Yaich",
+      "El Affroun",
+      "Mouzaia",
+      "Bougara",
+      "Oued Alleug",
+      "Soumaa",
+      "Chebli",
+      "Bouarfa",
+      "Larbaa",
+      "Meftah"
+    ]
   },
   {
     "code": 10,
@@ -117,8 +291,28 @@
     "aliases": [
       "bouira"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "البويرة",
+      "الأخضرية",
+      "سور الغزلان",
+      "عين بسام",
+      "مشدالة",
+      "بئر غبالو",
+      "القادرية",
+      "حيزر",
+      "أهل القصر"
+    ],
+    "communes_fr_sample": [
+      "Bouira",
+      "Lakhdaria",
+      "Sour El Ghozlane",
+      "Ain Bessem",
+      "M'Chedallah",
+      "Bir Ghbalou",
+      "Kadiria",
+      "Haizer",
+      "Ahl El Ksar"
+    ]
   },
   {
     "code": 11,
@@ -126,8 +320,20 @@
     "name_ar": "تمنراست",
     "name_fr": "Tamanrasset",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "تمنراست",
+      "عين امقل",
+      "أبلسة",
+      "إيدلس",
+      "تاظروك"
+    ],
+    "communes_fr_sample": [
+      "Tamanrasset",
+      "Ain Amguel",
+      "Abalessa",
+      "Idles",
+      "Tazrouk"
+    ]
   },
   {
     "code": 12,
@@ -135,8 +341,28 @@
     "name_ar": "تبسة",
     "name_fr": "Tébessa",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "تبسة",
+      "بئر العاتر",
+      "الشريعة",
+      "الونزة",
+      "العوينات",
+      "الكويف",
+      "مرسط",
+      "الماء الأبيض",
+      "نقرين"
+    ],
+    "communes_fr_sample": [
+      "Tebessa",
+      "Bir El Ater",
+      "Cheria",
+      "Ouenza",
+      "El Aouinet",
+      "El Kouif",
+      "Morsott",
+      "El Ma Labiodh",
+      "Negrine"
+    ]
   },
   {
     "code": 13,
@@ -151,8 +377,33 @@
       "لالة ستي",
       "مغنية"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "تلمسان",
+      "مغنية",
+      "سبدو",
+      "الغزوات",
+      "منصورة",
+      "الرمشي",
+      "الحناية",
+      "شتوان",
+      "ندرومة",
+      "أولاد ميمون",
+      "باب العسة",
+      "بني صاف"
+    ],
+    "communes_fr_sample": [
+      "Tlemcen",
+      "Maghnia",
+      "Sebdou",
+      "Ghazaouet",
+      "Mansourah",
+      "Remchi",
+      "Hennaya",
+      "Chetouane",
+      "Nedroma",
+      "Ouled Mimoun",
+      "Bab El Assa"
+    ]
   },
   {
     "code": 14,
@@ -163,8 +414,26 @@
       "عاصمة الرستميين",
       "tiaret"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "تيارت",
+      "فرندة",
+      "قصر الشلالة",
+      "السوقر",
+      "مهدية",
+      "رحوية",
+      "الدحموني",
+      "حمادية"
+    ],
+    "communes_fr_sample": [
+      "Tiaret",
+      "Frenda",
+      "Ksar Chellala",
+      "Sougueur",
+      "Mahdia",
+      "Rahouia",
+      "Dahmouni",
+      "Hamadia"
+    ]
   },
   {
     "code": 15,
@@ -177,8 +446,34 @@
       "tizi ouzou",
       "عزازقة"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "تيزي وزو",
+      "ذراع بن خدة",
+      "عزازقة",
+      "بوغني",
+      "واضية",
+      "تيقزيرت",
+      "ذراع الميزان",
+      "عين الحمام",
+      "أزفون",
+      "الأربعاء نايث إيراثن",
+      "واقنون",
+      "تادمايت"
+    ],
+    "communes_fr_sample": [
+      "Tizi Ouzou",
+      "Draa Ben Khedda",
+      "Azazga",
+      "Boghni",
+      "Ouadhia",
+      "Tigzirt",
+      "Draa El Mizan",
+      "Ain El Hammam",
+      "Azeffoun",
+      "Larbaa Nath Irathen",
+      "Ouaguenoun",
+      "Tadmait"
+    ]
   },
   {
     "code": 16,
@@ -205,8 +500,86 @@
       "شراقة",
       "قبة"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "الجزائر",
+      "باب الوادي",
+      "القبة",
+      "الحراش",
+      "باب الزوار",
+      "حيدرة",
+      "رويبة",
+      "الشراقة",
+      "درارية",
+      "بئر مراد رايس",
+      "بئر خادم",
+      "دالي ابراهيم",
+      "بن عكنون",
+      "براقي",
+      "بوزريعة",
+      "زرالدة",
+      "سطاوالي",
+      "عين طاية",
+      "الرغاية",
+      "برج الكيفان",
+      "الكاليتوس",
+      "بئر توتة",
+      "الأبيار",
+      "المرادية",
+      "بولوغين",
+      "عين البنيان",
+      "سيدي امحمد",
+      "باش جراح",
+      "الحميز",
+      "المقارية",
+      "المحالمة",
+      "الدويرة",
+      "باباحسن",
+      "خرايسية",
+      "السحاولة",
+      "البليدة",
+      "الرويسات",
+      "المدنية",
+      "القصبة"
+    ],
+    "communes_fr_sample": [
+      "Alger",
+      "Bab El Oued",
+      "Kouba",
+      "El Harrach",
+      "Bab Ezzouar",
+      "Hydra",
+      "Rouiba",
+      "Cheraga",
+      "Draria",
+      "Bir Mourad Rais",
+      "Birkhadem",
+      "Dely Ibrahim",
+      "Ben Aknoun",
+      "Baraki",
+      "Bouzareah",
+      "Zeralda",
+      "Staoueli",
+      "Ain Taya",
+      "Reghaia",
+      "Bordj El Kiffan",
+      "Les Eucalyptus",
+      "Birtouta",
+      "El Biar",
+      "El Mouradia",
+      "Bologhine",
+      "Ain Benian",
+      "Sidi M'Hamed",
+      "Bachedjerrah",
+      "El Hamiz",
+      "El Magharia",
+      "Mehalma",
+      "Douera",
+      "Baba Hassen",
+      "Khraicia",
+      "Saoula",
+      "El Madania",
+      "Casbah"
+    ]
   },
   {
     "code": 17,
@@ -219,8 +592,28 @@
       "أولاد نايل",
       "ولاد نائل"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "الجلفة",
+      "عين وسارة",
+      "مسعد",
+      "حاسي بحبح",
+      "الشارف",
+      "دار الشيوخ",
+      "الإدريسية",
+      "البيرين",
+      "حد الصحاري"
+    ],
+    "communes_fr_sample": [
+      "Djelfa",
+      "Ain Oussera",
+      "Messaad",
+      "Hassi Bahbah",
+      "Charef",
+      "Dar Chioukh",
+      "El Idrissia",
+      "Birine",
+      "Had Sahary"
+    ]
   },
   {
     "code": 18,
@@ -228,8 +621,28 @@
     "name_ar": "جيجل",
     "name_fr": "Jijel",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "جيجل",
+      "الطاهير",
+      "الميلية",
+      "العوانة",
+      "زيامة منصورية",
+      "الشقفة",
+      "العنصر",
+      "تاكسنة",
+      "جيملة"
+    ],
+    "communes_fr_sample": [
+      "Jijel",
+      "Taher",
+      "El Milia",
+      "El Aouana",
+      "Ziama Mansouriah",
+      "Chekfa",
+      "El Ancer",
+      "Taxenna",
+      "Djimla"
+    ]
   },
   {
     "code": 19,
@@ -244,8 +657,34 @@
       "عاصمة الهضاب",
       "عين الفوارة"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "سطيف",
+      "العلمة",
+      "عين ولمان",
+      "عين الكبيرة",
+      "عين أرنات",
+      "بوقاعة",
+      "بني ورتيلان",
+      "عموشة",
+      "صالح باي",
+      "قجال",
+      "بابور",
+      "جميلة"
+    ],
+    "communes_fr_sample": [
+      "Setif",
+      "El Eulma",
+      "Ain Oulmene",
+      "Ain El Kebira",
+      "Ain Arnat",
+      "Bougaa",
+      "Beni Ourtilane",
+      "Amoucha",
+      "Salah Bey",
+      "Guidjel",
+      "Babor",
+      "Djemila"
+    ]
   },
   {
     "code": 20,
@@ -253,8 +692,22 @@
     "name_ar": "سعيدة",
     "name_fr": "Saïda",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "سعيدة",
+      "يوب",
+      "الحساسنة",
+      "سيدي بوبكر",
+      "أولاد إبراهيم",
+      "عين الحجر"
+    ],
+    "communes_fr_sample": [
+      "Saida",
+      "Youb",
+      "Hassasna",
+      "Sidi Boubekeur",
+      "Ouled Brahim",
+      "Ain El Hadjar"
+    ]
   },
   {
     "code": 21,
@@ -265,8 +718,28 @@
       "روسيكادا",
       "skikda"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "سكيكدة",
+      "القل",
+      "الحروش",
+      "عزابة",
+      "تمالوس",
+      "فلفلة",
+      "رمضان جمال",
+      "سيدي مزغيش",
+      "بني بشير"
+    ],
+    "communes_fr_sample": [
+      "Skikda",
+      "Collo",
+      "El Harrouch",
+      "Azzaba",
+      "Tamalous",
+      "Filfila",
+      "Ramdane Djamel",
+      "Sidi Mezghiche",
+      "Beni Bechir"
+    ]
   },
   {
     "code": 22,
@@ -278,8 +751,26 @@
       "sba",
       "sidi bel abbes"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "سيدي بلعباس",
+      "تلاغ",
+      "سفيزف",
+      "ابن باديس",
+      "مصطفى بن براهيم",
+      "رأس الماء",
+      "مرحوم",
+      "تنيرة"
+    ],
+    "communes_fr_sample": [
+      "Sidi Bel Abbes",
+      "Telagh",
+      "Sfisef",
+      "Ben Badis",
+      "Mostefa Ben Brahim",
+      "Ras El Ma",
+      "Marhoum",
+      "Tenira"
+    ]
   },
   {
     "code": 23,
@@ -295,8 +786,26 @@
       "جوهرة الشرق",
       "لالة بونة"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "عنابة",
+      "البوني",
+      "الحجار",
+      "برحال",
+      "سيدي عمار",
+      "سرايدي",
+      "عين الباردة",
+      "شطايبي"
+    ],
+    "communes_fr_sample": [
+      "Annaba",
+      "El Bouni",
+      "El Hadjar",
+      "Berrahal",
+      "Sidi Amar",
+      "Seraidi",
+      "Ain Berda",
+      "Chetaibi"
+    ]
   },
   {
     "code": 24,
@@ -304,8 +813,26 @@
     "name_ar": "قالمة",
     "name_fr": "Guelma",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "قالمة",
+      "وادي الزناتي",
+      "بوشقوف",
+      "هيليوبوليس",
+      "حمام دباغ",
+      "بلخير",
+      "عين مخلوف",
+      "قلعة بوصبع"
+    ],
+    "communes_fr_sample": [
+      "Guelma",
+      "Oued Zenati",
+      "Bouchegouf",
+      "Heliopolis",
+      "Hammam Debagh",
+      "Belkheir",
+      "Ain Makhlouf",
+      "Guelaat Bou Sbaa"
+    ]
   },
   {
     "code": 25,
@@ -324,8 +851,28 @@
       "علي منجلي",
       "مدينة الجسور"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "قسنطينة",
+      "الخروب",
+      "علي منجلي",
+      "حامة بوزيان",
+      "زيغود يوسف",
+      "عين السمارة",
+      "ديدوش مراد",
+      "ابن باديس",
+      "عين عبيد"
+    ],
+    "communes_fr_sample": [
+      "Constantine",
+      "El Khroub",
+      "Ali Mendjeli",
+      "Hamma Bouziane",
+      "Zighoud Youcef",
+      "Ain Smara",
+      "Didouche Mourad",
+      "Ibn Badis",
+      "Ain Abid"
+    ]
   },
   {
     "code": 26,
@@ -333,8 +880,29 @@
     "name_ar": "المدية",
     "name_fr": "Médéa",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "المدية",
+      "وزرة",
+      "البرواقية",
+      "قصر البخاري",
+      "بني سليمان",
+      "شلالة العذاورة",
+      "تابلاط",
+      "العمارية",
+      "سيدي نعمان",
+      "عين بوسعادة"
+    ],
+    "communes_fr_sample": [
+      "Medea",
+      "Ouzera",
+      "Berrouaghia",
+      "Ksar El Boukhari",
+      "Beni Slimane",
+      "Chellalat El Adhaoura",
+      "Tablat",
+      "El Omaria",
+      "Sidi Naamane"
+    ]
   },
   {
     "code": 27,
@@ -345,8 +913,28 @@
       "mosta",
       "mostaganem"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "مستغانم",
+      "عين تادلس",
+      "ماسرى",
+      "حاسي مماش",
+      "سيدي علي",
+      "بوقيرات",
+      "خير الدين",
+      "سيدي لخضر",
+      "عشعاشة"
+    ],
+    "communes_fr_sample": [
+      "Mostaganem",
+      "Ain Tedeles",
+      "Mesra",
+      "Hassi Mameche",
+      "Sidi Ali",
+      "Bouguirat",
+      "Kheir Eddine",
+      "Sidi Lakhdar",
+      "Achaacha"
+    ]
   },
   {
     "code": 28,
@@ -354,8 +942,30 @@
     "name_ar": "المسيلة",
     "name_fr": "M'Sila",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "المسيلة",
+      "بوسعادة",
+      "مقرة",
+      "حمام الضلعة",
+      "سيدي عيسى",
+      "أولاد دراج",
+      "عين الحجل",
+      "سليم",
+      "الهامل",
+      "بن سرور"
+    ],
+    "communes_fr_sample": [
+      "M'Sila",
+      "Bou Saada",
+      "Magra",
+      "Hammam Dhalaa",
+      "Sidi Aissa",
+      "Ouled Derradj",
+      "Ain El Hadjel",
+      "Slim",
+      "El Hamel",
+      "Ben Srour"
+    ]
   },
   {
     "code": 29,
@@ -363,8 +973,28 @@
     "name_ar": "معسكر",
     "name_fr": "Mascara",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "معسكر",
+      "سيق",
+      "تيغنيف",
+      "المحمدية",
+      "وادي الأبطال",
+      "غريس",
+      "عوف",
+      "زهانة",
+      "فروحة"
+    ],
+    "communes_fr_sample": [
+      "Mascara",
+      "Sig",
+      "Tighennif",
+      "Mohammadia",
+      "Oued El Abtal",
+      "Ghriss",
+      "Aouf",
+      "Zahana",
+      "Froha"
+    ]
   },
   {
     "code": 30,
@@ -372,8 +1002,26 @@
     "name_ar": "ورقلة",
     "name_fr": "Ouargla",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "ورقلة",
+      "حاسي مسعود",
+      "تقرت",
+      "تماسين",
+      "سيدي خويلد",
+      "الرويسات",
+      "الطيبات",
+      "أنقوسة"
+    ],
+    "communes_fr_sample": [
+      "Ouargla",
+      "Hassi Messaoud",
+      "Touggourt",
+      "Temacine",
+      "Sidi Khouiled",
+      "Rouissat",
+      "Taibet",
+      "N'Goussa"
+    ]
   },
   {
     "code": 31,
@@ -393,8 +1041,34 @@
       "بئر الجير",
       "باهية"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "وهران",
+      "السانية",
+      "عين الترك",
+      "أرزيو",
+      "بئر الجير",
+      "مسرغين",
+      "بطيوة",
+      "قديل",
+      "وادي تليلات",
+      "الكرمة",
+      "بوسفر",
+      "العنصر"
+    ],
+    "communes_fr_sample": [
+      "Oran",
+      "Es Senia",
+      "Ain El Turk",
+      "Arzew",
+      "Bir El Djir",
+      "Messerghin",
+      "Bethioua",
+      "Gdyel",
+      "Oued Tlelat",
+      "El Kerma",
+      "Bousfer",
+      "El Ancor"
+    ]
   },
   {
     "code": 32,
@@ -402,8 +1076,24 @@
     "name_ar": "البيض",
     "name_fr": "El Bayadh",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "البيض",
+      "الأبيض سيدي الشيخ",
+      "بوعلام",
+      "بريزينة",
+      "الرقاصة",
+      "بوقطب",
+      "الكاف الأحمر"
+    ],
+    "communes_fr_sample": [
+      "El Bayadh",
+      "El Abiodh Sidi Cheikh",
+      "Boualem",
+      "Brezina",
+      "Rogassa",
+      "Bougtob",
+      "El Kheiter"
+    ]
   },
   {
     "code": 33,
@@ -411,8 +1101,20 @@
     "name_ar": "إليزي",
     "name_fr": "Illizi",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "إليزي",
+      "جانت",
+      "عين أمناس",
+      "برج الحواس",
+      "دبداب"
+    ],
+    "communes_fr_sample": [
+      "Illizi",
+      "Djanet",
+      "In Amenas",
+      "Bordj El Haouas",
+      "Debdeb"
+    ]
   },
   {
     "code": 34,
@@ -424,8 +1126,28 @@
       "bba",
       "bordj"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "برج بوعريريج",
+      "رأس الوادي",
+      "المنصورة",
+      "مجانة",
+      "الحمادية",
+      "برج زمورة",
+      "الياشير",
+      "عين تاغروت",
+      "بئر قاصد علي"
+    ],
+    "communes_fr_sample": [
+      "Bordj Bou Arreridj",
+      "Ras El Oued",
+      "Mansoura",
+      "Medjana",
+      "El Hamadia",
+      "Bordj Zemoura",
+      "El Achir",
+      "Ain Taghrout",
+      "Bir Kasdali"
+    ]
   },
   {
     "code": 35,
@@ -435,8 +1157,36 @@
     "aliases": [
       "boumerdes"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "بومرداس",
+      "دلس",
+      "الثنية",
+      "برج منايل",
+      "بودواو",
+      "خميس الخشنة",
+      "يسر",
+      "قورصو",
+      "زموري",
+      "سي مصطفى",
+      "الناصرية",
+      "تيجلابين",
+      "حمادي"
+    ],
+    "communes_fr_sample": [
+      "Boumerdes",
+      "Dellys",
+      "Thenia",
+      "Bordj Menaiel",
+      "Boudouaou",
+      "Khemis El Khechna",
+      "Isser",
+      "Corso",
+      "Zemmouri",
+      "Si Mustapha",
+      "Naciria",
+      "Tidjelabine",
+      "Hammadi"
+    ]
   },
   {
     "code": 36,
@@ -444,8 +1194,26 @@
     "name_ar": "الطارف",
     "name_fr": "El Tarf",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "الطارف",
+      "القالة",
+      "بن مهيدي",
+      "بوثلجة",
+      "الذرعان",
+      "بوحجار",
+      "الشط",
+      "عين العسل"
+    ],
+    "communes_fr_sample": [
+      "El Tarf",
+      "El Kala",
+      "Ben M'Hidi",
+      "Boutheldja",
+      "Drean",
+      "Bouhadjar",
+      "Echatt",
+      "Ain El Assel"
+    ]
   },
   {
     "code": 37,
@@ -453,8 +1221,14 @@
     "name_ar": "تندوف",
     "name_fr": "Tindouf",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "تندوف",
+      "أم العسل"
+    ],
+    "communes_fr_sample": [
+      "Tindouf",
+      "Oum El Assel"
+    ]
   },
   {
     "code": 38,
@@ -462,8 +1236,22 @@
     "name_ar": "تيسمسيلت",
     "name_fr": "Tissemsilt",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "تيسمسيلت",
+      "ثنية الحد",
+      "خميستي",
+      "برج بونعامة",
+      "لرجام",
+      "عماري"
+    ],
+    "communes_fr_sample": [
+      "Tissemsilt",
+      "Theniet El Had",
+      "Khemisti",
+      "Bordj Bounaama",
+      "Lardjem",
+      "Ammari"
+    ]
   },
   {
     "code": 39,
@@ -477,8 +1265,30 @@
       "واد سوف",
       "وادي سوف"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "الوادي",
+      "قمار",
+      "حاسي خليفة",
+      "الدبيلة",
+      "الرقيبة",
+      "جامعة",
+      "المغير",
+      "البياضة",
+      "الرباح",
+      "المقرن"
+    ],
+    "communes_fr_sample": [
+      "El Oued",
+      "Guemar",
+      "Hassi Khalifa",
+      "Debila",
+      "Reguiba",
+      "Djamaa",
+      "El Meghaier",
+      "El Bayadha",
+      "Robbah",
+      "Magrane"
+    ]
   },
   {
     "code": 40,
@@ -486,8 +1296,26 @@
     "name_ar": "خنشلة",
     "name_fr": "Khenchela",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "خنشلة",
+      "ششار",
+      "قايس",
+      "المحمل",
+      "بابار",
+      "عين الطويلة",
+      "الحامة",
+      "بوحمامة"
+    ],
+    "communes_fr_sample": [
+      "Khenchela",
+      "Chechar",
+      "Kais",
+      "El Mahmal",
+      "Babar",
+      "Ain Touila",
+      "El Hamma",
+      "Bouhmama"
+    ]
   },
   {
     "code": 41,
@@ -495,8 +1323,26 @@
     "name_ar": "سوق أهراس",
     "name_fr": "Souk Ahras",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "سوق أهراس",
+      "سدراتة",
+      "المراهنة",
+      "تاورة",
+      "مداوروش",
+      "أولاد دريس",
+      "أم العظائم",
+      "المشروحة"
+    ],
+    "communes_fr_sample": [
+      "Souk Ahras",
+      "Sedrata",
+      "M'Daourouch",
+      "Taoura",
+      "Merahna",
+      "Ouled Driss",
+      "Oum El Adhaim",
+      "Mechroha"
+    ]
   },
   {
     "code": 42,
@@ -507,8 +1353,34 @@
       "tipaza",
       "tipasa"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "تيبازة",
+      "شرشال",
+      "القليعة",
+      "فوكة",
+      "حطاطبة",
+      "بواسماعيل",
+      "الداموس",
+      "حجرة النص",
+      "قوراية",
+      "سيدي راشد",
+      "عين تاقورايت",
+      "سيدي غيلاس"
+    ],
+    "communes_fr_sample": [
+      "Tipaza",
+      "Cherchell",
+      "Kolea",
+      "Fouka",
+      "Hattatba",
+      "Bou Ismail",
+      "Damous",
+      "Hadjret En Nouss",
+      "Gouraya",
+      "Sidi Rached",
+      "Ain Tagourait",
+      "Sidi Ghiles"
+    ]
   },
   {
     "code": 43,
@@ -516,8 +1388,30 @@
     "name_ar": "ميلة",
     "name_fr": "Mila",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "ميلة",
+      "شلغوم العيد",
+      "تلاغمة",
+      "تاجنانت",
+      "فرجيوة",
+      "زغاية",
+      "وادي العثمانية",
+      "سيدي مروان",
+      "القرارم قوقة",
+      "عين التين"
+    ],
+    "communes_fr_sample": [
+      "Mila",
+      "Chelghoum Laid",
+      "Teleghma",
+      "Tadjenanet",
+      "Ferdjioua",
+      "Zeghaia",
+      "Oued Athmania",
+      "Sidi Merouane",
+      "Grarem Gouga",
+      "Ain Tine"
+    ]
   },
   {
     "code": 44,
@@ -525,8 +1419,32 @@
     "name_ar": "عين الدفلى",
     "name_fr": "Aïn Defla",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "عين الدفلى",
+      "خميس مليانة",
+      "العطاف",
+      "مليانة",
+      "جليدة",
+      "روينا",
+      "جندل",
+      "بوراشد",
+      "الحسنية",
+      "بومدفع",
+      "سيدي لخضر"
+    ],
+    "communes_fr_sample": [
+      "Ain Defla",
+      "Khemis Miliana",
+      "El Attaf",
+      "Miliana",
+      "Djelida",
+      "Rouina",
+      "Djendel",
+      "Bourached",
+      "El Hassania",
+      "Boumedfaa",
+      "Sidi Lakhdar"
+    ]
   },
   {
     "code": 45,
@@ -534,8 +1452,26 @@
     "name_ar": "النعامة",
     "name_fr": "Naâma",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "النعامة",
+      "المشرية",
+      "عين الصفراء",
+      "عسلة",
+      "صفيصيفة",
+      "مكمن بن عمار",
+      "تيوت",
+      "جنين بورزق"
+    ],
+    "communes_fr_sample": [
+      "Naama",
+      "Mecheria",
+      "Ain Sefra",
+      "Asla",
+      "Sfissifa",
+      "Makman Ben Amer",
+      "Tiout",
+      "Djenienne Bourezg"
+    ]
   },
   {
     "code": 46,
@@ -543,8 +1479,26 @@
     "name_ar": "عين تموشنت",
     "name_fr": "Aïn Témouchent",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "عين تموشنت",
+      "بني صاف",
+      "حمام بوحجر",
+      "العامرية",
+      "عين الكيحل",
+      "ولهاصة",
+      "عين الطلبة",
+      "المالح"
+    ],
+    "communes_fr_sample": [
+      "Ain Temouchent",
+      "Beni Saf",
+      "Hammam Bouhadjar",
+      "El Amria",
+      "Ain Kihel",
+      "Oulhassa",
+      "Ain Tolba",
+      "El Malah"
+    ]
   },
   {
     "code": 47,
@@ -556,8 +1510,30 @@
       "ميزاب",
       "وادي ميزاب"
     ],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "غرداية",
+      "متليلي",
+      "بريان",
+      "القرارة",
+      "بني يزقن",
+      "العطف",
+      "المنيعة",
+      "ضاية بن ضحوة",
+      "زلفانة",
+      "سبسب"
+    ],
+    "communes_fr_sample": [
+      "Ghardaia",
+      "Metlili",
+      "Berriane",
+      "El Guerrara",
+      "Beni Isguen",
+      "El Atteuf",
+      "El Menia",
+      "Dhayet Bendhahoua",
+      "Zelfana",
+      "Sebseb"
+    ]
   },
   {
     "code": 48,
@@ -565,8 +1541,30 @@
     "name_ar": "غليزان",
     "name_fr": "Relizane",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "غليزان",
+      "وادي ارهيو",
+      "مازونة",
+      "زمورة",
+      "يلل",
+      "جديوية",
+      "حمري",
+      "عمي موسى",
+      "بلعسل",
+      "مطمر"
+    ],
+    "communes_fr_sample": [
+      "Relizane",
+      "Oued Rhiou",
+      "Mazouna",
+      "Zemmora",
+      "Yellel",
+      "Djidioua",
+      "Hamri",
+      "Ammi Moussa",
+      "Belassel",
+      "Matmar"
+    ]
   },
   {
     "code": 49,
@@ -574,8 +1572,22 @@
     "name_ar": "تيميمون",
     "name_fr": "Timimoun",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "تيميمون",
+      "أوقروت",
+      "تنركوك",
+      "شروين",
+      "دلدول",
+      "طلمين"
+    ],
+    "communes_fr_sample": [
+      "Timimoun",
+      "Aougrout",
+      "Tinerkouk",
+      "Charouine",
+      "Deldoul",
+      "Talmine"
+    ]
   },
   {
     "code": 50,
@@ -583,8 +1595,14 @@
     "name_ar": "برج باجي مختار",
     "name_fr": "Bordj Badji Mokhtar",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "برج باجي مختار",
+      "تيمياوين"
+    ],
+    "communes_fr_sample": [
+      "Bordj Badji Mokhtar",
+      "Timiaouine"
+    ]
   },
   {
     "code": 51,
@@ -592,8 +1610,22 @@
     "name_ar": "أولاد جلال",
     "name_fr": "Ouled Djellal",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "أولاد جلال",
+      "سيدي خالد",
+      "البسباس",
+      "رأس الميعاد",
+      "الدوسن",
+      "الشعيبة"
+    ],
+    "communes_fr_sample": [
+      "Ouled Djellal",
+      "Sidi Khaled",
+      "Besbes",
+      "Ras El Miad",
+      "Doucen",
+      "Chaiba"
+    ]
   },
   {
     "code": 52,
@@ -601,8 +1633,24 @@
     "name_ar": "بني عباس",
     "name_fr": "Béni Abbès",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "بني عباس",
+      "إقلي",
+      "كرزاز",
+      "تيمودي",
+      "الواتة",
+      "بني يخلف",
+      "أولاد خضير"
+    ],
+    "communes_fr_sample": [
+      "Beni Abbes",
+      "Igli",
+      "Kerzaz",
+      "Timoudi",
+      "El Ouata",
+      "Beni Ikhlef",
+      "Ouled Khoudir"
+    ]
   },
   {
     "code": 53,
@@ -610,8 +1658,16 @@
     "name_ar": "عين صالح",
     "name_fr": "In Salah",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "عين صالح",
+      "إين غار",
+      "فقارة الزاوية"
+    ],
+    "communes_fr_sample": [
+      "In Salah",
+      "In Ghar",
+      "Foggaret Ezzoua"
+    ]
   },
   {
     "code": 54,
@@ -619,8 +1675,14 @@
     "name_ar": "عين قزام",
     "name_fr": "In Guezzam",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "عين قزام",
+      "تين زواتين"
+    ],
+    "communes_fr_sample": [
+      "In Guezzam",
+      "Tin Zaouatine"
+    ]
   },
   {
     "code": 55,
@@ -628,8 +1690,26 @@
     "name_ar": "توقرت",
     "name_fr": "Touggourt",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "تقرت",
+      "تماسين",
+      "النزلة",
+      "بلدة عمر",
+      "الطيبات",
+      "المنقر",
+      "بن ناصر",
+      "سيدي سليمان"
+    ],
+    "communes_fr_sample": [
+      "Touggourt",
+      "Temacine",
+      "Nezla",
+      "Blidet Amor",
+      "Taibet",
+      "El Mennguer",
+      "Benaceur",
+      "Sidi Slimane"
+    ]
   },
   {
     "code": 56,
@@ -637,8 +1717,14 @@
     "name_ar": "جانت",
     "name_fr": "Djanet",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "جانت",
+      "برج الحواس"
+    ],
+    "communes_fr_sample": [
+      "Djanet",
+      "Bordj El Haouas"
+    ]
   },
   {
     "code": 57,
@@ -646,8 +1732,22 @@
     "name_ar": "المغير",
     "name_fr": "El M'Ghair",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "المغير",
+      "جامعة",
+      "سيدي خليل",
+      "أم الطيور",
+      "المرارة",
+      "تندلة"
+    ],
+    "communes_fr_sample": [
+      "El M'Ghair",
+      "Djamaa",
+      "Sidi Khellil",
+      "Oum Touyour",
+      "El Mrara",
+      "Tendla"
+    ]
   },
   {
     "code": 58,
@@ -655,8 +1755,16 @@
     "name_ar": "المنيعة",
     "name_fr": "El Meniaa",
     "aliases": [],
-    "communes_sample": [],
-    "communes_fr_sample": []
+    "communes_sample": [
+      "المنيعة",
+      "حاسي الفحل",
+      "حاسي القارة"
+    ],
+    "communes_fr_sample": [
+      "El Meniaa",
+      "Hassi El Gara",
+      "Hassi Fehal"
+    ]
   },
   {
     "code": 59,
@@ -666,27 +1774,21 @@
     "aliases": [],
     "communes_sample": [
       "آفلو",
-      "قلتة سيدي سعد",
-      "عين سيدي علي",
-      "بيضاء",
-      "بريدة",
+      "سيدي بوزيد",
+      "تاجرونة",
       "الغيشة",
-      "الحاج المشري",
       "سبقاق",
       "تاويالة",
-      "وادي مرة"
+      "بريدة"
     ],
     "communes_fr_sample": [
       "Aflou",
-      "Gueltat Sidi Saâd",
-      "Aïn Sidi Ali",
-      "Beidha",
-      "Brida",
+      "Sidi Bouzid",
+      "Tadjerouna",
       "El Ghicha",
-      "Hadj Mechri",
       "Sebgag",
       "Taouiala",
-      "Oued Morra"
+      "Brida"
     ]
   },
   {
@@ -698,22 +1800,16 @@
     "communes_sample": [
       "بريكة",
       "بيطام",
-      "عبد القادر عزيل",
-      "تيلاطو",
-      "سقانة",
-      "الجزار",
-      "مدوكل",
-      "أولاد عمار"
+      "أمدوكال",
+      "أولاد عمار",
+      "سفيان"
     ],
     "communes_fr_sample": [
       "Barika",
       "Bitam",
-      "Abdelkader Azil",
-      "Tilatou",
-      "Seggana",
-      "Djezzar",
-      "Amdoukal",
-      "Ouled Ammar"
+      "M'doukal",
+      "Ouled Ammar",
+      "Soufiane"
     ]
   },
   {
@@ -725,16 +1821,12 @@
     "communes_sample": [
       "القنطرة",
       "عين زعطوط",
-      "البرانيس",
-      "الوطاية",
-      "جمورة"
+      "لوطاية"
     ],
     "communes_fr_sample": [
       "El Kantara",
-      "Aïn Zaatout",
-      "El Branès",
-      "El Outaya",
-      "Djemourah"
+      "Ain Zaatout",
+      "El Outaya"
     ]
   },
   {
@@ -746,14 +1838,16 @@
     "communes_sample": [
       "بئر العاتر",
       "نقرين",
-      "العقلة المالحة",
-      "فركان"
+      "صفصاف الوسرى",
+      "فركان",
+      "أم علي"
     ],
     "communes_fr_sample": [
       "Bir El Ater",
       "Negrine",
-      "El Ogla El Melha",
-      "Ferkane"
+      "Safsaf El Ouesra",
+      "Ferkane",
+      "Oum Ali"
     ]
   },
   {
@@ -765,13 +1859,11 @@
     "communes_sample": [
       "العريشة",
       "القور",
-      "سيدي الجيلالي",
       "البويهي"
     ],
     "communes_fr_sample": [
       "El Aricha",
       "El Gor",
-      "Sidi Djillali",
       "El Bouihi"
     ]
   },
@@ -785,17 +1877,13 @@
       "قصر الشلالة",
       "زمالة الأمير عبد القادر",
       "الرشايقة",
-      "الحمادية",
-      "سرقين",
-      "بوقرة"
+      "سرغين"
     ],
     "communes_fr_sample": [
       "Ksar Chellala",
-      "Zmalet Emir Abdelkader",
-      "Rechaïga",
-      "Hamadia",
-      "Serguine",
-      "Bougara"
+      "Zmalet El Emir Abdelkader",
+      "Rechaiga",
+      "Serghine"
     ]
   },
   {
@@ -807,26 +1895,14 @@
     "communes_sample": [
       "عين وسارة",
       "البيرين",
-      "بويرة الأحدب",
-      "الخميس",
-      "سيدي لعجال",
-      "حد الصحاري",
-      "قرنيني",
-      "بنهار",
-      "حاسي فدول",
-      "عين فكة"
+      "القرنيني",
+      "بنهار"
     ],
     "communes_fr_sample": [
-      "Aïn Ouessara",
+      "Ain Oussera",
       "Birine",
-      "Bouira Lahdab",
-      "El Khemis",
-      "Sidi Ladjel",
-      "Had Sahary",
       "Guernini",
-      "Benhar",
-      "Hassi Fdoul",
-      "Aïn Fekka"
+      "Benhar"
     ]
   },
   {
@@ -837,23 +1913,19 @@
     "aliases": [],
     "communes_sample": [
       "مسعد",
-      "سد رحال",
-      "فيض البطمة",
-      "القطارة",
-      "سلمانة",
-      "أم العظام",
       "دلدول",
-      "عمورة"
+      "سيدي بايزيد",
+      "فيض البطمة",
+      "عمورة",
+      "سلمانة"
     ],
     "communes_fr_sample": [
       "Messaad",
-      "Sed Rahal",
-      "Feidh El Botma",
-      "Guettara",
-      "Selmana",
-      "Oum El Adham",
       "Deldoul",
-      "Amourah"
+      "Sidi Baizid",
+      "Faidh El Botma",
+      "Amourah",
+      "Selmana"
     ]
   },
   {
@@ -864,27 +1936,17 @@
     "aliases": [],
     "communes_sample": [
       "قصر البخاري",
-      "أولاد معرف",
-      "عين بوسيف",
-      "دراق",
-      "البواعيش",
-      "الكاف الأخضر",
-      "شلالة العذاورة",
+      "مفتاح",
+      "سانق",
       "أولاد هلال",
-      "تافراوت",
-      "بوغار"
+      "بوغزول"
     ],
     "communes_fr_sample": [
       "Ksar El Boukhari",
-      "Ouled Maaref",
-      "Aïn Boucif",
-      "Draa",
-      "Bouaiche",
-      "El Kef Lakhdar",
-      "Chellalet El Adhaoura",
+      "Meftah",
+      "Saneg",
       "Ouled Hellal",
-      "Tafraout",
-      "Boughar"
+      "Boughzoul"
     ]
   },
   {
@@ -900,27 +1962,19 @@
     ],
     "communes_sample": [
       "بوسعادة",
-      "الخبانة",
-      "مصيف",
-      "أولاد سيدي إبراهيم",
-      "سيدي عامر",
-      "تامسة",
       "بن سرور",
-      "أولاد سليمان",
-      "الحوامد",
-      "الهامل"
+      "الهامل",
+      "تامسة",
+      "ولماس",
+      "محمد بوضياف"
     ],
     "communes_fr_sample": [
-      "Bou Saâda",
-      "Khoubana",
-      "M'Cif",
-      "Ouled Sidi Brahim",
-      "Sidi Ameur",
-      "Tamsa",
+      "Bou Saada",
       "Ben Srour",
-      "Ouled Slimane",
-      "El Houamed",
-      "El Hamel"
+      "El Hamel",
+      "Tamsa",
+      "Oultene",
+      "Mohamed Boudiaf"
     ]
   },
   {
@@ -931,21 +1985,17 @@
     "aliases": [],
     "communes_sample": [
       "الأبيض سيدي الشيخ",
-      "عين العراك",
-      "عرباوة",
-      "بوسمغون",
-      "الشلالة",
+      "بريزينة",
       "البنود",
-      "المهارة"
+      "عين العراك",
+      "الشقيق"
     ],
     "communes_fr_sample": [
       "El Abiodh Sidi Cheikh",
-      "Aïn El Arak",
-      "Arbaouet",
-      "Bou Semghoun",
-      "Chellala",
-      "El Bnoud",
-      "El Meharra"
+      "Brezina",
+      "El Bnoude",
+      "Ain El Orak",
+      "El Kheiter"
     ]
   }
 ]

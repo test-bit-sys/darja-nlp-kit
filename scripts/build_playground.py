@@ -99,19 +99,18 @@ def main() -> None:
     }}
 
     h1 {{
-      font-size: 2.8rem;
+      font-size: 2.7rem;
       font-weight: 900;
-      letter-spacing: -1px;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, #ffffff 0%, #10b981 50%, #06b6d4 100%);
+      background: linear-gradient(135deg, #10b981 0%, #38bdf8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
     }}
 
-    p.subtitle {{
+    .subtitle {{
       color: var(--text-muted);
-      font-size: 1.15rem;
-      max-width: 650px;
+      font-size: 1.1rem;
+      max-width: 700px;
       margin: 0 auto 20px;
     }}
 
@@ -127,32 +126,33 @@ def main() -> None:
       align-items: center;
       gap: 6px;
       padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
       border-radius: 10px;
-      background: #1e293b;
-      color: #e2e8f0;
+      color: var(--text-main);
       text-decoration: none;
       font-size: 13px;
       font-weight: 600;
-      border: 1px solid #334155;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
     }}
 
     .btn-link:hover {{
-      background: #334155;
-      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--primary);
       transform: translateY(-2px);
     }}
 
-    /* Main Box */
+    /* Card Box */
     .card {{
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: var(--radius);
       padding: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
       margin-bottom: 24px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }}
 
+    /* Text Input Area */
     .input-header {{
       display: flex;
       justify-content: space-between;
@@ -162,8 +162,8 @@ def main() -> None:
 
     .input-header label {{
       font-weight: 700;
-      font-size: 1rem;
-      color: #e5e7eb;
+      font-size: 1.1rem;
+      color: var(--text-main);
     }}
 
     .char-count {{
@@ -174,16 +174,17 @@ def main() -> None:
 
     textarea {{
       width: 100%;
-      height: 110px;
-      background: #0f172a;
-      border: 1px solid #334155;
+      height: 120px;
+      background: #080c14;
+      border: 1px solid var(--card-border);
       border-radius: 12px;
-      padding: 14px 16px;
-      color: #f8fafc;
-      font-size: 1.1rem;
+      padding: 16px;
+      color: #fff;
+      font-size: 16px;
       resize: vertical;
       outline: none;
       transition: border-color 0.2s;
+      line-height: 1.6;
     }}
 
     textarea:focus {{
@@ -201,108 +202,93 @@ def main() -> None:
     }}
 
     .samples-label {{
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 13px;
       color: var(--text-muted);
+      font-weight: 600;
     }}
 
     .sample-chip {{
-      background: #1e293b;
-      border: 1px solid #334155;
-      padding: 5px 12px;
-      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 4px 10px;
+      border-radius: 6px;
       font-size: 12px;
       cursor: pointer;
-      color: #cbd5e1;
-      transition: all 0.15s;
+      transition: all 0.2s;
     }}
 
     .sample-chip:hover {{
-      background: var(--primary);
-      color: #000;
+      background: rgba(16, 185, 129, 0.15);
       border-color: var(--primary);
     }}
 
-    /* Grid layout for results */
+    /* Results Grid */
     .results-grid {{
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 20px;
-      margin-top: 24px;
     }}
 
     .section-title {{
-      font-size: 0.95rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
       margin-bottom: 14px;
       display: flex;
       align-items: center;
       gap: 8px;
     }}
 
-    .section-title::before {{
-      content: '';
-      width: 8px;
-      height: 8px;
-      background: var(--primary);
-      border-radius: 50%;
-      display: inline-block;
-    }}
-
-    /* Sentiment Card */
+    /* Sentiment Meter */
     .sentiment-banner {{
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
+      padding: 14px 18px;
       border-radius: 12px;
-      margin-bottom: 16px;
-      background: #1e293b;
+      background: #080c14;
+      margin-bottom: 14px;
+      border: 1px solid var(--card-border);
     }}
 
     .sentiment-badge {{
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 800;
-      padding: 6px 16px;
-      border-radius: 999px;
+      padding: 4px 12px;
+      border-radius: 8px;
     }}
 
-    .badge-positive {{
-      background: rgba(16, 185, 129, 0.2);
-      color: #34d399;
-      border: 1px solid #10b981;
-    }}
-
-    .badge-negative {{
-      background: rgba(239, 68, 68, 0.2);
-      color: #f87171;
-      border: 1px solid #ef4444;
-    }}
-
-    .badge-mixed {{
-      background: rgba(245, 158, 11, 0.2);
-      color: #fbbf24;
-      border: 1px solid #f59e0b;
-    }}
-
-    .badge-neutral {{
-      background: rgba(148, 163, 184, 0.2);
-      color: #cbd5e1;
-      border: 1px solid #64748b;
-    }}
+    .badge-positive {{ background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }}
+    .badge-negative {{ background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }}
+    .badge-mixed {{ background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }}
+    .badge-neutral {{ background: rgba(156, 163, 175, 0.2); color: #9ca3af; border: 1px solid #6b7280; }}
 
     .score-display {{
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       font-weight: 700;
     }}
 
+    /* Intent Badge */
+    .intent-badge {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1.05rem;
+    }}
+    .intent-order {{ background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.5); color: #34d399; }}
+    .intent-price {{ background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.5); color: #facc15; }}
+    .intent-delivery {{ background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.5); color: #60a5fa; }}
+    .intent-availability {{ background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.5); color: #c084fc; }}
+    .intent-complaint {{ background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.5); color: #f87171; }}
+    .intent-greeting {{ background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.5); color: #22d3ee; }}
+    .intent-unknown {{ background: rgba(156, 163, 175, 0.15); border: 1px solid rgba(156, 163, 175, 0.5); color: #9ca3af; }}
+
+    /* Tokens Pills */
     .tokens-pill-box {{
       display: flex;
       flex-wrap: wrap;
@@ -311,52 +297,50 @@ def main() -> None:
     }}
 
     .token-pill {{
-      padding: 3px 10px;
+      padding: 3px 8px;
       border-radius: 6px;
       font-size: 12px;
       font-weight: 600;
     }}
 
-    .token-pos {{
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }}
+    .token-pos {{ background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }}
+    .token-neg {{ background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }}
 
-    .token-neg {{
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }}
-
-    /* Wilayas & Entities Cards */
+    /* Entities tags */
     .entity-tag {{
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
+      gap: 6px;
+      padding: 6px 12px;
       background: #1e293b;
       border: 1px solid #334155;
-      border-radius: 10px;
-      margin-right: 8px;
-      margin-bottom: 8px;
+      border-radius: 8px;
       font-size: 13px;
+      margin: 4px;
     }}
 
     .entity-code {{
       background: var(--primary);
       color: #000;
-      font-weight: 800;
-      padding: 2px 7px;
-      border-radius: 6px;
+      font-weight: 700;
       font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }}
+
+    .commune-badge {{
+      background: rgba(59, 130, 246, 0.25);
+      border: 1px solid rgba(59, 130, 246, 0.5);
+      color: #93c5fd;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 11px;
     }}
 
     .payment-tag {{
-      background: rgba(6, 182, 212, 0.15);
-      border: 1px solid rgba(6, 182, 212, 0.4);
-      color: #38bdf8;
+      background: rgba(147, 51, 234, 0.15);
+      border: 1px solid rgba(147, 51, 234, 0.4);
+      color: #c084fc;
       padding: 6px 12px;
       border-radius: 8px;
       font-size: 13px;
@@ -368,20 +352,20 @@ def main() -> None:
     .price-tag {{
       background: rgba(245, 158, 11, 0.15);
       border: 1px solid rgba(245, 158, 11, 0.4);
-      color: #fcd34d;
+      color: #fbbf24;
       padding: 6px 12px;
       border-radius: 8px;
-      font-size: 13px;
       font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
       font-weight: 700;
       display: inline-block;
       margin-bottom: 6px;
     }}
 
     .carrier-tag {{
-      background: rgba(168, 85, 247, 0.15);
-      border: 1px solid rgba(168, 85, 247, 0.4);
-      color: #c084fc;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: #38bdf8;
       padding: 6px 12px;
       border-radius: 8px;
       font-size: 13px;
@@ -391,9 +375,9 @@ def main() -> None:
     }}
 
     .mode-tag {{
-      background: rgba(34, 197, 94, 0.15);
-      border: 1px solid rgba(34, 197, 94, 0.4);
-      color: #4ade80;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
       padding: 6px 12px;
       border-radius: 8px;
       font-size: 13px;
@@ -465,10 +449,10 @@ def main() -> None:
       <div class="logo-badge">
         <span>DZ Open Suite</span>
         <span>Zero-Dependency</span>
-        <span>69 Wilayas</span>
+        <span>69 Wilayas & 550+ Communes</span>
       </div>
       <h1>darja-nlp-kit</h1>
-      <p class="subtitle">مختبر المعالجة اللغوية الطبيعية للهجة الجزائرية (الدارجة، الأرابيزي، والتناوب اللغوي الفرنسي)</p>
+      <p class="subtitle">مختبر المعالجة اللغوية الطبيعية للهجة الجزائرية (الدارجة، الأرابيزي، النوايا، وتحويل العملات الشعبية)</p>
       <div class="links-bar">
         <a href="https://github.com/test-bit-sys/darja-nlp-kit" target="_blank" class="btn-link">
           ⭐ مستودع GitHub
@@ -487,20 +471,32 @@ def main() -> None:
         <label for="textInput">اكتب أو الصق نصاً بالدارجة الجزائرية أو الأرابيزي:</label>
         <span class="char-count" id="charCount">0 حرف</span>
       </div>
-      <textarea id="textInput" placeholder="مثال: produit mli7 bzaf walakin livraison l wahran rotar chwiya, prix 4500 DA w khlass b baridimob">السلعة هاااااايلة بزاااااف و الخدمة فور، يعطيك الصحة! توصيل لبوسعادة و نخلصك بـ baridimob السعر زوج ملاين</textarea>
+      <textarea id="textInput" placeholder="مثال: salam khoya rani hab nchrih b 2 mlayen w 500 alf l Rouiba fi Alger b yalidine stop desk. num: 0555123456">salam khoya rani hab nchrih b 2 mlayen w 500 alf l Rouiba fi Alger b yalidine stop desk. num ta3i: 0661234567</textarea>
       
       <div class="samples-bar">
         <span class="samples-label">نماذج سريعة للتجربة:</span>
-        <button class="sample-chip" onclick="loadSample(0)">🛒 تعليق متجر إيجابي</button>
-        <button class="sample-chip" onclick="loadSample(1)">⚠️ تعليق سلبي ونفي معكوس</button>
-        <button class="sample-chip" onclick="loadSample(2)">🔤 أرابيزي مع فرنسية وسعر</button>
-        <button class="sample-chip" onclick="loadSample(3)">📍 لهجة وهران والولاية 31</button>
-        <button class="sample-chip" onclick="loadSample(4)">📍 لهجة قسنطينة وسيرتا</button>
+        <button class="sample-chip" onclick="loadSample(0)">🛒 طلب شراء + رويبة + سعر مركب</button>
+        <button class="sample-chip" onclick="loadSample(1)">💰 استفسار عن السعر وتوفر السلعة</button>
+        <button class="sample-chip" onclick="loadSample(2)">🌟 متجر إيجابي + بلدية العلمة</button>
+        <button class="sample-chip" onclick="loadSample(3)">⚠️ شكوى واسترجاع حشيتوهالي</button>
+        <button class="sample-chip" onclick="loadSample(4)">📍 لهجة وهران + بلدية عين الترك</button>
+        <button class="sample-chip" onclick="loadSample(5)">🚚 استفسار عن التوصيل لقسنطينة</button>
       </div>
     </div>
 
     <div class="results-grid">
-      <!-- 1. Sentiment Card -->
+      <!-- 1. Customer Intent Card -->
+      <div class="card">
+        <div class="section-title">تحليل نية الزبون (Customer Intent Classification)</div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <div id="intentBadge" class="intent-badge intent-order">🛒 طلب شراء (ORDER)</div>
+          <div id="intentConfidence" style="font-family:'JetBrains Mono',monospace; color:var(--text-muted); font-size:13px;">دقة 90%</div>
+        </div>
+        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">الكلمات الدالة المرصودة:</div>
+        <div id="intentKeywords" class="tokens-pill-box"></div>
+      </div>
+
+      <!-- 2. Sentiment Card -->
       <div class="card">
         <div class="section-title">تحليل المشاعر (Sentiment Analysis)</div>
         <div class="sentiment-banner">
@@ -514,13 +510,13 @@ def main() -> None:
         </div>
       </div>
 
-      <!-- 2. Wilayas (69) & Geo Card -->
+      <!-- 3. Wilayas (69) & Communes Card -->
       <div class="card">
-        <div class="section-title">الولايات الجزائرية المرصودة (69 Wilayas - Law 26-06)</div>
+        <div class="section-title">الولايات والبلديات (69 Wilayas & 550+ Communes)</div>
         <div id="wilayasBox"></div>
       </div>
 
-      <!-- 3. Payments & Prices Card -->
+      <!-- 4. Payments & Prices Card -->
       <div class="card">
         <div class="section-title">طرق الدفع والأسعار المستخرجة (Payments & Prices)</div>
         <div style="margin-bottom: 12px;">
@@ -528,12 +524,12 @@ def main() -> None:
           <div id="paymentsBox"></div>
         </div>
         <div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">الأسعار والمبالغ:</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">الأسعار والمبالغ بالدينار (شاملة الملايين والألوف):</div>
           <div id="pricesBox"></div>
         </div>
       </div>
 
-      <!-- 4. Logistics & Phone Card -->
+      <!-- 5. Logistics & Phone Card -->
       <div class="card">
         <div class="section-title">شركات التوصيل ونمط الاستلام والهاتف (Logistics & Contact)</div>
         <div style="margin-bottom: 10px;">
@@ -550,7 +546,7 @@ def main() -> None:
         </div>
       </div>
 
-      <!-- 5. Dialect Card -->
+      <!-- 6. Dialect Card -->
       <div class="card">
         <div class="section-title">كشف اللهجة الجهوية (Regional Dialect)</div>
         <div style="margin-bottom: 14px;">
@@ -560,7 +556,7 @@ def main() -> None:
         <div id="dialectMarkers" class="tokens-pill-box"></div>
       </div>
 
-      <!-- 6. Arabizi & Normalization -->
+      <!-- 7. Arabizi & Normalization -->
       <div class="card" style="grid-column: 1 / -1;">
         <div class="section-title">معالجة الأرابيزي والتطبيع (Arabizi Transliteration & Normalizer)</div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
@@ -579,16 +575,16 @@ def main() -> None:
         </div>
       </div>
 
-      <!-- 7. AI Agent Customer Assistant Simulator -->
+      <!-- 8. AI Agent Customer Assistant Simulator -->
       <div class="card" style="grid-column: 1 / -1; border-color: rgba(59, 130, 246, 0.4); background: radial-gradient(circle at top left, #0f1c3f, #111827);">
         <div class="section-title" style="color: #60a5fa;">🤖 محاكي وكيل الذكاء الاصطناعي الجزائري (AI Agent Assistant Simulator)</div>
         <p style="font-size: 13px; color: #94a3b8; margin-bottom: 14px;">
-          كيف يستقبل نموذج الذكاء الاصطناعي (مثل GPT-4o / Claude / Gemini) هذا الزبون عبر <strong>darja-nlp-kit</strong>، وكيف يطابق لهجته بدقة وحقائق مؤكدة دون أي هلوسة:
+          كيف يستقبل نموذج الذكاء الاصطناعي (مثل GPT-4o / Claude / Gemini) هذا الزبون عبر <strong>darja-nlp-kit</strong>، مع مطابقة النية، اللهجة، والمبالغ دون هلوسة:
         </p>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
           <div>
             <div style="font-size: 12px; color: #93c5fd; font-weight: 700; margin-bottom: 6px;">🧠 الـ System Prompt المحقون للذكاء الاصطناعي:</div>
-            <pre id="agentPromptBox" style="background:#080c14; border:1px solid #1e293b; border-radius:10px; padding:12px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#cbd5e1; max-height:170px; overflow-y:auto; white-space:pre-wrap;"></pre>
+            <pre id="agentPromptBox" style="background:#080c14; border:1px solid #1e293b; border-radius:10px; padding:12px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#cbd5e1; max-height:200px; overflow-y:auto; white-space:pre-wrap;"></pre>
           </div>
           <div>
             <div style="font-size: 12px; color: #34d399; font-weight: 700; margin-bottom: 6px;">💬 رد الذكاء الاصطناعي البشري الواقعي (AI Agent Response):</div>
@@ -649,155 +645,66 @@ def main() -> None:
 
     function arabiziToArabic(text) {{
       if (!text) return '';
-      const tokens = text.split(/(\\s+)/);
-      const res = [];
-      for (const token of tokens) {{
-        if (/^\\s+$/.test(token) || !token) {{ res.push(token); continue; }}
-        if (/^[\\u0600-\\u06FF]/.test(token)) {{ res.push(token); continue; }}
-        if (isFrenchWord(token) || /^\\d+$/.test(token)) {{ res.push(token); continue; }}
+      const tokens = text.split(/(\\s+|[.,!?;:()]+)/);
+      return tokens.map(tok => {{
+        if (!tok.trim() || /^[.,!?;:()]+$/.test(tok)) return tok;
+        const lower = tok.toLowerCase();
+        if (ARABIZI_RULES.overrides[lower]) return ARABIZI_RULES.overrides[lower];
+        if (isFrenchWord(lower) || /^[0-9+]+$/.test(tok)) return tok;
 
-        const lower = token.toLowerCase();
-        if (ARABIZI_RULES.overrides[lower]) {{ res.push(ARABIZI_RULES.overrides[lower]); continue; }}
-
-        let translit = '';
-        let i = 0;
-        while (i < lower.length) {{
-          let matched = false;
-          if (i + 1 < lower.length) {{
-            const dg = lower.substring(i, i + 2);
-            if (ARABIZI_RULES.digraphs[dg]) {{ translit += ARABIZI_RULES.digraphs[dg]; i += 2; matched = true; }}
-          }}
-          if (!matched) {{
-            const ch = lower[i];
-            if (/[0-9]/.test(ch) && ARABIZI_RULES.numbers[ch]) {{
-              const before = i > 0 ? lower[i-1] : '';
-              const after = i < lower.length - 1 ? lower[i+1] : '';
-              const hasLetter = /[a-zA-Z\\u0600-\\u06FF]/.test(before) || /[a-zA-Z\\u0600-\\u06FF]/.test(after);
-              translit += hasLetter ? ARABIZI_RULES.numbers[ch] : ch;
-            }} else if (ARABIZI_RULES.singles[ch]) {{
-              translit += ARABIZI_RULES.singles[ch];
-            }} else {{
-              translit += ch;
-            }}
-            i++;
-          }}
+        let res = lower;
+        for (const [k, v] of Object.entries(ARABIZI_RULES.digraphs)) {{
+          res = res.replaceAll(k, v);
         }}
-        res.push(translit);
-      }}
-      return res.join('');
-    }}
-
-    function tokenize(text) {{
-      if (!text) return {{ tokens: [], negations: [] }};
-      const raw = text.split(/[\\s,.!?;:()[\\]{{}}"\'`\\u060C\\u061B\\u061F\\u0640]+/).filter(t => t.length > 0);
-      const tokens = [];
-      const negations = [];
-      for (const token of raw) {{
-        const m = token.match(/^ما(.+?)ش$/) || token.match(/^ma(.+?)ch$/i);
-        if (m && m[1].length >= 2) {{
-          negations.push({{ original: token, root: m[1], negated: true }});
+        for (const [k, v] of Object.entries(ARABIZI_RULES.numbers)) {{
+          res = res.replaceAll(k, v);
         }}
-        tokens.push(token);
-      }}
-      return {{ tokens, negations }};
-    }}
-
-    const STOPWORDS_SET = new Set();
-    Object.values(STOPWORDS_DATA).forEach(list => list.forEach(w => {{ STOPWORDS_SET.add(w); STOPWORDS_SET.add(w.toLowerCase()); }}));
-    const AR_PREFIXES = ['بال', 'وال', 'فال', 'كال', 'ال', 'و', 'ب', 'ل', 'ف', 'ك'];
-    const AR_SUFFIXES = ['ين', 'ات', 'ة', 'ه'];
-
-    function stripPrefix(token) {{
-      for (const p of AR_PREFIXES) {{
-        if (token.startsWith(p) && token.length > p.length + 1) return token.slice(p.length);
-      }}
-      return null;
-    }}
-    function stripSuffix(token) {{
-      for (const s of AR_SUFFIXES) {{
-        if (token.endsWith(s) && token.length > s.length + 1) return token.slice(0, -s.length);
-      }}
-      return null;
+        for (const [k, v] of Object.entries(ARABIZI_RULES.singles)) {{
+          res = res.replaceAll(k, v);
+        }}
+        return res;
+      }}).join('');
     }}
 
     function removeStopwords(text) {{
-      const {{ tokens }} = tokenize(text);
-      return tokens.filter(t => {{
-        if (STOPWORDS_SET.has(t) || STOPWORDS_SET.has(t.toLowerCase())) return false;
-        const sp = stripPrefix(t);
-        if (sp && (STOPWORDS_SET.has(sp) || STOPWORDS_SET.has(sp.toLowerCase()))) return false;
-        return true;
-      }}).join(' ');
-    }}
-
-    function lookupScore(word) {{
-      const lower = word.toLowerCase();
-      if (LEXICON_DATA.positive[word] !== undefined) return LEXICON_DATA.positive[word];
-      if (LEXICON_DATA.positive[lower] !== undefined) return LEXICON_DATA.positive[lower];
-      if (LEXICON_DATA.negative[word] !== undefined) return LEXICON_DATA.negative[word];
-      if (LEXICON_DATA.negative[lower] !== undefined) return LEXICON_DATA.negative[lower];
-      return null;
-    }}
-
-    function findScore(token) {{
-      let s = lookupScore(token);
-      if (s !== null) return s;
-      const sp = stripPrefix(token);
-      if (sp) {{
-        s = lookupScore(sp);
-        if (s !== null) return s;
-        const sBoth = stripSuffix(sp);
-        if (sBoth) {{
-          s = lookupScore(sBoth);
-          if (s !== null) return s;
-        }}
+      if (!text) return '';
+      const allStops = new Set();
+      for (const list of Object.values(STOPWORDS_DATA)) {{
+        list.forEach(w => allStops.add(w.toLowerCase()));
       }}
-      const ss = stripSuffix(token);
-      if (ss) {{
-        s = lookupScore(ss);
-        if (s !== null) return s;
-      }}
-      return null;
+      const tokens = text.split(/\\s+/);
+      const filtered = tokens.filter(t => !allStops.has(t.toLowerCase()) && !allStops.has(normalize(t)));
+      return filtered.join(' ');
     }}
 
     function analyzeSentiment(text) {{
       if (!text) return {{ score: 0, label: 'NEUTRAL', positiveTokens: [], negativeTokens: [], negated: false }};
-      const {{ tokens, negations }} = tokenize(text);
-      const pos = [];
-      const neg = [];
-      let total = 0;
-      let count = 0;
-      let hasNeg = false;
-      const circum = new Set(negations.map(n => n.original));
+      const clean = normalize(text);
+      const words = clean.split(/[\\s,،!?;:.]+/).filter(Boolean);
+      let total = 0, count = 0, hasNeg = false;
+      const pos = [], neg = [];
 
-      for (let i = 0; i < tokens.length; i++) {{
-        const t = tokens[i];
-        if (circum.has(t)) {{
-          hasNeg = true;
-          const negInfo = negations.find(n => n.original === t);
-          if (negInfo) {{
-            const rScore = findScore(negInfo.root);
-            if (rScore !== null) {{
-              const flipped = rScore * -0.8;
-              total += flipped; count++;
-              if (flipped > 0) pos.push(t); else neg.push(t);
-              continue;
-            }}
-          }}
+      for (let i = 0; i < words.length; i++) {{
+        const w = words[i].toLowerCase();
+        let score = null;
+        let t = words[i];
+
+        if (LEXICON_DATA.positive[w] !== undefined) {{
+          score = LEXICON_DATA.positive[w];
+        }} else if (LEXICON_DATA.negative[w] !== undefined) {{
+          score = LEXICON_DATA.negative[w];
         }}
 
-        let score = findScore(t);
         if (score === null) continue;
 
-        const prev = i > 0 ? tokens[i-1] : null;
-        if (prev && (LEXICON_DATA.negators.includes(prev) || LEXICON_DATA.negators.includes(prev.toLowerCase()))) {{
-          score = score * -0.8;
+        const prev = i > 0 ? words[i - 1].toLowerCase() : null;
+        if (prev && LEXICON_DATA.negators.includes(prev)) {{
+          score = -score * 0.8;
           hasNeg = true;
         }}
-
-        const next = i + 1 < tokens.length ? tokens[i+1] : null;
-        if (next && LEXICON_DATA.intensifiers[next]) score *= LEXICON_DATA.intensifiers[next];
-        if (prev && LEXICON_DATA.intensifiers[prev] && !LEXICON_DATA.negators.includes(prev)) score *= LEXICON_DATA.intensifiers[prev];
+        if (prev && LEXICON_DATA.intensifiers[prev] && !LEXICON_DATA.negators.includes(prev)) {{
+          score *= LEXICON_DATA.intensifiers[prev];
+        }}
 
         total += score;
         count++;
@@ -814,23 +721,117 @@ def main() -> None:
       return {{ score: rounded, label, positiveTokens: pos, negativeTokens: neg, negated: hasNeg }};
     }}
 
+    function identifyIntent(text) {{
+      if (!text) return {{ intent: 'UNKNOWN', confidence: 0, matchedKeywords: [] }};
+      const lower = text.toLowerCase();
+      const rules = [
+        {{
+          intent: 'COMPLAINT',
+          keywords: [
+            'مكسرة', 'مكسر', 'ما وصلتش', 'ما لحقتش', 'روطار', 'سلعة عيانة', 'سلعة ميتة', 'حشيتوهالي',
+            'حشاوها لي', 'بدلوهالي', 'روتور', 'رجعولي دراهمي', 'ما رديتوش', 'حقار', 'سراقين', 'سرقة',
+            'فضيحة', 'سلعة مفاتشة', 'ماشي كيما الفوتو', 'ماشي كيما التصويرة', 'ناقصة', 'معطوبة', 'مخدوعة',
+            'reclamation', 'retour', 'casse', 'mfetcha', 'retard', 'ma wesletch', '7chawhali',
+            'arnaque', 'ser9a', 'khorda', 'naqsa'
+          ]
+        }},
+        {{
+          intent: 'ORDER',
+          keywords: [
+            'كوموندي', 'نكوموندي', 'كومونديلي', 'كوموندالي', 'باغي نشري', 'راني باغي', 'باغي', 'حاب نشري',
+            'حبيت نشري', 'راني حاب', 'حاب', 'حبيت', 'ابعثلي', 'ابعثهالي', 'ابعثوهالي', 'احجزلي', 'حجز', 'احجز',
+            'راني شاري', 'نشريها', 'نشري', 'جيبهالي', 'حاب نطلب', 'طلب شراء', 'نحتاج حبة', 'نحتاج زوج', 'نحتاج',
+            'commander', 'ncommander', 'baghi nchri', 'rani baghi', 'baghi', 'hab nchri', '7ab nchri',
+            'rani hab', 'rani 7ab', 'hab', '7ab', 'habb', 'nchri', 'chrit', 'nchriha', 'nchrihoum',
+            'ab3atli', 'ab3athali', 'livrili', 'livrihali', 'livreli', '7jezli', 'reserver', 'je veux acheter'
+          ]
+        }},
+        {{
+          intent: 'DELIVERY_INQUIRY',
+          keywords: [
+            'شحال التوصيل', 'كاين توصيل', 'توصلو', 'توصيل لـ', 'توصيل', 'ليفريزون', 'شحال ليفريزون',
+            'وقتاش تلحق', 'وقتاش يوصل', 'شحال تاخذ وقت', 'توصلوها', 'توصيل مجاني', 'شحال فالدار',
+            'livraison', 'chhal livraison', 'toussil', 'twaslou', 'we9tach tel7a9', 'wektach telhaq',
+            'chhal w9t', 'livraison gratuite', 'frais de livraison', 'delai'
+          ]
+        }},
+        {{
+          intent: 'PRICE_INQUIRY',
+          keywords: [
+            'شحال', 'بشحال', 'بقداش', 'قداش', 'سومة', 'شحال السومة', 'شحال يدير', 'شحال دير',
+            'شحال راها دير', 'بشحال هاذي', 'شحال تسوى', 'بري', 'بري تاعو', 'سعر', 'شحال السعر',
+            'prix', 'bch7al', 'ch7al', 'bchhal', 'chhal', '9dach', 'qadach', 'souma', 'c combien',
+            'combien', 'chhal ydir', 'chhal tdir', 'ch7al ydir', 'tarif'
+          ]
+        }},
+        {{
+          intent: 'AVAILABILITY_INQUIRY',
+          keywords: [
+            'كاينة', 'كاين', 'كاينين', 'متوفرة', 'متوفر', 'مازالت', 'مازال كاين', 'مازال كاينة',
+            'ديسبو', 'مازالت عندكم', 'عندكم منها', 'كاش ما بقا', 'كاش جديد', 'كاين ستوك',
+            'kayen', 'kayna', 'dispo', 'disponible', 'mazal', 'mazal kayn', 'mazal kayna', '3andkom',
+            'fih stock'
+          ]
+        }},
+        {{
+          intent: 'GREETING',
+          keywords: [
+            'سلام', 'سلام عليكم', 'السلام عليكم', 'صباح الخير', 'مساء الخير', 'يعطيك الصحة', 'صحيت',
+            'واش راك', 'كيراك', 'كيراكم', 'شراكم', 'واش خويا', 'عيشك', 'خويا لعزيز', 'ربي يحفظك',
+            'salam', 'slm', 'salam alikoum', 'sbah lkhir', 'msa lkhir', 'sahit', 'kirak', 'wach rak',
+            'azul', 'bonjour', 'bonsoir'
+          ]
+        }}
+      ];
+
+      const scores = {{}};
+      for (const r of rules) {{
+        scores[r.intent] = [];
+        for (const kw of r.keywords) {{
+          if (lower.includes(kw.toLowerCase())) scores[r.intent].push(kw);
+        }}
+      }}
+
+      const priority = ['COMPLAINT', 'ORDER', 'DELIVERY_INQUIRY', 'PRICE_INQUIRY', 'AVAILABILITY_INQUIRY'];
+      let best = 'UNKNOWN';
+      let bestKws = [];
+      for (const p of priority) {{
+        if (scores[p].length > 0) {{
+          best = p;
+          bestKws = scores[p];
+          break;
+        }}
+      }}
+      if (best === 'UNKNOWN' && scores.GREETING.length > 0) {{
+        best = 'GREETING';
+        bestKws = scores.GREETING;
+      }}
+      if (best === 'UNKNOWN') return {{ intent: 'UNKNOWN', confidence: 0, matchedKeywords: [] }};
+      return {{
+        intent: best,
+        confidence: Math.min(0.99, Math.round((0.70 + bestKws.length * 0.1) * 100) / 100),
+        matchedKeywords: bestKws
+      }};
+    }}
+
     function extractEntities(text) {{
       const wilayas = [];
       const addedCodes = new Set();
       const lower = text.toLowerCase();
+      let maskedText = text;
 
-      // Wilayas by code
+      // 1. Wilayas by direct code (e.g. wilaya 16, w 31, l 16)
       const codeReg = /(?:wilaya|w|ولاية|ولايه|l)\\s*([0-6]?[0-9])\\b/gi;
       let m;
       while ((m = codeReg.exec(text)) !== null) {{
         const num = parseInt(m[1], 10);
         if (num >= 1 && num <= 69 && !addedCodes.has(num)) {{
           const w = WILAYAS_DATA.find(x => x.code === num);
-          if (w) {{ addedCodes.add(num); wilayas.push({{ ...w, matchedText: m[0] }}); }}
+          if (w) {{ addedCodes.add(num); wilayas.push({{ ...w, matchedText: m[0], commune: null }}); }}
         }}
       }}
 
-      // Wilayas by names/aliases
+      // 2. Wilayas by names/aliases
       for (const w of WILAYAS_DATA) {{
         if (addedCodes.has(w.code)) continue;
         const cands = [w.name_ar, w.name_fr, ...(w.aliases || [])];
@@ -841,7 +842,26 @@ def main() -> None:
           const reg = new RegExp(`(^|\\s|[.,!?;:()])${{escaped}}($|\\s|[.,!?;:()])`, 'i');
           if (reg.test(lower) || (cLower.length > 3 && lower.includes(cLower))) {{
             addedCodes.add(w.code);
-            wilayas.push({{ ...w, matchedText: cand }});
+            const allComs = [...(w.communes_sample || []), ...(w.communes_fr_sample || [])];
+            const matchedCom = allComs.find(c => c.toLowerCase() === cLower) || null;
+            wilayas.push({{ ...w, matchedText: cand, commune: matchedCom }});
+            break;
+          }}
+        }}
+      }}
+
+      // 3. Wilayas by Communes (550+ Algerian communes)
+      for (const w of WILAYAS_DATA) {{
+        if (addedCodes.has(w.code)) continue;
+        const communes = [...(w.communes_sample || []), ...(w.communes_fr_sample || [])];
+        for (const com of communes) {{
+          if (!com || com.length < 3) continue;
+          const cLower = com.toLowerCase();
+          const escaped = cLower.replace(/[-[\\]{{}}()*+?.,\\\\^$|#\\s]/g, '\\\\$&');
+          const reg = new RegExp(`(^|\\s|[.,!?;:()])${{escaped}}($|\\s|[.,!?;:()])`, 'i');
+          if (reg.test(lower) || (cLower.length >= 4 && lower.includes(cLower))) {{
+            addedCodes.add(w.code);
+            wilayas.push({{ ...w, matchedText: com, commune: com }});
             break;
           }}
         }}
@@ -860,25 +880,68 @@ def main() -> None:
         if (match) payments.push({{ type: p.type, label: p.label, matched: match[0].trim() }});
       }}
 
-      // Prices
+      // Prices (Compound + Dynamic + Fixed)
       const prices = [];
+      const millionsMap = {{
+        'زوج': 2, 'تلات': 3, 'تلاتة': 3, 'ربع': 4, 'ربعة': 4,
+        'خمس': 5, 'خمسة': 5, 'ست': 6, 'ستة': 6, 'سبع': 7,
+        'سبعة': 7, 'تمن': 8, 'تمنية': 8, 'تسع': 9, 'تسعة': 9,
+        'عشر': 10, 'عشرة': 10,
+        'zouj': 2, 'zoudj': 2, 'tlata': 3, 'tleta': 3, 'rab3a': 4,
+        'khamsa': 5, 'setta': 6, 'seb3a': 7, 'tmenya': 8, 'tes3a': 9, '3achra': 10
+      }};
+      const thousandsMap = {{
+        'مية': 100, 'ميتين': 200, 'تلمية': 300, 'تلاتمية': 300, 'ربعمية': 400,
+        'خمسمية': 500, 'ستمية': 600, 'سبعمية': 700, 'تمنمية': 800, 'تسعمية': 900,
+        'عشرين': 20, 'تلاتين': 30, 'ربعين': 40, 'خمسين': 50, 'ستين': 60,
+        'سبعين': 70, 'تمانين': 80, 'تسعين': 90,
+        'mya': 100, 'mitin': 200, 'teltmya': 300, 'khamsmya': 500, 'khamsin': 50
+      }};
+      const mStr = 'زوج|تلات|تلاتة|ربع|ربعة|خمس|خمسة|ست|ستة|سبع|سبعة|تمن|تمنية|تسع|تسعة|عشر|عشرة|zouj|zoudj|tlata|tleta|rab3a|khamsa|setta|seb3a|tmenya|tes3a|3achra';
+      const kStr = 'مية|ميتين|تلمية|تلاتمية|ربعمية|خمسمية|ستمية|سبعمية|تمنمية|تسعمية|عشرين|تلاتين|ربعين|خمسين|ستين|سبعين|تمانين|تسعين|mya|mitin|teltmya|khamsmya|khamsin';
+
+      // 1. Compound prices (e.g. 2 mlayen w 500 alf)
+      const compReg = new RegExp(`(?:^|\\s|[^\\w\\u0600-\\u06FF])(\\d+(?:[.,]\\d+)?|${{mStr}})?\\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)\\s*(?:و|\\+|et|w)\\s*(\\d+(?:[.,]\\d+)?|${{kStr}})?\\s*(?:الف|ألف|alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])`, 'gi');
+      let compM;
+      while ((compM = compReg.exec(text)) !== null) {{
+        const rM = compM[1];
+        const rK = compM[2];
+        let mVal = 1;
+        if (rM) {{
+          const k = rM.toLowerCase();
+          mVal = millionsMap[k] !== undefined ? millionsMap[k] : (parseFloat(k.replace(',', '.')) || 1);
+        }}
+        let kVal = 1;
+        if (rK) {{
+          const k = rK.toLowerCase();
+          kVal = thousandsMap[k] !== undefined ? thousandsMap[k] : (parseFloat(k.replace(',', '.')) || 0);
+        }}
+        const total = (mVal * 10000) + (kVal * 10);
+        prices.push({{ raw: compM[0].trim(), amount: total }});
+        maskedText = maskedText.slice(0, compM.index) + ' '.repeat(compM[0].length) + maskedText.slice(compM.index + compM[0].length);
+      }}
+
+      // 2. Numeric prices with currency
       const priceNumReg = /(?:^|\\s|[^\\w\\u0600-\\u06FF])(\\d+(?:[.,]\\d+)?)\\s*(da|dzd|دج|دينار|الف|ألف|alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])/gi;
       let pm;
-      while ((pm = priceNumReg.exec(text)) !== null) {{
+      while ((pm = priceNumReg.exec(maskedText)) !== null) {{
         let val = parseFloat(pm[1].replace(',', '.'));
         const u = pm[2].toLowerCase();
         if (u === 'الف' || u === 'ألف' || u === 'alf') val *= 1000;
         prices.push({{ raw: pm[0].trim(), amount: val }});
+        maskedText = maskedText.slice(0, pm.index) + ' '.repeat(pm[0].length) + maskedText.slice(pm.index + pm[0].length);
       }}
 
-      // Dynamic millions (e.g. 2 mlayen, 3 ملاين)
+      // 3. Dynamic millions (e.g. 2 mlayen, 3 ملاين)
       const dynMilReg = /(?:^|\\s|[^\\w\\u0600-\\u06FF])(\\d+(?:[.,]\\d+)?)\\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)(?=$|\\s|[^\\w\\u0600-\\u06FF])/gi;
       let dmDyn;
-      while ((dmDyn = dynMilReg.exec(text)) !== null) {{
+      while ((dmDyn = dynMilReg.exec(maskedText)) !== null) {{
         const val = parseFloat(dmDyn[1].replace(',', '.')) * 10000;
         prices.push({{ raw: dmDyn[0].trim(), amount: val }});
+        maskedText = maskedText.slice(0, dmDyn.index) + ' '.repeat(dmDyn[0].length) + maskedText.slice(dmDyn.index + dmDyn[0].length);
       }}
 
+      // 4. Fixed colloquial amounts
       const darjaAmounts = [
         {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(مية\\s*الف|100\\s*الف|mya|myat\\s*alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 1000 }},
         {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(ميتين\\s*الف|200\\s*الف|mitin\\s*alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 2000 }},
@@ -889,8 +952,11 @@ def main() -> None:
         {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(عشر\\s*ملاين|3achr\\s*mlayen)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 100000 }},
       ];
       for (const item of darjaAmounts) {{
-        const dm = text.match(item.reg);
-        if (dm) prices.push({{ raw: dm[0].trim(), amount: item.val }});
+        const dm = maskedText.match(item.reg);
+        if (dm) {{
+          prices.push({{ raw: dm[0].trim(), amount: item.val }});
+          maskedText = maskedText.slice(0, dm.index) + ' '.repeat(dm[0].length) + maskedText.slice(dm.index + dm[0].length);
+        }}
       }}
 
       // Deliveries
@@ -967,11 +1033,12 @@ def main() -> None:
     const charCount = document.getElementById('charCount');
 
     const SAMPLES = [
-      "salam khoya rani hab nchrih b 2 mlayen l Constantine b yalidine stop desk. num ta3i: 0661234567",
-      "السلعة هاااااايلة بزاااااف و الخدمة فور، يعطيك الصحة! توصيل لبوسعادة ياليدين ستوب ديسك كلمني في 0661234567",
-      "khedma 3ayana w sil3a khorda wlah ma thechmou 7chitohali w l colis ja mfetchech!",
-      "شوالا راك باغي خوية غايا درك؟ كاين توصيل للسانية ولاية 31 بـ zr express للدار و نخلصك كاش عند الاستلام",
-      "واشنهي هادا قداش يدير ياسر باهي سيرتا نخلصك كاش بـ مية الف"
+      "salam khoya rani hab nchrih b 2 mlayen w 500 alf l Rouiba fi Alger b yalidine stop desk. num ta3i: 0661234567",
+      "بشحال هاذي خاوة السومة تاعها قداش؟ كاش جديد متوفر منها ولا خلاصت؟",
+      "السلعة هاااااايلة بزاااااف و الخدمة فور، يعطيك الصحة! توصيل للعلمة سطيف و نخلصك بـ baridimob",
+      "khedma 3ayana w sil3a khorda wlah ma thechmou 7chitohali w l colis ja mfetchech w mserba9!",
+      "شوالا راك باغي خوية غايا درك؟ كاين توصيل لعين الترك ولاية 31 بـ zr express للدار و نخلصك كاش عند الاستلام",
+      "واشنهي هادا قداش التوصيل لقسنطينة سيرتا و وقتاش تلحق؟ نخلصك كاش بـ مية الف"
     ];
 
     function loadSample(idx) {{
@@ -983,7 +1050,37 @@ def main() -> None:
       const text = inputArea.value;
       charCount.textContent = `${{text.length}} حرف`;
 
-      // 1. Sentiment
+      // 1. Intent Classification
+      const intentRes = identifyIntent(text);
+      const iBadge = document.getElementById('intentBadge');
+      const iConf = document.getElementById('intentConfidence');
+      const iKws = document.getElementById('intentKeywords');
+
+      const intentDisplay = {{
+        ORDER: {{ label: '🛒 طلب شراء (ORDER)', cls: 'intent-order' }},
+        PRICE_INQUIRY: {{ label: '💰 استفسار عن السعر (PRICE_INQUIRY)', cls: 'intent-price' }},
+        DELIVERY_INQUIRY: {{ label: '🚚 استفسار عن التوصيل (DELIVERY_INQUIRY)', cls: 'intent-delivery' }},
+        AVAILABILITY_INQUIRY: {{ label: '📦 توفر السلعة (AVAILABILITY_INQUIRY)', cls: 'intent-availability' }},
+        COMPLAINT: {{ label: '⚠️ شكوى / مشكلة (COMPLAINT)', cls: 'intent-complaint' }},
+        GREETING: {{ label: '👋 تحية وتواصل (GREETING)', cls: 'intent-greeting' }},
+        UNKNOWN: {{ label: '❓ غير محدد (UNKNOWN)', cls: 'intent-unknown' }}
+      }};
+
+      const info = intentDisplay[intentRes.intent] || intentDisplay.UNKNOWN;
+      iBadge.className = 'intent-badge ' + info.cls;
+      iBadge.textContent = info.label;
+      iConf.textContent = intentRes.confidence > 0 ? `دقة ${{(intentRes.confidence * 100).toFixed(0)}}%` : '-';
+
+      iKws.innerHTML = '';
+      if (intentRes.matchedKeywords.length > 0) {{
+        intentRes.matchedKeywords.forEach(k => {{
+          iKws.innerHTML += `<span class="token-pill" style="background:#1e293b; color:#38bdf8; border:1px solid #0284c7;">${{k}}</span>`;
+        }});
+      }} else {{
+        iKws.innerHTML = '<span class="empty-state">لا توجد كلمات نية صريحة</span>';
+      }}
+
+      // 2. Sentiment
       const sent = analyzeSentiment(text);
       const sBadge = document.getElementById('sentimentBadge');
       const sScore = document.getElementById('sentimentScore');
@@ -1015,7 +1112,7 @@ def main() -> None:
       }}
       negFlag.style.display = sent.negated ? 'block' : 'none';
 
-      // 2. Entities
+      // 3. Entities
       const entities = extractEntities(text);
       const wilayasBox = document.getElementById('wilayasBox');
       const paymentsBox = document.getElementById('paymentsBox');
@@ -1024,16 +1121,18 @@ def main() -> None:
       wilayasBox.innerHTML = '';
       if (entities.wilayas.length > 0) {{
         entities.wilayas.forEach(w => {{
+          const comBadge = w.commune ? `<span class="commune-badge">📍 بلدية ${{w.commune}}</span>` : '';
           wilayasBox.innerHTML += `
             <div class="entity-tag">
               <span class="entity-code">${{w.code_str || w.code}}</span>
               <strong>${{w.name_ar}}</strong>
               <span style="color:var(--text-muted); font-size:11px;">(${{w.name_fr}})</span>
+              ${{comBadge}}
             </div>
           `;
         }});
       }} else {{
-        wilayasBox.innerHTML = '<span class="empty-state">لم يتم رصد ولايات في النص</span>';
+        wilayasBox.innerHTML = '<span class="empty-state">لم يتم رصد ولايات أو بلديات في النص</span>';
       }}
 
       paymentsBox.innerHTML = '';
@@ -1083,7 +1182,7 @@ def main() -> None:
         phonesBox.innerHTML = '<span class="empty-state">لا توجد أرقام هواتف مرصودة</span>';
       }}
 
-      // 3. Dialect
+      // 4. Dialect
       const dialect = detectDialect(text);
       const dBadge = document.getElementById('dialectBadge');
       const dMarkers = document.getElementById('dialectMarkers');
@@ -1104,35 +1203,46 @@ def main() -> None:
         dMarkers.innerHTML = '<span class="empty-state">لا توجد مؤشرات جهوية حصرية</span>';
       }}
 
-      // 4. Arabizi, Normalization, Stopwords
+      // 5. Arabizi, Normalization, Stopwords
       const arabiziClean = arabiziToArabic(text);
       document.getElementById('arabiziBox').textContent = arabiziClean || '-';
       document.getElementById('normalizedBox').textContent = normalize(text) || '-';
       document.getElementById('stopwordsBox').textContent = removeStopwords(text) || '-';
 
-      // 5. AI Agent Simulator
-      const wilayaName = entities.wilayas.length > 0 ? entities.wilayas[0].name_ar + ' (' + entities.wilayas[0].code_str + ')' : null;
+      // 6. AI Agent Simulator
+      let wilayaName = null;
+      if (entities.wilayas.length > 0) {{
+        const firstW = entities.wilayas[0];
+        const comPart = firstW.commune ? ' - بلدية ' + firstW.commune : '';
+        wilayaName = `${{firstW.name_ar}} (${{firstW.code_str || firstW.code}})${{comPart}}`;
+      }}
       const carrierName = entities.deliveries && entities.deliveries.length > 0 ? entities.deliveries[0].label : null;
       const priceText = entities.prices.length > 0 ? entities.prices[0].amount.toLocaleString() + ' دج' : null;
 
       const agentPrompt = `[سياق الزبون المستخرج بدقة عبر darja-nlp-kit]:
 - الرسالة الأصلية: "${{text}}"
 - الترجمة التفسيرية: "${{arabiziClean}}"
-- اللهجة المستهدفة: ${{dialect.region}} (${{regionNames[dialect.region] || 'عامة'}})
+- النية الأساسية (Intent): ${{intentRes.intent}} (${{info.label}})
+- المنطقة واللهجة: ${{dialect.region}} (${{regionNames[dialect.region] || 'عامة'}})
 - المزاج والشعور: ${{sent.label}} (الدرجة: ${{sent.score.toFixed(2)}})
-- الولاية المؤكدة: ${{wilayaName || 'غير محددة'}}
+- الولاية والبلدية: ${{wilayaName || 'غير محددة'}}
 - شركة التوصيل: ${{carrierName || 'غير محددة'}}
 - نمط التوصيل: ${{entities.deliveryMode || 'غير محدد'}}
 - المبالغ بالدينار: ${{priceText || 'غير محددة'}}
 - وسائل الدفع: ${{entities.payments.length > 0 ? entities.payments.map(p => p.label).join(', ') : 'غير محددة'}}
 
-[التعليمات]: طابق لهجة الزبون ومزاجه، وأجب بدارجة جزائرية عفوية ومحترمة (لا فصحى معربة)، والتزم بالأسعار والولايات بدون هلوسة.`;
+[التعليمات]: طابق نية الزبون ولهجته بدقة، وأجب بدارجة جزائرية عفوية ومحترمة (لا فصحى معربة)، والتزم بالأسعار والولايات بدون أي هلوسة.`;
 
       document.getElementById('agentPromptBox').textContent = agentPrompt;
 
       let agentReply = '';
-      if (sent.label === 'NEGATIVE') {{
+      if (intentRes.intent === 'COMPLAINT' || sent.label === 'NEGATIVE') {{
         agentReply = 'سلام عليكم خويا، حقك علينا ونعتذروا منك بزاف بزاف! ما تقلقش روحك كامل، المشكل نحلوهولك درك. قولي برك واش صرا بالضبط ونبدلولك السلعة ولا نرجعولك دراهمك في الحين.';
+      }} else if (intentRes.intent === 'PRICE_INQUIRY') {{
+        const pDesc = priceText ? `السعر راهو ${{priceText}}` : 'السعر راهو مدروس وفي متناول الجميع';
+        agentReply = `وعليكم السلام خويا لعزيز! ${{pDesc}}. والتوصيل متوفر لجميع الولايات (خدمة سريعة للدار أو المكتب). تحب نسجلك طلبية؟`;
+      }} else if (intentRes.intent === 'AVAILABILITY_INQUIRY') {{
+        agentReply = 'أهلاً خويا! السلعة مازالت متوفرة والستوك كاين، بصح الكمية محدودة بزاف. إذا راك مهتم ابعثلي معلوماتك درك نريڤلوهالك قبل ما تفرى!';
       }} else {{
         const targetWilaya = wilayaName ? 'لـ ' + wilayaName : 'عندك';
         const targetPrice = priceText ? 'والحساب راهو ' + priceText : 'والسعر مضبوط';
