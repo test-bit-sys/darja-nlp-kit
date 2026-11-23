@@ -18,8 +18,16 @@ from .entities import (
     WilayaEntity,
     PaymentEntity,
     PriceEntity,
+    DeliveryEntity,
+    DeliveryModeEntity,
+    PhoneEntity,
 )
 from .dialect import detect_dialect, DialectResult
+from .agent import (
+    build_agent_context,
+    format_agent_system_prompt,
+    get_openai_tool_definitions,
+)
 
 __version__ = '1.0.0'
 
@@ -43,6 +51,12 @@ __all__ = [
     'WilayaEntity',
     'PaymentEntity',
     'PriceEntity',
+    'DeliveryEntity',
+    'DeliveryModeEntity',
+    'PhoneEntity',
     'detect_dialect',
     'DialectResult',
+    'build_agent_context',
+    'format_agent_system_prompt',
+    'get_openai_tool_definitions',
 ]

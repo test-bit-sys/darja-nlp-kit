@@ -23,12 +23,13 @@ Handles Arabic script, Arabizi (Latin transliteration with numbers), and French/
 ## Features
 
 - **Text Normalization** — Unify Arabic letter variants, strip diacritics, reduce character elongation
-- **Arabizi-to-Arabic Transliteration** — Smart conversion with French loanword detection, digraph mappings, and context-sensitive number handling
-- **Stopword Removal** — 500+ categorized Algerian Darja stopwords (Arabic script + Arabizi) with prefix stripping
+- **Arabizi-to-Arabic Transliteration** — Smart conversion with 220+ French loanwords whitelist, digraph mappings, and context-sensitive numbers
+- **Stopword Removal** — 545+ categorized Algerian Darja stopwords (Arabic script + Arabizi) with prefix stripping
 - **Tokenization** — Mixed-script tokenization with circumfix negation detection (ما...ش / ma...ch)
-- **Sentiment Analysis** — Score-based analysis with negation inversion, double negation, intensifier scaling, and code-switching support
-- **Algerian Geo & Entity Extraction** — Full coverage of all 69 wilayas (Law 26-06 reform), Algerian payment methods (BaridiMob, Edahabia, CCP, COD), and Darja prices
-- **Regional Dialect Identification** — Detect regional dialects: WEST (Oran), EAST (Constantine/Setif), CENTER (Algiers), SOUTH, or GENERAL_DARJA
+- **Sentiment Analysis** — Score-based analysis with negation inversion, double negation, intensifier scaling, and code-switching support (330+ entries)
+- **Algerian Geo, Logistics & Entity Extraction** — Full coverage of all 69 wilayas (Law 26-06 reform), carriers (Yalidine, ZR Express, Maystro, Procolis, EMS, Kazitour, Guepex), delivery mode (Stop Desk / Home Delivery), Algerian phone numbers, payments (BaridiMob, Edahabia, CCP, COD), and Darja colloquial prices (`زوج ملاين` $\rightarrow$ 20,000 DZD, `3 mlayen` $\rightarrow$ 30,000 DZD)
+- **Regional Dialect Identification** — Detect regional dialects: WEST (Oran/Tlemcen), EAST (Constantine/Setif), CENTER (Algiers/Blida), SOUTH, or GENERAL_DARJA
+- **AI Agent & LLM Middleware** — Pre-packaged grounding engine & dialect-mirroring system prompt generator for AI Agents (GPT-4o, Claude, Gemini, Llama) to deliver ultra-realistic human responses to Algerian customers without hallucination
 
 ## Installation
 
@@ -341,6 +342,34 @@ All linguistic data lives in `/data` and is synced to both packages:
 | `stopwords.json` | 500+ categorized regional and general stopwords |
 | `lexicon.json` | Algerian sentiment dictionary with 230+ phrases, idioms, negators, and intensifiers |
 | `arabizi_rules.json` | Transliteration rules, French whitelist, and irregular overrides |
+
+### `buildAgentContext(message)` & `formatAgentSystemPrompt(context)`
+
+Empower AI models (GPT-4o, Claude, Gemini, Llama) to act as realistic Algerian customer representatives. Extracts grounded facts (exact DZD price, confirmed Wilaya, delivery carrier, phone) and generates a dialect-mirroring, tone-calibrated system prompt with zero hallucinations.
+
+**Python:**
+```python
+from darja_nlp import build_agent_context, format_agent_system_prompt
+
+# 1. Build structured ground-truth context
+ctx = build_agent_context(
+    "salam khoya hab nchrih b 2 mlayen l Constantine b yalidine stop desk. num: 0661234567"
+)
+
+# 2. Generate enriched system prompt for LLM
+prompt = format_agent_system_prompt(ctx)
+# -> Ready to be sent to OpenAI / Anthropic / Gemini API
+```
+
+**TypeScript:**
+```typescript
+import { buildAgentContext, formatAgentSystemPrompt } from '@dz-open-suite/darja-nlp-kit';
+
+const ctx = buildAgentContext(
+  'salam khoya hab nchrih b 2 mlayen l Constantine b yalidine stop desk. num: 0661234567'
+);
+const prompt = formatAgentSystemPrompt(ctx);
+```
 
 ## Running Tests
 

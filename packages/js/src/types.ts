@@ -80,10 +80,33 @@ export interface PriceEntity {
   currency: 'DZD';
 }
 
+export type DeliveryCompanyType = 'YALIDINE' | 'ZR_EXPRESS' | 'MAYSTRO' | 'PROCOLIS' | 'EMS' | 'KAZITOUR' | 'GUEPEX';
+export type DeliveryModeType = 'STOP_DESK' | 'HOME_DELIVERY';
+
+export interface DeliveryEntity {
+  company: DeliveryCompanyType;
+  label: string;
+  matchedText: string;
+}
+
+export interface DeliveryModeEntity {
+  mode: DeliveryModeType;
+  label: string;
+  matchedText: string;
+}
+
+export interface PhoneEntity {
+  raw: string;
+  normalized: string;
+}
+
 export interface EntitiesResult {
   wilayas: WilayaEntity[];
   payments: PaymentEntity[];
   prices: PriceEntity[];
+  deliveries?: DeliveryEntity[];
+  deliveryMode?: DeliveryModeEntity | null;
+  phones?: PhoneEntity[];
 }
 
 export type DialectRegion = 'WEST' | 'EAST' | 'CENTER' | 'SOUTH' | 'GENERAL_DARJA';

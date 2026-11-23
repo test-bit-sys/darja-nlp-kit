@@ -378,6 +378,43 @@ def main() -> None:
       margin-bottom: 6px;
     }}
 
+    .carrier-tag {{
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #c084fc;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 6px;
+    }}
+
+    .mode-tag {{
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #4ade80;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 6px;
+    }}
+
+    .phone-tag {{
+      background: rgba(236, 72, 153, 0.15);
+      border: 1px solid rgba(236, 72, 153, 0.4);
+      color: #f472b6;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 6px;
+    }}
+
     /* Text display boxes */
     .code-box {{
       background: #0f172a;
@@ -496,7 +533,24 @@ def main() -> None:
         </div>
       </div>
 
-      <!-- 4. Dialect Card -->
+      <!-- 4. Logistics & Phone Card -->
+      <div class="card">
+        <div class="section-title">شركات التوصيل ونمط الاستلام والهاتف (Logistics & Contact)</div>
+        <div style="margin-bottom: 10px;">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">شركة التوصيل:</div>
+          <div id="deliveriesBox"></div>
+        </div>
+        <div style="margin-bottom: 10px;">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">نمط التوصيل:</div>
+          <div id="deliveryModeBox"></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">أرقام الهاتف المرصودة:</div>
+          <div id="phonesBox"></div>
+        </div>
+      </div>
+
+      <!-- 5. Dialect Card -->
       <div class="card">
         <div class="section-title">كشف اللهجة الجهوية (Regional Dialect)</div>
         <div style="margin-bottom: 14px;">
@@ -506,7 +560,7 @@ def main() -> None:
         <div id="dialectMarkers" class="tokens-pill-box"></div>
       </div>
 
-      <!-- 5. Arabizi & Normalization -->
+      <!-- 6. Arabizi & Normalization -->
       <div class="card" style="grid-column: 1 / -1;">
         <div class="section-title">معالجة الأرابيزي والتطبيع (Arabizi Transliteration & Normalizer)</div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
@@ -521,6 +575,24 @@ def main() -> None:
           <div>
             <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">النص بعد تصفية الكلمات الشائعة (Stopwords Filtered):</div>
             <div id="stopwordsBox" class="code-box"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. AI Agent Customer Assistant Simulator -->
+      <div class="card" style="grid-column: 1 / -1; border-color: rgba(59, 130, 246, 0.4); background: radial-gradient(circle at top left, #0f1c3f, #111827);">
+        <div class="section-title" style="color: #60a5fa;">🤖 محاكي وكيل الذكاء الاصطناعي الجزائري (AI Agent Assistant Simulator)</div>
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 14px;">
+          كيف يستقبل نموذج الذكاء الاصطناعي (مثل GPT-4o / Claude / Gemini) هذا الزبون عبر <strong>darja-nlp-kit</strong>، وكيف يطابق لهجته بدقة وحقائق مؤكدة دون أي هلوسة:
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+          <div>
+            <div style="font-size: 12px; color: #93c5fd; font-weight: 700; margin-bottom: 6px;">🧠 الـ System Prompt المحقون للذكاء الاصطناعي:</div>
+            <pre id="agentPromptBox" style="background:#080c14; border:1px solid #1e293b; border-radius:10px; padding:12px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#cbd5e1; max-height:170px; overflow-y:auto; white-space:pre-wrap;"></pre>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: #34d399; font-weight: 700; margin-bottom: 6px;">💬 رد الذكاء الاصطناعي البشري الواقعي (AI Agent Response):</div>
+            <div id="agentReplyBox" style="background:#080c14; border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:16px; font-size:15px; color:#f0fdf4; line-height:1.7; min-height:80px; display:flex; align-items:center;"></div>
           </div>
         </div>
       </div>
@@ -798,21 +870,69 @@ def main() -> None:
         if (u === 'الف' || u === 'ألف' || u === 'alf') val *= 1000;
         prices.push({{ raw: pm[0].trim(), amount: val }});
       }}
+
+      // Dynamic millions (e.g. 2 mlayen, 3 ملاين)
+      const dynMilReg = /(?:^|\\s|[^\\w\\u0600-\\u06FF])(\\d+(?:[.,]\\d+)?)\\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)(?=$|\\s|[^\\w\\u0600-\\u06FF])/gi;
+      let dmDyn;
+      while ((dmDyn = dynMilReg.exec(text)) !== null) {{
+        const val = parseFloat(dmDyn[1].replace(',', '.')) * 10000;
+        prices.push({{ raw: dmDyn[0].trim(), amount: val }});
+      }}
+
       const darjaAmounts = [
         {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(مية\\s*الف|100\\s*الف|mya|myat\\s*alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 1000 }},
         {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(ميتين\\s*الف|200\\s*الف|mitin\\s*alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 2000 }},
         {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(خمسمية\\s*الف|500\\s*الف|khams\\s*mya|500\\s*alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 5000 }},
         {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(مليون|mlyon|1\\s*mlyon)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 10000 }},
-        {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(زوج\\s*ملاين|2\\s*mlyon|zoudj\\s*mlayen)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 20000 }},
-        {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(خمس\\s*ملاين|5\\s*mlyon|khams\\s*mlayen)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 50000 }},
-        {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(عشر\\s*ملاين|10\\s*mlyon|3achr\\s*mlayen)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 100000 }},
+        {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(زوج\\s*ملاين|زوج\\s*ملايين|zoudj\\s*mlayen|zouj\\s*mlayen)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 20000 }},
+        {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(خمس\\s*ملاين|khams\\s*mlayen)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 50000 }},
+        {{ reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(عشر\\s*ملاين|3achr\\s*mlayen)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i, val: 100000 }},
       ];
       for (const item of darjaAmounts) {{
         const dm = text.match(item.reg);
         if (dm) prices.push({{ raw: dm[0].trim(), amount: item.val }});
       }}
 
-      return {{ wilayas, payments, prices }};
+      // Deliveries
+      const deliveries = [];
+      const deliveryPatterns = [
+        {{ company: 'YALIDINE', label: 'Yalidine Express (ياليدين)', reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(yalidine|yalidin|ياليدين)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i }},
+        {{ company: 'ZR_EXPRESS', label: 'ZR Express (زد ار اكسبرس)', reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(zr\\s*express|zr|زد\\s*ار\\s*اكسبرس|زد\\s*ار)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i }},
+        {{ company: 'MAYSTRO', label: 'Maystro Delivery (مايسترو)', reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(maystro\\s*delivery|maystro|مايسترو)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i }},
+        {{ company: 'PROCOLIS', label: 'Procolis (بروكولي)', reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(procolis|pro\\s*colis|بروكولي|بروكوليس)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i }},
+        {{ company: 'EMS', label: 'EMS Algérie Poste (البريد السريع)', reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(ems|ems\\s*algerie|البريد\\s*السريع)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i }},
+        {{ company: 'KAZITOUR', label: 'Kazitour Express (كازيتور)', reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(kazitour|kazi\\s*tour|كازيتور)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i }},
+        {{ company: 'GUEPEX', label: 'Guepex Express (قيباكس)', reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(guepex|قيباكس)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i }},
+      ];
+      for (const d of deliveryPatterns) {{
+        const m = text.match(d.reg);
+        if (m) deliveries.push({{ company: d.company, label: d.label, matched: m[0].trim() }});
+      }}
+
+      // Delivery Mode
+      let deliveryMode = null;
+      const modePatterns = [
+        {{ mode: 'STOP_DESK', label: 'Stop Desk (استلام من المكتب)', reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(stop\\s*desk|stopdesk|سطوب\\s*ديسك|ستوب\\s*ديسك|المكتب|فالبيرو|في\\s*البيرو|agence)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i }},
+        {{ mode: 'HOME_DELIVERY', label: 'Home Delivery (توصيل للمنزل)', reg: /(?:^|\\s|[^\\w\\u0600-\\u06FF])(a\\s*domicile|[aà]\\s*domicile|للدار|لباب\\s*الدار|توصيل\\s*للمنزل|توصيل\\s*للدار|فالدار)(?=$|\\s|[^\\w\\u0600-\\u06FF])/i }},
+      ];
+      for (const dm of modePatterns) {{
+        const m = text.match(dm.reg);
+        if (m) {{ deliveryMode = dm.label; break; }}
+      }}
+
+      // Phones
+      const phones = [];
+      const phoneReg = /(?:^|\\s|[^\\w\\u0600-\\u06FF])((?:\\+213|00213|0)\\s*(?:[5-7]|2[0-9]|3[0-9]|4[0-9])(?:[\\s.-]?\\d){{8}})(?=$|\\s|[^\\w\\u0600-\\u06FF])/gi;
+      let phMatch;
+      while ((phMatch = phoneReg.exec(text)) !== null) {{
+        let raw = phMatch[1].trim();
+        let norm = raw.replace(/[\\s.-]/g, '');
+        if (norm.startsWith('00213')) norm = '0' + norm.slice(5);
+        else if (norm.startsWith('+213')) norm = '0' + norm.slice(4);
+        phones.push({{ raw, normalized: norm }});
+      }}
+
+      return {{ wilayas, payments, prices, deliveries, deliveryMode, phones }};
     }}
 
     function detectDialect(text) {{
@@ -847,10 +967,10 @@ def main() -> None:
     const charCount = document.getElementById('charCount');
 
     const SAMPLES = [
-      "السلعة هاااااايلة بزاااااف و الخدمة فور، يعطيك الصحة! توصيل لبوسعادة و نخلصك بـ baridimob السعر زوج ملاين",
-      "السلعة ماشي عيانة بصح التوصيل روطار و السيرفيس ماشي شباب قاع، ما ننصحكمش",
-      "produit mli7 bzaf walakin livraison l wahran rotar chwiya, prix 4500 DA w khlass b edahabia",
-      "شوالا راك باغي خوية غايا درك؟ كاين توصيل للسانية ولاية 31 و نخلصك كاش عند الاستلام",
+      "salam khoya rani hab nchrih b 2 mlayen l Constantine b yalidine stop desk. num ta3i: 0661234567",
+      "السلعة هاااااايلة بزاااااف و الخدمة فور، يعطيك الصحة! توصيل لبوسعادة ياليدين ستوب ديسك كلمني في 0661234567",
+      "khedma 3ayana w sil3a khorda wlah ma thechmou 7chitohali w l colis ja mfetchech!",
+      "شوالا راك باغي خوية غايا درك؟ كاين توصيل للسانية ولاية 31 بـ zr express للدار و نخلصك كاش عند الاستلام",
       "واشنهي هادا قداش يدير ياسر باهي سيرتا نخلصك كاش بـ مية الف"
     ];
 
@@ -934,6 +1054,35 @@ def main() -> None:
         pricesBox.innerHTML = '<span class="empty-state">لا توجد أسعار مرصودة</span>';
       }}
 
+      // Logistics & Phones
+      const deliveriesBox = document.getElementById('deliveriesBox');
+      const deliveryModeBox = document.getElementById('deliveryModeBox');
+      const phonesBox = document.getElementById('phonesBox');
+
+      deliveriesBox.innerHTML = '';
+      if (entities.deliveries && entities.deliveries.length > 0) {{
+        entities.deliveries.forEach(d => {{
+          deliveriesBox.innerHTML += `<span class="carrier-tag">${{d.label}}</span> `;
+        }});
+      }} else {{
+        deliveriesBox.innerHTML = '<span class="empty-state">لم تحدد شركة توصيل</span>';
+      }}
+
+      if (entities.deliveryMode) {{
+        deliveryModeBox.innerHTML = `<span class="mode-tag">${{entities.deliveryMode}}</span>`;
+      }} else {{
+        deliveryModeBox.innerHTML = '<span class="empty-state">لم يحدد نمط التوصيل (مكتب / منزل)</span>';
+      }}
+
+      phonesBox.innerHTML = '';
+      if (entities.phones && entities.phones.length > 0) {{
+        entities.phones.forEach(ph => {{
+          phonesBox.innerHTML += `<span class="phone-tag">${{ph.raw}} &rarr; ${{ph.normalized}}</span> `;
+        }});
+      }} else {{
+        phonesBox.innerHTML = '<span class="empty-state">لا توجد أرقام هواتف مرصودة</span>';
+      }}
+
       // 3. Dialect
       const dialect = detectDialect(text);
       const dBadge = document.getElementById('dialectBadge');
@@ -956,9 +1105,48 @@ def main() -> None:
       }}
 
       // 4. Arabizi, Normalization, Stopwords
-      document.getElementById('arabiziBox').textContent = arabiziToArabic(text) || '-';
+      const arabiziClean = arabiziToArabic(text);
+      document.getElementById('arabiziBox').textContent = arabiziClean || '-';
       document.getElementById('normalizedBox').textContent = normalize(text) || '-';
       document.getElementById('stopwordsBox').textContent = removeStopwords(text) || '-';
+
+      // 5. AI Agent Simulator
+      const wilayaName = entities.wilayas.length > 0 ? entities.wilayas[0].name_ar + ' (' + entities.wilayas[0].code_str + ')' : null;
+      const carrierName = entities.deliveries && entities.deliveries.length > 0 ? entities.deliveries[0].label : null;
+      const priceText = entities.prices.length > 0 ? entities.prices[0].amount.toLocaleString() + ' دج' : null;
+
+      const agentPrompt = `[سياق الزبون المستخرج بدقة عبر darja-nlp-kit]:
+- الرسالة الأصلية: "${{text}}"
+- الترجمة التفسيرية: "${{arabiziClean}}"
+- اللهجة المستهدفة: ${{dialect.region}} (${{regionNames[dialect.region] || 'عامة'}})
+- المزاج والشعور: ${{sent.label}} (الدرجة: ${{sent.score.toFixed(2)}})
+- الولاية المؤكدة: ${{wilayaName || 'غير محددة'}}
+- شركة التوصيل: ${{carrierName || 'غير محددة'}}
+- نمط التوصيل: ${{entities.deliveryMode || 'غير محدد'}}
+- المبالغ بالدينار: ${{priceText || 'غير محددة'}}
+- وسائل الدفع: ${{entities.payments.length > 0 ? entities.payments.map(p => p.label).join(', ') : 'غير محددة'}}
+
+[التعليمات]: طابق لهجة الزبون ومزاجه، وأجب بدارجة جزائرية عفوية ومحترمة (لا فصحى معربة)، والتزم بالأسعار والولايات بدون هلوسة.`;
+
+      document.getElementById('agentPromptBox').textContent = agentPrompt;
+
+      let agentReply = '';
+      if (sent.label === 'NEGATIVE') {{
+        agentReply = 'سلام عليكم خويا، حقك علينا ونعتذروا منك بزاف بزاف! ما تقلقش روحك كامل، المشكل نحلوهولك درك. قولي برك واش صرا بالضبط ونبدلولك السلعة ولا نرجعولك دراهمك في الحين.';
+      }} else {{
+        const targetWilaya = wilayaName ? 'لـ ' + wilayaName : 'عندك';
+        const targetPrice = priceText ? 'والحساب راهو ' + priceText : 'والسعر مضبوط';
+        const targetCarrier = carrierName ? 'مع ' + carrierName : 'مع شركة التوصيل';
+
+        if (dialect.region === 'WEST') {{
+          agentReply = `وعليكم السلام خويا لعزيز! مرحبا بيك، السلعة راها كاينة ونوصلوها ${{targetWilaya}} ${{targetCarrier}}. ${{targetPrice}}. تقدر تفيرسي في BaridiMob ولا تخلص كاش كي توصلك السلعة غايا!`;
+        }} else if (dialect.region === 'EAST') {{
+          agentReply = `أهلاً وسهلاً بيك خويا ربي يحفظك! سلعة لوز وضرك نوجدوهالك ${{targetWilaya}} ${{targetCarrier}}، ${{targetPrice}}. تقدر تخلص بالـ BaridiMob ولا تكاشي كي يوصلهالك الليفرور، عيشك!`;
+        }} else {{
+          agentReply = `سلام خويا، مرحبا بيك عندنا! ما كاش مشكل خلاص، السلعة متوفرة ونوصلوها ${{targetWilaya}} ${{targetCarrier}}، ${{targetPrice}}. بالنسبة للدفع تحب بريدي موب ولا كاش كي تلحقك السلعة للباب؟`;
+        }}
+      }}
+      document.getElementById('agentReplyBox').textContent = agentReply;
     }}
 
     inputArea.addEventListener('input', processText);

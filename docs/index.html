@@ -355,6 +355,43 @@
       margin-bottom: 6px;
     }
 
+    .carrier-tag {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #c084fc;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+
+    .mode-tag {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #4ade80;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+
+    .phone-tag {
+      background: rgba(236, 72, 153, 0.15);
+      border: 1px solid rgba(236, 72, 153, 0.4);
+      color: #f472b6;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+
     /* Text display boxes */
     .code-box {
       background: #0f172a;
@@ -473,7 +510,24 @@
         </div>
       </div>
 
-      <!-- 4. Dialect Card -->
+      <!-- 4. Logistics & Phone Card -->
+      <div class="card">
+        <div class="section-title">شركات التوصيل ونمط الاستلام والهاتف (Logistics & Contact)</div>
+        <div style="margin-bottom: 10px;">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">شركة التوصيل:</div>
+          <div id="deliveriesBox"></div>
+        </div>
+        <div style="margin-bottom: 10px;">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">نمط التوصيل:</div>
+          <div id="deliveryModeBox"></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">أرقام الهاتف المرصودة:</div>
+          <div id="phonesBox"></div>
+        </div>
+      </div>
+
+      <!-- 5. Dialect Card -->
       <div class="card">
         <div class="section-title">كشف اللهجة الجهوية (Regional Dialect)</div>
         <div style="margin-bottom: 14px;">
@@ -483,7 +537,7 @@
         <div id="dialectMarkers" class="tokens-pill-box"></div>
       </div>
 
-      <!-- 5. Arabizi & Normalization -->
+      <!-- 6. Arabizi & Normalization -->
       <div class="card" style="grid-column: 1 / -1;">
         <div class="section-title">معالجة الأرابيزي والتطبيع (Arabizi Transliteration & Normalizer)</div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
@@ -501,6 +555,24 @@
           </div>
         </div>
       </div>
+
+      <!-- 7. AI Agent Customer Assistant Simulator -->
+      <div class="card" style="grid-column: 1 / -1; border-color: rgba(59, 130, 246, 0.4); background: radial-gradient(circle at top left, #0f1c3f, #111827);">
+        <div class="section-title" style="color: #60a5fa;">🤖 محاكي وكيل الذكاء الاصطناعي الجزائري (AI Agent Assistant Simulator)</div>
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 14px;">
+          كيف يستقبل نموذج الذكاء الاصطناعي (مثل GPT-4o / Claude / Gemini) هذا الزبون عبر <strong>darja-nlp-kit</strong>، وكيف يطابق لهجته بدقة وحقائق مؤكدة دون أي هلوسة:
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+          <div>
+            <div style="font-size: 12px; color: #93c5fd; font-weight: 700; margin-bottom: 6px;">🧠 الـ System Prompt المحقون للذكاء الاصطناعي:</div>
+            <pre id="agentPromptBox" style="background:#080c14; border:1px solid #1e293b; border-radius:10px; padding:12px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#cbd5e1; max-height:170px; overflow-y:auto; white-space:pre-wrap;"></pre>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: #34d399; font-weight: 700; margin-bottom: 6px;">💬 رد الذكاء الاصطناعي البشري الواقعي (AI Agent Response):</div>
+            <div id="agentReplyBox" style="background:#080c14; border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:16px; font-size:15px; color:#f0fdf4; line-height:1.7; min-height:80px; display:flex; align-items:center;"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -511,9 +583,9 @@
 
   <script>
     // Embedded Linguistic Datasets
-    const STOPWORDS_DATA = {"prepositions": ["في", "من", "على", "عند", "مع", "تاع", "نتاع", "ديال", "حتى", "بين", "قبل", "بعد", "فوق", "تحت", "قدام", "وراء", "بلا", "حول", "عن", "خلاف", "قرب", "جنب", "وسط", "ضد", "عوض", "كيف", "بحال", "fi", "men", "3la", "3and", "m3a", "ta3", "nta3", "dyal", "hta", "bin", "9bal", "b3d", "fo9", "t7t", "9dam", "wra", "bla", "7awl", "3n", "9rab", "jnab", "wst", "b7al"], "pronouns": ["أنا", "نتا", "نتي", "هو", "هي", "حنا", "نتوما", "هوما", "ياه", "ياها", "ياهم", "ياك", "ياكم", "يانا", "ني", "ك", "و", "ها", "نا", "كم", "هم", "ana", "nta", "nti", "hwa", "hya", "hia", "7na", "ntouma", "houma", "yah", "yaha", "yahom", "yak", "yakom", "yana"], "possessives": ["راني", "راك", "راكي", "راه", "راهي", "رانا", "راكم", "راهم", "تاعي", "تاعك", "تاعو", "تاعها", "تاعنا", "تاعكم", "تاعهم", "نتاعي", "نتاعك", "نتاعو", "نتاعها", "نتاعنا", "نتاعكم", "نتاعهم", "rani", "rak", "raki", "rah", "rahi", "rana", "rakom", "rahom", "ta3i", "ta3ek", "ta3o", "ta3ha", "ta3na", "ta3kom", "ta3hom", "nta3i", "nta3ek", "nta3o", "nta3ha", "nta3na", "nta3kom", "nta3hom"], "demonstratives": ["هاد", "هادا", "هادي", "هادو", "هداك", "هديك", "هدوك", "ذاك", "ذيك", "ذوك", "هذا", "هذي", "هذو", "had", "hada", "hadi", "hadou", "hdak", "hdik", "hdouk", "hda", "hdo", "dak", "dik", "douk"], "question_words": ["واش", "علاش", "كيفاش", "وقتاش", "وين", "شكون", "شحال", "كيفاه", "واشمن", "واشنو", "علاه", "فاش", "فين", "منين", "آش", "شنو", "قداش", "علاشنو", "آشمن", "wesh", "wach", "3lah", "3lach", "kifach", "we9tach", "win", "chkoun", "ch7al", "kifah", "wachmen", "fach", "fin", "mnin", "ach", "chnou", "9dach", "achmen", "واشنهي", "شاكاين", "شوالا", "شا", "علاشنهي", "كفاه", "chwala", "chakayn"], "conjunctions": ["و", "ولا", "أو", "بصح", "لاكن", "حيث", "باش", "بلي", "كي", "ملي", "إلى", "لوكان", "كيما", "خاطر", "على خاطر", "بالاك", "يمكن", "إذا", "واخا", "مع ذلك", "w", "wla", "aw", "bsa7", "lakin", "7it", "bach", "bli", "ki", "mli", "ila", "loukan", "kima", "khatir", "3la khatir", "balak", "ymkn", "ida", "wakha"], "adverbs": ["برك", "زعما", "غير", "يعني", "هكدا", "هكاك", "دروك", "توا", "غدوا", "لبارح", "دايما", "أبدا", "بكري", "مازال", "خلاص", "ياسر", "بزاف", "واعر", "شوية", "قاع", "ديجا", "زربة", "الزربة", "بالزربة", "هنا", "هناك", "لهيه", "فوت", "طول", "ساعات", "ديما", "زادا", "تاني", "برا", "داخل", "نهار", "كامل", "حوايج", "bark", "z3ma", "ghir", "y3ni", "hakda", "hakak", "dork", "tawa", "ghdwa", "lbar7", "dayma", "abadan", "bkri", "mazal", "khlas", "yaser", "bzaf", "wa3r", "chwiya", "ga3", "dija", "zarba", "bzarba", "hna", "hnak", "lhih", "foot", "tool", "sa3at", "dima", "zada", "tani", "bra", "dakhl", "غايا", "باغي", "حرز", "راك عاقل", "درك", "ضرك", "زي", "حكاية", "هكداك", "هكا", "روحي", "ڨاع", "حتة", "يخي", "شراكم", "chouf", "ghaya", "baghi", "drk", "daba"], "negation": ["ما", "ماشي", "مشي", "والو", "لا", "ماكانش", "ماعندوش", "ماراهش", "مابقاش", "ماقدرش", "ماحبش", "ماعرفش", "مازالش", "مافهمتش", "ماعجبنيش", "ماجاش", "ma", "machi", "walou", "la", "makanch", "ma3andouch", "marahch", "mab9ach", "ma9darch", "ma7abch", "ma3rafch", "mazalch", "mafhamtch", "ma3jabtnich", "majach"], "auxiliary_verbs": ["كان", "يكون", "كانت", "كانو", "راح", "يروح", "جا", "يجي", "دار", "يدير", "قال", "يقول", "عرف", "يعرف", "حب", "يحب", "بغا", "يبغي", "خلا", "يخلي", "لقا", "يلقى", "ولا", "يولي", "بان", "يبان", "بدا", "يبدا", "كمل", "يكمل", "وصل", "يوصل", "kan", "ykoun", "kant", "kanou", "ra7", "yrou7", "ja", "yji", "dar", "ydir", "9al", "y9oul", "3raf", "y3raf", "7ab", "y7ab", "bgha", "ybghi", "khla", "ykhli", "l9a", "yl9a", "wla", "ywli", "ban", "yban", "bda", "ybda", "kml", "ykml", "wsl", "ywsl"], "relative_pronouns": ["لي", "الي", "اللي", "متاع", "وين ما", "فين ما", "كل ما", "اش ما", "كيف ما", "li", "elli", "alli", "mta3", "win ma", "fin ma", "kol ma", "ach ma", "kif ma"], "time_expressions": ["دروك", "توا", "غدا", "لبارح", "ليوم", "الليلة", "الصباح", "العشية", "من بعد", "من قبل", "بكرة", "هادا الوقت", "ديما", "ساعات", "مرات", "نهار", "صباح", "مسا", "dork", "tawa", "ghda", "lbar7", "lyoum", "llila", "sba7", "l3chiya", "mn b3d", "mn 9bal", "bokra", "had lw9t", "dima", "sa3at", "mrat", "nhar", "sba7", "msa"], "discourse_markers": ["يعني", "والله", "بصح", "نورمال", "زعما", "هكدا", "واه", "ايه", "هيه", "طيب", "خلاص", "يلا", "هيا", "اسمع", "شوف", "عاد", "اوك", "صح", "فهمت", "ايوا", "اهيه", "اها", "يخي", "دونك", "y3ni", "wallah", "bsa7", "normal", "z3ma", "hakda", "wah", "ayeh", "hih", "tayeb", "khlas", "yala", "hya", "sma3", "chouf", "3ad", "ok", "sa7", "fhamt", "iwa", "ahih", "aha", "yakhi", "donc"]};
-    const LEXICON_DATA = {"positive": {"هايل": 0.9, "مليح": 0.7, "فور": 0.85, "ثقة": 0.85, "نقي": 0.75, "يعطيك الصحة": 0.95, "ممتاز": 0.95, "زين": 0.75, "واعر": 0.8, "خطير": 0.85, "تحفة": 0.9, "قنبلة": 0.85, "صحيح": 0.7, "مضبوط": 0.7, "تمام": 0.75, "باهي": 0.7, "لاباس": 0.5, "ناجح": 0.75, "فرحان": 0.8, "معجبني": 0.8, "عجبني": 0.8, "حابو": 0.7, "حبيتو": 0.75, "يجنن": 0.9, "خرافي": 0.85, "مبدع": 0.8, "محترم": 0.75, "ولاد الناس": 0.8, "يستاهل": 0.75, "نظيف": 0.65, "جديد": 0.5, "ساهل": 0.6, "سريع": 0.65, "جميل": 0.75, "حلو": 0.7, "زيرو مشاكل": 0.9, "قوي": 0.7, "متين": 0.7, "راقي": 0.8, "يهبل": 0.85, "بنين": 0.75, "شابة": 0.7, "يرقد": 0.65, "صاي": 0.6, "كلاس": 0.85, "عامر": 0.6, "مكتوب بالزين": 0.8, "يسلمو": 0.85, "بارك الله فيك": 0.9, "top": 0.8, "super": 0.85, "bien": 0.65, "parfait": 0.9, "excellent": 0.95, "genial": 0.85, "magnifique": 0.9, "formidable": 0.85, "impeccable": 0.9, "merci": 0.6, "bravo": 0.8, "cool": 0.7, "nickel": 0.8, "hayel": 0.9, "mli7": 0.7, "four": 0.85, "t9a": 0.85, "n9i": 0.75, "wa3r": 0.8, "5atir": 0.85, "t7fa": 0.9, "9onbla": 0.85, "bahi": 0.7, "labas": 0.5, "m3ajbni": 0.8, "3ajbni": 0.8, "yjnn": 0.9, "5arafi": 0.85, "mo7taram": 0.75, "yhbl": 0.85, "bnin": 0.75, "chaba": 0.7, "class": 0.85, "yslmou": 0.85, "سلعة لوز": 0.95, "طيارة": 0.9, "قوة": 0.9, "هبال": 0.9, "طوب": 0.9, "متقون": 0.85, "لوريجينال": 0.9, "ما شاء الله": 0.95, "تبارك الله": 0.95, "الله يبارك": 0.95, "شبان": 0.8, "ما عندي ما نقول": 0.95, "حاجة نقية": 0.85, "يرحم والديكم": 0.9, "ربي يبارك": 0.95, "سلعة شابة": 0.85, "قنين": 0.8, "طوب دي طوب": 0.95, "سيرفيس شباب": 0.85, "مخدوم مليح": 0.85, "رجال ثقة": 0.9, "في القمة": 0.95, "سلعة اوريجينال": 0.9, "top du top": 0.95, "original": 0.85, "sl3a louz": 0.95, "9wa": 0.9, "hbal": 0.9, "tayara": 0.9, "fi l9ima": 0.95, "chbab": 0.8, "rabi ybarek": 0.95, "lah ybarek": 0.95}, "negative": {"عيان": -0.85, "ارناك": -1.0, "غالي": -0.5, "روطار": -0.6, "مكسر": -0.8, "خاسر": -0.8, "كاذب": -0.9, "نصاب": -1.0, "حقير": -0.95, "زبالة": -0.95, "خايب": -0.85, "خامج": -0.85, "مقلق": -0.7, "متعب": -0.6, "مريض": -0.6, "كره": -0.9, "كرهت": -0.9, "ماعجبنيش": -0.8, "ماحبيتوش": -0.75, "صعيب": -0.55, "مشكل": -0.7, "مشكلة": -0.7, "خسارة": -0.75, "ضيع": -0.7, "فاشل": -0.85, "مهزول": -0.7, "بايخ": -0.75, "تافه": -0.85, "حشيان": -0.6, "معطل": -0.65, "خربان": -0.8, "مخرب": -0.8, "كاسر": -0.65, "مفسد": -0.75, "منكسر": -0.7, "رخيص": -0.4, "خايف": -0.5, "زعفان": -0.7, "طفران": -0.5, "مللت": -0.6, "حقرة": -0.9, "حگرة": -0.9, "ما يسواش": -0.85, "والو": -0.6, "صفر": -0.7, "خيبة": -0.8, "يقرف": -0.85, "مقرف": -0.85, "حرام": -0.8, "عيب": -0.7, "arnaque": -1.0, "nul": -0.85, "mauvais": -0.8, "probleme": -0.65, "retard": -0.6, "cher": -0.5, "casse": -0.8, "horrible": -0.9, "pire": -0.95, "decu": -0.8, "catastrophe": -0.95, "defaut": -0.6, "3ayan": -0.85, "arnac": -1.0, "ghali": -0.5, "rotar": -0.6, "mksr": -0.8, "5asr": -0.8, "5ayb": -0.85, "5amj": -0.85, "m9l9": -0.7, "fachl": -0.85, "bay5": -0.75, "5rban": -0.8, "z3fan": -0.7, "y9rf": -0.85, "m9rf": -0.85, "ma yswach": -0.85, "خرطي": -0.9, "حشوها لي": -0.95, "حشوة": -0.9, "خردة": -0.9, "سلعة شينوا": -0.85, "تبزنيس": -0.8, "سرقة عيني عينك": -1.0, "مقلد": -0.85, "مغشوش": -0.95, "كوارث": -0.9, "تعمار شكارة": -0.85, "مبهدل": -0.8, "ما تسواش": -0.85, "طمع": -0.7, "ما ننصح حتى واحد": -0.95, "سلعة تعيفة": -0.85, "فضيحة": -0.9, "لعب دراري": -0.8, "نصب واحتيال": -1.0, "حرام عليكم": -0.9, "حسبي الله": -0.85, "تخلاط": -0.7, "بلا فايدة": -0.75, "خسارة دراهم": -0.9, "حشاوها لي": -0.95, "سلعة ميتة": -0.8, "khoroti": -0.9, "khorti": -0.9, "khorda": -0.9, "sl3a chinwa": -0.85, "tbaznis": -0.8, "ser9a": -1.0, "7achwa": -0.9, "7chawhali": -0.95, "fdi7a": -0.9, "khasart drahem": -0.9, "chkara": -0.8, "na9es bzaf": -0.75}, "negators": ["ما", "ماشي", "مشي", "والو", "غير", "بلا", "عمرو", "عمري", "عمرها", "عمرهم", "ma", "machi", "mchi", "walou", "ghir", "bla", "3omri", "3omro", "3omrha", "3omrhom"], "intensifiers": {"بزاف": 1.5, "فور": 1.4, "قاع": 1.5, "ڨاع": 1.5, "ياسر": 1.4, "واعر": 1.3, "هايل": 1.3, "خلاص": 1.2, "كثير": 1.3, "جدا": 1.4, "خطير": 1.3, "حتى": 1.2, "باطل": 1.3, "bzaf": 1.5, "bzzf": 1.5, "ga3": 1.5, "yaser": 1.4, "wa3r": 1.3, "5atir": 1.3, "barcha": 1.4, "trop": 1.4, "tres": 1.3, "vraiment": 1.3, "كارثة": 1.5, "قمة": 1.4, "ميت": 1.3, "بالبزاف": 1.5, "طوب": 1.4, "grave": 1.4, "hyper": 1.4, "mega": 1.4}};
-    const ARABIZI_RULES = {"numbers": {"2": "ا", "3": "ع", "5": "خ", "6": "ط", "7": "ح", "8": "غ", "9": "ق"}, "digraphs": {"ch": "ش", "sh": "ش", "kh": "خ", "gh": "غ", "th": "ث", "dh": "ذ", "ou": "و", "aa": "ا", "ii": "ي", "oo": "و", "ee": "ي", "dj": "دج", "tj": "تج", "ts": "تس"}, "singles": {"a": "ا", "b": "ب", "t": "ت", "j": "ج", "h": "ح", "d": "د", "r": "ر", "z": "ز", "s": "س", "c": "ك", "f": "ف", "q": "ق", "k": "ك", "l": "ل", "m": "م", "n": "ن", "w": "و", "y": "ي", "i": "ي", "u": "و", "o": "و", "e": "ا", "g": "ق", "p": "ب", "v": "ف", "x": "كس"}, "french_whitelist": ["livraison", "produit", "prix", "commande", "client", "merci", "bonjour", "probleme", "disponible", "qualite", "service", "garantie", "facture", "remboursement", "paiement", "carte", "retour", "echange", "stock", "promotion", "solde", "offre", "magasin", "boutique", "achat", "vente", "colis", "expedition", "adresse", "telephone", "numero", "message", "reponse", "information", "description", "photo", "couleur", "taille", "modele", "marque", "original", "copie", "faux", "vrai", "nouveau", "ancien", "petit", "grand", "moyen", "normal", "super", "extra", "special", "gratuit", "payant", "cher", "moins", "plus", "tres", "trop", "bien", "mal", "bon", "mauvais", "mieux", "pire", "parfait", "nul", "top", "excellent", "genial", "horrible", "catastrophe", "arnaque", "retard", "decu", "merveilleux", "magnifique", "formidable", "impeccable", "nickel", "bravo", "cool", "casse", "defaut", "abime", "neuf", "occasion", "reconditionne", "emballage", "carton", "plastique", "fragile", "lourd", "leger", "rapide", "lent", "long", "court", "simple", "complique", "difficile", "facile", "possible", "impossible", "urgent", "important", "necessaire", "inutile", "pratique", "utile", "portable", "tablette", "ordinateur", "accessoire", "chargeur", "ecran", "batterie", "cable", "wifi", "internet", "site", "page", "compte", "profil", "inscription", "connexion", "mot de passe", "application", "version", "mise a jour", "installation", "configuration", "parametres", "options", "contact", "support", "aide", "question", "solution", "recommander", "conseiller", "suggerer", "proposer", "confirmer", "annuler", "modifier", "supprimer", "ajouter", "envoyer", "recevoir", "attendre", "verifier", "tester", "comparer", "choisir", "commander", "payer", "acheter", "vendre", "echanger", "retourner", "rembourser", "contacter", "chambre", "douche", "marche", "marché", "bouton", "choix", "touche", "coucher", "chercher", "chauffeur", "chouette", "bouchon", "recherche", "brochure", "fourchette", "gauche", "mouche", "couche", "mouchoir", "deboucher", "ouchette", "boucherie", "oucherie", "richesse", "douchette", "accouchement", "ouchoir", "ouverture", "fourniture", "couchage", "ouchon"], "french_suffixes": ["tion", "sion", "ment", "eur", "eux", "ique", "able", "ible", "iste", "isme", "ance", "ence", "oire", "aire", "elle", "ette", "ille", "aille", "ouille", "ure", "age", "ier", "iere"], "overrides": {"slm": "سلام", "salam": "سلام", "cv": "صافا", "svp": "من فضلك", "stp": "من فضلك", "nchallah": "ان شاء الله", "inchallah": "ان شاء الله", "nshallah": "ان شاء الله", "hamdoulah": "الحمد لله", "hamdoullah": "الحمد لله", "lhamdoulah": "الحمد لله", "alhamdoulillah": "الحمد لله", "bismillah": "بسم الله", "bsmllah": "بسم الله", "mchallah": "ما شاء الله", "machallah": "ما شاء الله", "mashallah": "ما شاء الله", "sba7lkhir": "صباح الخير", "sba7 lkhir": "صباح الخير", "msalkhir": "مساء الخير", "msa lkhir": "مساء الخير", "bslama": "بالسلامة", "bsslama": "بالسلامة", "sahit": "صحيت", "ya3tik sa77a": "يعطيك الصحة", "y3tik sa77a": "يعطيك الصحة", "barklahfik": "بارك الله فيك", "barkallahfik": "بارك الله فيك", "tbarkllah": "تبارك الله", "tbarkallah": "تبارك الله", "starfallah": "استغفر الله", "staghfirallah": "استغفر الله", "dz": "الجزائر", "dzayer": "الجزائر", "dzair": "الجزائر", "bladi": "بلادي", "labas": "لاباس", "lbs": "لاباس", "wlh": "والله", "wallah": "والله", "mdr": "يضحك", "ptdr": "يضحك بزاف", "hhh": "هههه", "hhhh": "هههه", "khoya": "خويا", "khouya": "خويا", "kho": "خويا", "sahbi": "صاحبي", "s7bi": "صاحبي", "2ana": "انا"}};
+    const STOPWORDS_DATA = {"prepositions": ["في", "من", "على", "عند", "مع", "تاع", "نتاع", "ديال", "حتى", "بين", "قبل", "بعد", "فوق", "تحت", "قدام", "وراء", "بلا", "حول", "عن", "خلاف", "قرب", "جنب", "وسط", "ضد", "عوض", "كيف", "بحال", "fi", "men", "3la", "3and", "m3a", "ta3", "nta3", "dyal", "hta", "bin", "9bal", "b3d", "fo9", "t7t", "9dam", "wra", "bla", "7awl", "3n", "9rab", "jnab", "wst", "b7al"], "pronouns": ["أنا", "نتا", "نتي", "هو", "هي", "حنا", "نتوما", "هوما", "ياه", "ياها", "ياهم", "ياك", "ياكم", "يانا", "ني", "ك", "و", "ها", "نا", "كم", "هم", "ana", "nta", "nti", "hwa", "hya", "hia", "7na", "ntouma", "houma", "yah", "yaha", "yahom", "yak", "yakom", "yana"], "possessives": ["راني", "راك", "راكي", "راه", "راهي", "رانا", "راكم", "راهم", "تاعي", "تاعك", "تاعو", "تاعها", "تاعنا", "تاعكم", "تاعهم", "نتاعي", "نتاعك", "نتاعو", "نتاعها", "نتاعنا", "نتاعكم", "نتاعهم", "rani", "rak", "raki", "rah", "rahi", "rana", "rakom", "rahom", "ta3i", "ta3ek", "ta3o", "ta3ha", "ta3na", "ta3kom", "ta3hom", "nta3i", "nta3ek", "nta3o", "nta3ha", "nta3na", "nta3kom", "nta3hom"], "demonstratives": ["هاد", "هادا", "هادي", "هادو", "هداك", "هديك", "هدوك", "ذاك", "ذيك", "ذوك", "هذا", "هذي", "هذو", "had", "hada", "hadi", "hadou", "hdak", "hdik", "hdouk", "hda", "hdo", "dak", "dik", "douk"], "question_words": ["واش", "علاش", "كيفاش", "وقتاش", "وين", "شكون", "شحال", "كيفاه", "واشمن", "واشنو", "علاه", "فاش", "فين", "منين", "آش", "شنو", "قداش", "علاشنو", "آشمن", "wesh", "wach", "3lah", "3lach", "kifach", "we9tach", "win", "chkoun", "ch7al", "kifah", "wachmen", "fach", "fin", "mnin", "ach", "chnou", "9dach", "achmen", "واشنهي", "شاكاين", "شوالا", "شا", "علاشنهي", "كفاه", "اسكو", "اسك", "واشبيك", "شبيك", "شاخصك", "chwala", "chakayn", "esq", "esk", "eske", "chbik", "washbik"], "conjunctions": ["و", "ولا", "أو", "بصح", "لاكن", "حيث", "باش", "بلي", "كي", "ملي", "إلى", "لوكان", "كيما", "خاطر", "على خاطر", "بالاك", "يمكن", "إذا", "واخا", "مع ذلك", "w", "wla", "aw", "bsa7", "lakin", "7it", "bach", "bli", "ki", "mli", "ila", "loukan", "kima", "khatir", "3la khatir", "balak", "ymkn", "ida", "wakha"], "adverbs": ["برك", "زعما", "غير", "يعني", "هكدا", "هكاك", "دروك", "توا", "غدوا", "لبارح", "دايما", "أبدا", "بكري", "مازال", "خلاص", "ياسر", "بزاف", "واعر", "شوية", "قاع", "ديجا", "زربة", "الزربة", "بالزربة", "هنا", "هناك", "لهيه", "فوت", "طول", "ساعات", "ديما", "زادا", "تاني", "برا", "داخل", "نهار", "كامل", "حوايج", "bark", "z3ma", "ghir", "y3ni", "hakda", "hakak", "dork", "tawa", "ghdwa", "lbar7", "dayma", "abadan", "bkri", "mazal", "khlas", "yaser", "bzaf", "wa3r", "chwiya", "ga3", "dija", "zarba", "bzarba", "hna", "hnak", "lhih", "foot", "tool", "sa3at", "dima", "zada", "tani", "bra", "dakhl", "غايا", "باغي", "حرز", "راك عاقل", "درك", "ضرك", "زي", "حكاية", "هكداك", "هكا", "روحي", "ڨاع", "حتة", "يخي", "شراكم", "chouf", "ghaya", "baghi", "drk", "daba"], "negation": ["ما", "ماشي", "مشي", "والو", "لا", "ماكانش", "ماعندوش", "ماراهش", "مابقاش", "ماقدرش", "ماحبش", "ماعرفش", "مازالش", "مافهمتش", "ماعجبنيش", "ماجاش", "ma", "machi", "walou", "la", "makanch", "ma3andouch", "marahch", "mab9ach", "ma9darch", "ma7abch", "ma3rafch", "mazalch", "mafhamtch", "ma3jabtnich", "majach"], "auxiliary_verbs": ["كان", "يكون", "كانت", "كانو", "راح", "يروح", "جا", "يجي", "دار", "يدير", "قال", "يقول", "عرف", "يعرف", "حب", "يحب", "بغا", "يبغي", "خلا", "يخلي", "لقا", "يلقى", "ولا", "يولي", "بان", "يبان", "بدا", "يبدا", "كمل", "يكمل", "وصل", "يوصل", "kan", "ykoun", "kant", "kanou", "ra7", "yrou7", "ja", "yji", "dar", "ydir", "9al", "y9oul", "3raf", "y3raf", "7ab", "y7ab", "bgha", "ybghi", "khla", "ykhli", "l9a", "yl9a", "wla", "ywli", "ban", "yban", "bda", "ybda", "kml", "ykml", "wsl", "ywsl"], "relative_pronouns": ["لي", "الي", "اللي", "متاع", "وين ما", "فين ما", "كل ما", "اش ما", "كيف ما", "li", "elli", "alli", "mta3", "win ma", "fin ma", "kol ma", "ach ma", "kif ma"], "time_expressions": ["دروك", "توا", "غدا", "لبارح", "ليوم", "الليلة", "الصباح", "العشية", "من بعد", "من قبل", "بكرة", "هادا الوقت", "ديما", "ساعات", "مرات", "نهار", "صباح", "مسا", "dork", "tawa", "ghda", "lbar7", "lyoum", "llila", "sba7", "l3chiya", "mn b3d", "mn 9bal", "bokra", "had lw9t", "dima", "sa3at", "mrat", "nhar", "sba7", "msa"], "discourse_markers": ["يعني", "والله", "بصح", "نورمال", "زعما", "هكدا", "واه", "ايه", "هيه", "طيب", "خلاص", "يلا", "هيا", "اسمع", "شوف", "عاد", "اوك", "صح", "فهمت", "ايوا", "اهيه", "اها", "يخي", "دونك", "المهم", "ايا", "بلعقل", "بالعقل", "y3ni", "wallah", "bsa7", "normal", "z3ma", "hakda", "wah", "ayeh", "hih", "tayeb", "khlas", "yala", "hya", "sma3", "chouf", "3ad", "ok", "sa7", "fhamt", "iwa", "ahih", "aha", "yakhi", "donc", "lmouhim", "aya", "bel39el"]};
+    const LEXICON_DATA = {"positive": {"هايل": 0.9, "مليح": 0.7, "فور": 0.85, "ثقة": 0.85, "نقي": 0.75, "يعطيك الصحة": 0.95, "ممتاز": 0.95, "زين": 0.75, "واعر": 0.8, "خطير": 0.85, "تحفة": 0.9, "قنبلة": 0.85, "صحيح": 0.7, "مضبوط": 0.7, "تمام": 0.75, "باهي": 0.7, "لاباس": 0.5, "ناجح": 0.75, "فرحان": 0.8, "معجبني": 0.8, "عجبني": 0.8, "حابو": 0.7, "حبيتو": 0.75, "يجنن": 0.9, "خرافي": 0.85, "مبدع": 0.8, "محترم": 0.75, "ولاد الناس": 0.8, "يستاهل": 0.75, "نظيف": 0.65, "جديد": 0.5, "ساهل": 0.6, "سريع": 0.65, "جميل": 0.75, "حلو": 0.7, "زيرو مشاكل": 0.9, "قوي": 0.7, "متين": 0.7, "راقي": 0.8, "يهبل": 0.85, "بنين": 0.75, "شابة": 0.7, "يرقد": 0.65, "صاي": 0.6, "كلاس": 0.85, "عامر": 0.6, "مكتوب بالزين": 0.8, "يسلمو": 0.85, "بارك الله فيك": 0.9, "top": 0.8, "super": 0.85, "bien": 0.65, "parfait": 0.9, "excellent": 0.95, "genial": 0.85, "magnifique": 0.9, "formidable": 0.85, "impeccable": 0.9, "merci": 0.6, "bravo": 0.85, "cool": 0.7, "nickel": 0.8, "hayel": 0.9, "mli7": 0.7, "four": 0.85, "t9a": 0.85, "n9i": 0.75, "wa3r": 0.8, "5atir": 0.85, "t7fa": 0.9, "9onbla": 0.85, "bahi": 0.7, "labas": 0.5, "m3ajbni": 0.8, "3ajbni": 0.8, "yjnn": 0.9, "5arafi": 0.85, "mo7taram": 0.75, "yhbl": 0.85, "bnin": 0.75, "chaba": 0.7, "class": 0.85, "yslmou": 0.85, "سلعة لوز": 0.95, "طيارة": 0.9, "قوة": 0.9, "هبال": 0.9, "طوب": 0.9, "متقون": 0.85, "لوريجينال": 0.9, "ما شاء الله": 0.95, "تبارك الله": 0.95, "الله يبارك": 0.95, "شبان": 0.8, "ما عندي ما نقول": 0.95, "حاجة نقية": 0.85, "يرحم والديكم": 0.9, "ربي يبارك": 0.95, "سلعة شابة": 0.85, "قنين": 0.8, "طوب دي طوب": 0.95, "سيرفيس شباب": 0.85, "مخدوم مليح": 0.85, "رجال ثقة": 0.9, "في القمة": 0.95, "سلعة اوريجينال": 0.9, "top du top": 0.95, "original": 0.85, "sl3a louz": 0.95, "9wa": 0.9, "hbal": 0.9, "tayara": 0.9, "fi l9ima": 0.95, "chbab": 0.8, "rabi ybarek": 0.95, "lah ybarek": 0.95, "اصلية": 0.85, "دوريجين": 0.9, "سرفيس طوب": 0.9, "خدمة نقية": 0.85, "خدمة في المستوى": 0.9, "وصلت في وقتها": 0.85, "ربي يجازيك": 0.9, "ناس ملاح": 0.85, "سلعة ماشاء الله": 0.95, "حاجة فور": 0.9, "حاجة شابة": 0.8, "متقونة": 0.85, "تغليف هايل": 0.85, "مغلفة مليح": 0.8, "امانة": 0.85, "سريع في الرد": 0.8, "ثقة و امان": 0.95, "كعبة لوز": 0.95, "خدمة احترافية": 0.9, "سلعة شابة بزاف": 0.9, "تستاهل كل خير": 0.9, "بياع ثقة": 0.9, "بياعة ثقة": 0.9, "ربي يرزقك": 0.9, "سلعة دوريجين": 0.95, "توصيل سريع": 0.85, "توصيل في القمة": 0.9, "مطابقة للوصف": 0.9, "كيما في التصويرة": 0.95, "سيرفيس سريع": 0.85, "تعامل راقي": 0.9, "خدمة متقونة": 0.85, "ربي يوفقك": 0.85, "سعر معقول": 0.75, "سومة شابة": 0.8, "سومة هايلة": 0.85, "بري مليح": 0.75, "prix chbab": 0.8, "prix mlih": 0.75, "sl3a d'origine": 0.95, "service top": 0.9, "khedma n9iya": 0.85, "livraison rapide": 0.85, "nas mlah": 0.85, "fi lmostawa": 0.85, "tbarkellah": 0.95, "khedma mregla": 0.9, "mregla": 0.85, "mrigel": 0.85, "mrigla": 0.85, "merci bcp": 0.8, "conforme": 0.9, "sans defaut": 0.85, "khedma bayna": 0.85}, "negative": {"عيان": -0.85, "ارناك": -1.0, "غالي": -0.5, "روطار": -0.6, "مكسر": -0.8, "خاسر": -0.8, "كاذب": -0.9, "نصاب": -1.0, "حقير": -0.95, "زبالة": -0.95, "خايب": -0.85, "خامج": -0.85, "مقلق": -0.7, "متعب": -0.6, "مريض": -0.6, "كره": -0.9, "كرهت": -0.9, "ماعجبنيش": -0.8, "ماحبيتوش": -0.75, "صعيب": -0.55, "مشكل": -0.7, "مشكلة": -0.7, "خسارة": -0.75, "ضيع": -0.7, "فاشل": -0.85, "مهزول": -0.7, "بايخ": -0.75, "تافه": -0.85, "حشيان": -0.6, "معطل": -0.65, "خربان": -0.8, "مخرب": -0.8, "كاسر": -0.65, "مفسد": -0.75, "منكسر": -0.7, "رخيص": -0.4, "خايف": -0.5, "زعفان": -0.7, "طفران": -0.5, "مللت": -0.6, "حقرة": -0.9, "حگرة": -0.9, "ما يسواش": -0.85, "والو": -0.6, "صفر": -0.7, "خيبة": -0.8, "يقرف": -0.85, "مقرف": -0.85, "حرام": -0.8, "عيب": -0.7, "arnaque": -1.0, "nul": -0.85, "mauvais": -0.8, "probleme": -0.65, "retard": -0.6, "cher": -0.5, "casse": -0.8, "horrible": -0.9, "pire": -0.95, "decu": -0.8, "catastrophe": -0.95, "defaut": -0.6, "3ayan": -0.85, "arnac": -1.0, "ghali": -0.5, "rotar": -0.6, "mksr": -0.8, "5asr": -0.8, "5ayb": -0.85, "5amj": -0.85, "m9l9": -0.7, "fachl": -0.85, "bay5": -0.75, "5rban": -0.8, "z3fan": -0.7, "y9rf": -0.85, "m9rf": -0.85, "ma yswach": -0.85, "خرطي": -0.9, "حشوها لي": -0.95, "حشوة": -0.9, "خردة": -0.9, "سلعة شينوا": -0.85, "تبزنيس": -0.8, "سرقة عيني عينك": -1.0, "مقلد": -0.8, "مغشوش": -0.95, "كوارث": -0.9, "تعمار شكارة": -0.85, "مبهدل": -0.8, "ما تسواش": -0.85, "طمع": -0.7, "ما ننصح حتى واحد": -0.95, "سلعة تعيفة": -0.85, "فضيحة": -0.9, "لعب دراري": -0.8, "نصب واحتيال": -1.0, "حرام عليكم": -0.9, "حسبي الله": -0.85, "تخلاط": -0.7, "بلا فايدة": -0.75, "خسارة دراهم": -0.9, "حشاوها لي": -0.95, "سلعة ميتة": -0.8, "khoroti": -0.9, "khorti": -0.9, "khorda": -0.9, "sl3a chinwa": -0.85, "tbaznis": -0.8, "ser9a": -1.0, "7achwa": -0.9, "7chawhali": -0.95, "fdi7a": -0.9, "khasart drahem": -0.9, "chkara": -0.8, "na9es bzaf": -0.75, "سلعة مفاتشة": -0.85, "سلعة معطوبة": -0.9, "توصيل معطل": -0.7, "ما وصلني والو": -0.85, "ليفرور حقار": -0.95, "اميتياسيون": -0.8, "فوتوكوبي": -0.75, "ريحة الموت": -0.9, "ماعندكمش كلمة": -0.95, "بدون مصداقية": -0.9, "بلوكاني": -0.9, "حظرني": -0.85, "كذابين": -0.95, "سراقين": -1.0, "سراق": -1.0, "ماشي كيما الفوتو": -0.85, "ماشي كيما التصويرة": -0.85, "مقطعة": -0.8, "مكسرة": -0.85, "لومبالاج مقطع": -0.7, "سلعة ناقصة": -0.8, "حبة ناقصة": -0.7, "ما رديتوش": -0.75, "فوتور": -0.75, "ماتحشموش": -0.95, "تافهين": -0.9, "تطياش": -0.8, "خدمة ناقصة": -0.75, "تضييع وقت": -0.85, "تخسار دراهم": -0.9, "ما كان والو": -0.75, "تمنشير": -0.7, "سلعة رديئة": -0.85, "جودة هابطة": -0.8, "سومة غالية بزاف": -0.65, "machi kima la photo": -0.85, "ma reponditouch": -0.75, "blocani": -0.9, "ma 3andkomch lkelma": -0.95, "sl3a mfatcha": -0.85, "ser9in": -1.0, "sar9a": -1.0, "kolchi fawda": -0.85, "bla fayda": -0.75, "retard kbir": -0.8, "livreur ma 3ayetlich": -0.85, "sl3a m3atouba": -0.9, "khasart w9t": -0.85, "imitasyon": -0.8, "khra": -0.95, "mregbouha": -0.75}, "negators": ["ما", "ماشي", "مشي", "والو", "غير", "بلا", "عمرو", "عمري", "عمرها", "عمرهم", "جامي", "ابدا", "ma", "machi", "mchi", "walou", "ghir", "bla", "3omri", "3omro", "3omrha", "3omrhom", "jamais", "abdan"], "intensifiers": {"بزاف": 1.5, "فور": 1.4, "قاع": 1.5, "ڨاع": 1.5, "ياسر": 1.4, "واعر": 1.3, "هايل": 1.3, "خلاص": 1.2, "كثير": 1.3, "جدا": 1.4, "خطير": 1.3, "حتى": 1.2, "باطل": 1.3, "bzaf": 1.5, "bzzf": 1.5, "ga3": 1.5, "yaser": 1.4, "wa3r": 1.3, "5atir": 1.3, "barcha": 1.4, "trop": 1.4, "tres": 1.3, "vraiment": 1.3, "كارثة": 1.5, "قمة": 1.4, "ميت": 1.3, "بالبزاف": 1.5, "طوب": 1.4, "grave": 1.4, "hyper": 1.4, "mega": 1.4, "في السماء": 1.4, "طايح": 1.2, "خارج قاع": 1.4, "طاير": 1.3, "قاوية": 1.4, "qawya": 1.4, "haja kbira": 1.4}};
+    const ARABIZI_RULES = {"numbers": {"2": "ا", "3": "ع", "5": "خ", "6": "ط", "7": "ح", "8": "غ", "9": "ق"}, "digraphs": {"ch": "ش", "sh": "ش", "kh": "خ", "gh": "غ", "th": "ث", "dh": "ذ", "ou": "و", "aa": "ا", "ii": "ي", "oo": "و", "ee": "ي", "dj": "دج", "tj": "تج", "ts": "تس"}, "singles": {"a": "ا", "b": "ب", "t": "ت", "j": "ج", "h": "ح", "d": "د", "r": "ر", "z": "ز", "s": "س", "c": "ك", "f": "ف", "q": "ق", "k": "ك", "l": "ل", "m": "م", "n": "ن", "w": "و", "y": "ي", "i": "ي", "u": "و", "o": "و", "e": "ا", "g": "ق", "p": "ب", "v": "ف", "x": "كس"}, "french_whitelist": ["livraison", "produit", "prix", "commande", "client", "merci", "bonjour", "probleme", "disponible", "qualite", "service", "garantie", "facture", "remboursement", "paiement", "carte", "retour", "echange", "stock", "promotion", "solde", "offre", "magasin", "boutique", "achat", "vente", "colis", "expedition", "adresse", "telephone", "numero", "message", "reponse", "information", "description", "photo", "couleur", "taille", "modele", "marque", "original", "copie", "faux", "vrai", "nouveau", "ancien", "petit", "grand", "moyen", "normal", "super", "extra", "special", "gratuit", "payant", "cher", "moins", "plus", "tres", "trop", "bien", "mal", "bon", "mauvais", "mieux", "pire", "parfait", "nul", "top", "excellent", "genial", "horrible", "catastrophe", "arnaque", "retard", "decu", "merveilleux", "magnifique", "formidable", "impeccable", "nickel", "bravo", "cool", "casse", "defaut", "abime", "neuf", "occasion", "reconditionne", "emballage", "carton", "plastique", "fragile", "lourd", "leger", "rapide", "lent", "long", "court", "simple", "complique", "difficile", "facile", "possible", "impossible", "urgent", "important", "necessaire", "inutile", "pratique", "utile", "portable", "tablette", "ordinateur", "accessoire", "chargeur", "ecran", "batterie", "cable", "wifi", "internet", "site", "page", "compte", "profil", "inscription", "connexion", "mot de passe", "application", "version", "mise a jour", "installation", "configuration", "parametres", "options", "contact", "support", "aide", "question", "solution", "recommander", "conseiller", "suggerer", "proposer", "confirmer", "annuler", "modifier", "supprimer", "ajouter", "envoyer", "recevoir", "attendre", "verifier", "tester", "comparer", "choisir", "commander", "payer", "acheter", "vendre", "echanger", "retourner", "rembourser", "contacter", "chambre", "douche", "marche", "marché", "bouton", "choix", "touche", "coucher", "chercher", "chauffeur", "chouette", "bouchon", "recherche", "brochure", "fourchette", "gauche", "mouche", "couche", "mouchoir", "deboucher", "ouchette", "boucherie", "oucherie", "richesse", "douchette", "accouchement", "ouchoir", "ouverture", "fourniture", "couchage", "ouchon", "livreur", "bureau", "agence", "domicile", "commune", "daira", "pointure", "reception", "reduction", "ticket", "bon", "bordereau", "reclamation", "frais", "tarif", "dispo", "total", "reste", "avance", "reglement", "versement", "virement", "tracking", "suivi", "express", "panier", "validation", "authentique"], "french_suffixes": ["tion", "sion", "ment", "eur", "eux", "ique", "able", "ible", "iste", "isme", "ance", "ence", "oire", "aire", "elle", "ette", "ille", "aille", "ouille", "ure", "age", "ier", "iere"], "overrides": {"slm": "سلام", "salam": "سلام", "cv": "صافا", "svp": "من فضلك", "stp": "من فضلك", "nchallah": "ان شاء الله", "inchallah": "ان شاء الله", "nshallah": "ان شاء الله", "hamdoulah": "الحمد لله", "hamdoullah": "الحمد لله", "lhamdoulah": "الحمد لله", "alhamdoulillah": "الحمد لله", "bismillah": "بسم الله", "bsmllah": "بسم الله", "mchallah": "ما شاء الله", "machallah": "ما شاء الله", "mashallah": "ما شاء الله", "sba7lkhir": "صباح الخير", "sba7 lkhir": "صباح الخير", "msalkhir": "مساء الخير", "msa lkhir": "مساء الخير", "bslama": "بالسلامة", "bsslama": "بالسلامة", "sahit": "صحيت", "ya3tik sa77a": "يعطيك الصحة", "y3tik sa77a": "يعطيك الصحة", "barklahfik": "بارك الله فيك", "barkallahfik": "بارك الله فيك", "tbarkllah": "تبارك الله", "tbarkallah": "تبارك الله", "starfallah": "استغفر الله", "staghfirallah": "استغفر الله", "dz": "الجزائر", "dzayer": "الجزائر", "dzair": "الجزائر", "bladi": "بلادي", "labas": "لاباس", "lbs": "لاباس", "wlh": "والله", "wallah": "والله", "mdr": "يضحك", "ptdr": "يضحك بزاف", "hhh": "هههه", "hhhh": "هههه", "khoya": "خويا", "khouya": "خويا", "kho": "خويا", "khti": "اختي", "khtitou": "اختي", "sahbi": "صاحبي", "s7bi": "صاحبي", "chouf": "شوف", "chofi": "شوفي", "drk": "درك", "dork": "دروك", "wesh": "واش", "wach": "واش", "wech": "واش", "chnou": "شنو", "chwala": "شوالا", "kirak": "كيراك", "kiraki": "كيراكي", "ghaya": "غايا", "mrigel": "مريڨل", "mregla": "مريڨلة", "ch7al": "شحال", "bch7al": "بشحال", "bchhal": "بشحال", "qadach": "قداش", "9edach": "قداش", "9dech": "قداش", "3aychek": "عيشك", "3aychik": "عيشك", "sa7a": "صحة", "saha": "صحة", "ysslmk": "يسلمك", "yselmek": "يسلمك", "rabi ya7fdhek": "ربي يحفظك", "rabi ye7fdek": "ربي يحفظك", "rabi ykhalik": "ربي يخليك", "bzaf": "بزاف", "bzzf": "بزاف", "chwiya": "شوية", "chwya": "شوية", "dima": "ديما", "brk": "برك", "bark": "برك", "walo": "والو", "walou": "والو", "sl3a": "سلعة", "sil3a": "سلعة", "souma": "سومة", "chkara": "شكارة", "drahem": "دراهم", "machi": "ماشي", "makach": "ماكاش", "kain": "كاين", "kayen": "كاين", "kayna": "كاينة", "chrit": "شريت", "chrito": "شريتو", "nchri": "نشري", "livrili": "ليفريلي", "livrihali": "ليفريحالي", "toussil": "توصيل", "dar": "دار", "ldar": "للدار", "stopdesk": "سطوب ديسك", "yalidine": "ياليدين", "2ana": "انا"}};
     const WILAYAS_DATA = [{"code": 1, "code_str": "01", "name_ar": "أدرار", "name_fr": "Adrar", "aliases": ["بلاد التمور", "adrar"], "communes_sample": [], "communes_fr_sample": []}, {"code": 2, "code_str": "02", "name_ar": "الشلف", "name_fr": "Chlef", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 3, "code_str": "03", "name_ar": "الأغواط", "name_fr": "Laghouat", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 4, "code_str": "04", "name_ar": "أم البواقي", "name_fr": "Oum El Bouaghi", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 5, "code_str": "05", "name_ar": "باتنة", "name_fr": "Batna", "aliases": ["barika", "batna", "الأوراس", "عاصمة الأوراس"], "communes_sample": [], "communes_fr_sample": []}, {"code": 6, "code_str": "06", "name_ar": "بجاية", "name_fr": "Béjaïa", "aliases": ["akbou", "bejaia", "bgayet", "bougie", "اقبو", "صالداي", "لؤلؤة الجزائر"], "communes_sample": [], "communes_fr_sample": []}, {"code": 7, "code_str": "07", "name_ar": "بسكرة", "name_fr": "Biskra", "aliases": ["biskra", "tolga", "الزيبان", "طولقة", "عاصمة التمور", "عروس الزيبان"], "communes_sample": [], "communes_fr_sample": []}, {"code": 8, "code_str": "08", "name_ar": "بشار", "name_fr": "Béchar", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 9, "code_str": "09", "name_ar": "البليدة", "name_fr": "Blida", "aliases": ["blida", "boufarik", "الورود", "بوفاريك", "مدينة الورود"], "communes_sample": [], "communes_fr_sample": []}, {"code": 10, "code_str": "10", "name_ar": "البويرة", "name_fr": "Bouira", "aliases": ["bouira"], "communes_sample": [], "communes_fr_sample": []}, {"code": 11, "code_str": "11", "name_ar": "تمنراست", "name_fr": "Tamanrasset", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 12, "code_str": "12", "name_ar": "تبسة", "name_fr": "Tébessa", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 13, "code_str": "13", "name_ar": "تلمسان", "name_fr": "Tlemcen", "aliases": ["maghnia", "tlemcen", "tlemsan", "جوهرة المغرب العربي", "لالة ستي", "مغنية"], "communes_sample": [], "communes_fr_sample": []}, {"code": 14, "code_str": "14", "name_ar": "تيارت", "name_fr": "Tiaret", "aliases": ["عاصمة الرستميين", "tiaret"], "communes_sample": [], "communes_fr_sample": []}, {"code": 15, "code_str": "15", "name_ar": "تيزي وزو", "name_fr": "Tizi Ouzou", "aliases": ["azazga", "tizi", "tizi ouzou", "عزازقة"], "communes_sample": [], "communes_fr_sample": []}, {"code": 16, "code_str": "16", "name_ar": "الجزائر", "name_fr": "Alger", "aliases": ["alg", "alger", "algiers", "bab ezzouar", "cheraga", "dzayer", "hydra", "kouba", "rouiba", "البهجة", "العاصمة", "القبة", "حيدرة", "دزاير", "دزاير العاصمة", "رويبة", "شراقة", "قبة"], "communes_sample": [], "communes_fr_sample": []}, {"code": 17, "code_str": "17", "name_ar": "الجلفة", "name_fr": "Djelfa", "aliases": ["ain oussera", "djelfa", "أولاد نايل", "ولاد نائل"], "communes_sample": [], "communes_fr_sample": []}, {"code": 18, "code_str": "18", "name_ar": "جيجل", "name_fr": "Jijel", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 19, "code_str": "19", "name_ar": "سطيف", "name_fr": "Sétif", "aliases": ["el eulma", "setif", "stif", "العلمة", "عاصمة الهضاب", "عين الفوارة"], "communes_sample": [], "communes_fr_sample": []}, {"code": 20, "code_str": "20", "name_ar": "سعيدة", "name_fr": "Saïda", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 21, "code_str": "21", "name_ar": "سكيكدة", "name_fr": "Skikda", "aliases": ["روسيكادا", "skikda"], "communes_sample": [], "communes_fr_sample": []}, {"code": 22, "code_str": "22", "name_ar": "سيدي بلعباس", "name_fr": "Sidi Bel Abbès", "aliases": ["bel abbes", "sba", "sidi bel abbes"], "communes_sample": [], "communes_fr_sample": []}, {"code": 23, "code_str": "23", "name_ar": "عنابة", "name_fr": "Annaba", "aliases": ["annaba", "bone", "el bouni", "البوني", "بونة", "جوهرة الشرق", "لالة بونة"], "communes_sample": [], "communes_fr_sample": []}, {"code": 24, "code_str": "24", "name_ar": "قالمة", "name_fr": "Guelma", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 25, "code_str": "25", "name_ar": "قسنطينة", "name_fr": "Constantine", "aliases": ["ali mendjeli", "constantine", "khroub", "ksantina", "qsentina", "الجسور المعلقة", "الخروب", "سيرتا", "علي منجلي", "مدينة الجسور"], "communes_sample": [], "communes_fr_sample": []}, {"code": 26, "code_str": "26", "name_ar": "المدية", "name_fr": "Médéa", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 27, "code_str": "27", "name_ar": "مستغانم", "name_fr": "Mostaganem", "aliases": ["mosta", "mostaganem"], "communes_sample": [], "communes_fr_sample": []}, {"code": 28, "code_str": "28", "name_ar": "المسيلة", "name_fr": "M'Sila", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 29, "code_str": "29", "name_ar": "معسكر", "name_fr": "Mascara", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 30, "code_str": "30", "name_ar": "ورقلة", "name_fr": "Ouargla", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 31, "code_str": "31", "name_ar": "وهران", "name_fr": "Oran", "aliases": ["arzew", "bir el djir", "es senia", "oran", "wahran", "wahren", "ارزيو", "الباهية", "السانية", "بئر الجير", "باهية"], "communes_sample": [], "communes_fr_sample": []}, {"code": 32, "code_str": "32", "name_ar": "البيض", "name_fr": "El Bayadh", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 33, "code_str": "33", "name_ar": "إليزي", "name_fr": "Illizi", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 34, "code_str": "34", "name_ar": "برج بوعريريج", "name_fr": "Bordj Bou Arreridj", "aliases": ["عاصمة الإلكترونيك", "bba", "bordj"], "communes_sample": [], "communes_fr_sample": []}, {"code": 35, "code_str": "35", "name_ar": "بومرداس", "name_fr": "Boumerdès", "aliases": ["boumerdes"], "communes_sample": [], "communes_fr_sample": []}, {"code": 36, "code_str": "36", "name_ar": "الطارف", "name_fr": "El Tarf", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 37, "code_str": "37", "name_ar": "تندوف", "name_fr": "Tindouf", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 38, "code_str": "38", "name_ar": "تيسمسيلت", "name_fr": "Tissemsilt", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 39, "code_str": "39", "name_ar": "الوادي", "name_fr": "El Oued", "aliases": ["el oued", "souf", "مدينة الألف قبة", "واد سوف", "وادي سوف"], "communes_sample": [], "communes_fr_sample": []}, {"code": 40, "code_str": "40", "name_ar": "خنشلة", "name_fr": "Khenchela", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 41, "code_str": "41", "name_ar": "سوق أهراس", "name_fr": "Souk Ahras", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 42, "code_str": "42", "name_ar": "تيبازة", "name_fr": "Tipaza", "aliases": ["tipaza", "tipasa"], "communes_sample": [], "communes_fr_sample": []}, {"code": 43, "code_str": "43", "name_ar": "ميلة", "name_fr": "Mila", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 44, "code_str": "44", "name_ar": "عين الدفلى", "name_fr": "Aïn Defla", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 45, "code_str": "45", "name_ar": "النعامة", "name_fr": "Naâma", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 46, "code_str": "46", "name_ar": "عين تموشنت", "name_fr": "Aïn Témouchent", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 47, "code_str": "47", "name_ar": "غرداية", "name_fr": "Ghardaïa", "aliases": ["ghardaia", "ميزاب", "وادي ميزاب"], "communes_sample": [], "communes_fr_sample": []}, {"code": 48, "code_str": "48", "name_ar": "غليزان", "name_fr": "Relizane", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 49, "code_str": "49", "name_ar": "تيميمون", "name_fr": "Timimoun", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 50, "code_str": "50", "name_ar": "برج باجي مختار", "name_fr": "Bordj Badji Mokhtar", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 51, "code_str": "51", "name_ar": "أولاد جلال", "name_fr": "Ouled Djellal", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 52, "code_str": "52", "name_ar": "بني عباس", "name_fr": "Béni Abbès", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 53, "code_str": "53", "name_ar": "عين صالح", "name_fr": "In Salah", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 54, "code_str": "54", "name_ar": "عين قزام", "name_fr": "In Guezzam", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 55, "code_str": "55", "name_ar": "توقرت", "name_fr": "Touggourt", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 56, "code_str": "56", "name_ar": "جانت", "name_fr": "Djanet", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 57, "code_str": "57", "name_ar": "المغير", "name_fr": "El M'Ghair", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 58, "code_str": "58", "name_ar": "المنيعة", "name_fr": "El Meniaa", "aliases": [], "communes_sample": [], "communes_fr_sample": []}, {"code": 59, "code_str": "59", "name_ar": "آفلو", "name_fr": "Aflou", "aliases": [], "communes_sample": ["آفلو", "قلتة سيدي سعد", "عين سيدي علي", "بيضاء", "بريدة", "الغيشة", "الحاج المشري", "سبقاق", "تاويالة", "وادي مرة"], "communes_fr_sample": ["Aflou", "Gueltat Sidi Saâd", "Aïn Sidi Ali", "Beidha", "Brida", "El Ghicha", "Hadj Mechri", "Sebgag", "Taouiala", "Oued Morra"]}, {"code": 60, "code_str": "60", "name_ar": "بريكة", "name_fr": "Barika", "aliases": [], "communes_sample": ["بريكة", "بيطام", "عبد القادر عزيل", "تيلاطو", "سقانة", "الجزار", "مدوكل", "أولاد عمار"], "communes_fr_sample": ["Barika", "Bitam", "Abdelkader Azil", "Tilatou", "Seggana", "Djezzar", "Amdoukal", "Ouled Ammar"]}, {"code": 61, "code_str": "61", "name_ar": "القنطرة", "name_fr": "El Kantara", "aliases": [], "communes_sample": ["القنطرة", "عين زعطوط", "البرانيس", "الوطاية", "جمورة"], "communes_fr_sample": ["El Kantara", "Aïn Zaatout", "El Branès", "El Outaya", "Djemourah"]}, {"code": 62, "code_str": "62", "name_ar": "بئر العاتر", "name_fr": "Bir El Ater", "aliases": [], "communes_sample": ["بئر العاتر", "نقرين", "العقلة المالحة", "فركان"], "communes_fr_sample": ["Bir El Ater", "Negrine", "El Ogla El Melha", "Ferkane"]}, {"code": 63, "code_str": "63", "name_ar": "العريشة", "name_fr": "El Aricha", "aliases": [], "communes_sample": ["العريشة", "القور", "سيدي الجيلالي", "البويهي"], "communes_fr_sample": ["El Aricha", "El Gor", "Sidi Djillali", "El Bouihi"]}, {"code": 64, "code_str": "64", "name_ar": "قصر الشلالة", "name_fr": "Ksar Chellala", "aliases": [], "communes_sample": ["قصر الشلالة", "زمالة الأمير عبد القادر", "الرشايقة", "الحمادية", "سرقين", "بوقرة"], "communes_fr_sample": ["Ksar Chellala", "Zmalet Emir Abdelkader", "Rechaïga", "Hamadia", "Serguine", "Bougara"]}, {"code": 65, "code_str": "65", "name_ar": "عين وسارة", "name_fr": "Aïn Ouessara", "aliases": [], "communes_sample": ["عين وسارة", "البيرين", "بويرة الأحدب", "الخميس", "سيدي لعجال", "حد الصحاري", "قرنيني", "بنهار", "حاسي فدول", "عين فكة"], "communes_fr_sample": ["Aïn Ouessara", "Birine", "Bouira Lahdab", "El Khemis", "Sidi Ladjel", "Had Sahary", "Guernini", "Benhar", "Hassi Fdoul", "Aïn Fekka"]}, {"code": 66, "code_str": "66", "name_ar": "مسعد", "name_fr": "Messaad", "aliases": [], "communes_sample": ["مسعد", "سد رحال", "فيض البطمة", "القطارة", "سلمانة", "أم العظام", "دلدول", "عمورة"], "communes_fr_sample": ["Messaad", "Sed Rahal", "Feidh El Botma", "Guettara", "Selmana", "Oum El Adham", "Deldoul", "Amourah"]}, {"code": 67, "code_str": "67", "name_ar": "قصر البخاري", "name_fr": "Ksar El Boukhari", "aliases": [], "communes_sample": ["قصر البخاري", "أولاد معرف", "عين بوسيف", "دراق", "البواعيش", "الكاف الأخضر", "شلالة العذاورة", "أولاد هلال", "تافراوت", "بوغار"], "communes_fr_sample": ["Ksar El Boukhari", "Ouled Maaref", "Aïn Boucif", "Draa", "Bouaiche", "El Kef Lakhdar", "Chellalet El Adhaoura", "Ouled Hellal", "Tafraout", "Boughar"]}, {"code": 68, "code_str": "68", "name_ar": "بوسعادة", "name_fr": "Bou Saâda", "aliases": ["bou saada", "bousaada", "بوابة الصحراء", "مدينة السعادة"], "communes_sample": ["بوسعادة", "الخبانة", "مصيف", "أولاد سيدي إبراهيم", "سيدي عامر", "تامسة", "بن سرور", "أولاد سليمان", "الحوامد", "الهامل"], "communes_fr_sample": ["Bou Saâda", "Khoubana", "M'Cif", "Ouled Sidi Brahim", "Sidi Ameur", "Tamsa", "Ben Srour", "Ouled Slimane", "El Houamed", "El Hamel"]}, {"code": 69, "code_str": "69", "name_ar": "الأبيض سيدي الشيخ", "name_fr": "El Abiodh Sidi Cheikh", "aliases": [], "communes_sample": ["الأبيض سيدي الشيخ", "عين العراك", "عرباوة", "بوسمغون", "الشلالة", "البنود", "المهارة"], "communes_fr_sample": ["El Abiodh Sidi Cheikh", "Aïn El Arak", "Arbaouet", "Bou Semghoun", "Chellala", "El Bnoud", "El Meharra"]}];
 
     // Core Algorithms
@@ -775,21 +847,69 @@
         if (u === 'الف' || u === 'ألف' || u === 'alf') val *= 1000;
         prices.push({ raw: pm[0].trim(), amount: val });
       }
+
+      // Dynamic millions (e.g. 2 mlayen, 3 ملاين)
+      const dynMilReg = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)(?=$|\s|[^\w\u0600-\u06FF])/gi;
+      let dmDyn;
+      while ((dmDyn = dynMilReg.exec(text)) !== null) {
+        const val = parseFloat(dmDyn[1].replace(',', '.')) * 10000;
+        prices.push({ raw: dmDyn[0].trim(), amount: val });
+      }
+
       const darjaAmounts = [
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(مية\s*الف|100\s*الف|mya|myat\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 1000 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(ميتين\s*الف|200\s*الف|mitin\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 2000 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(خمسمية\s*الف|500\s*الف|khams\s*mya|500\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 5000 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(مليون|mlyon|1\s*mlyon)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 10000 },
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(زوج\s*ملاين|2\s*mlyon|zoudj\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 20000 },
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(خمس\s*ملاين|5\s*mlyon|khams\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 50000 },
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(عشر\s*ملاين|10\s*mlyon|3achr\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 100000 },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(زوج\s*ملاين|زوج\s*ملايين|zoudj\s*mlayen|zouj\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 20000 },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(خمس\s*ملاين|khams\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 50000 },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(عشر\s*ملاين|3achr\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 100000 },
       ];
       for (const item of darjaAmounts) {
         const dm = text.match(item.reg);
         if (dm) prices.push({ raw: dm[0].trim(), amount: item.val });
       }
 
-      return { wilayas, payments, prices };
+      // Deliveries
+      const deliveries = [];
+      const deliveryPatterns = [
+        { company: 'YALIDINE', label: 'Yalidine Express (ياليدين)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(yalidine|yalidin|ياليدين)(?=$|\s|[^\w\u0600-\u06FF])/i },
+        { company: 'ZR_EXPRESS', label: 'ZR Express (زد ار اكسبرس)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(zr\s*express|zr|زد\s*ار\s*اكسبرس|زد\s*ار)(?=$|\s|[^\w\u0600-\u06FF])/i },
+        { company: 'MAYSTRO', label: 'Maystro Delivery (مايسترو)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(maystro\s*delivery|maystro|مايسترو)(?=$|\s|[^\w\u0600-\u06FF])/i },
+        { company: 'PROCOLIS', label: 'Procolis (بروكولي)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(procolis|pro\s*colis|بروكولي|بروكوليس)(?=$|\s|[^\w\u0600-\u06FF])/i },
+        { company: 'EMS', label: 'EMS Algérie Poste (البريد السريع)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(ems|ems\s*algerie|البريد\s*السريع)(?=$|\s|[^\w\u0600-\u06FF])/i },
+        { company: 'KAZITOUR', label: 'Kazitour Express (كازيتور)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(kazitour|kazi\s*tour|كازيتور)(?=$|\s|[^\w\u0600-\u06FF])/i },
+        { company: 'GUEPEX', label: 'Guepex Express (قيباكس)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(guepex|قيباكس)(?=$|\s|[^\w\u0600-\u06FF])/i },
+      ];
+      for (const d of deliveryPatterns) {
+        const m = text.match(d.reg);
+        if (m) deliveries.push({ company: d.company, label: d.label, matched: m[0].trim() });
+      }
+
+      // Delivery Mode
+      let deliveryMode = null;
+      const modePatterns = [
+        { mode: 'STOP_DESK', label: 'Stop Desk (استلام من المكتب)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(stop\s*desk|stopdesk|سطوب\s*ديسك|ستوب\s*ديسك|المكتب|فالبيرو|في\s*البيرو|agence)(?=$|\s|[^\w\u0600-\u06FF])/i },
+        { mode: 'HOME_DELIVERY', label: 'Home Delivery (توصيل للمنزل)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(a\s*domicile|[aà]\s*domicile|للدار|لباب\s*الدار|توصيل\s*للمنزل|توصيل\s*للدار|فالدار)(?=$|\s|[^\w\u0600-\u06FF])/i },
+      ];
+      for (const dm of modePatterns) {
+        const m = text.match(dm.reg);
+        if (m) { deliveryMode = dm.label; break; }
+      }
+
+      // Phones
+      const phones = [];
+      const phoneReg = /(?:^|\s|[^\w\u0600-\u06FF])((?:\+213|00213|0)\s*(?:[5-7]|2[0-9]|3[0-9]|4[0-9])(?:[\s.-]?\d){8})(?=$|\s|[^\w\u0600-\u06FF])/gi;
+      let phMatch;
+      while ((phMatch = phoneReg.exec(text)) !== null) {
+        let raw = phMatch[1].trim();
+        let norm = raw.replace(/[\s.-]/g, '');
+        if (norm.startsWith('00213')) norm = '0' + norm.slice(5);
+        else if (norm.startsWith('+213')) norm = '0' + norm.slice(4);
+        phones.push({ raw, normalized: norm });
+      }
+
+      return { wilayas, payments, prices, deliveries, deliveryMode, phones };
     }
 
     function detectDialect(text) {
@@ -824,10 +944,10 @@
     const charCount = document.getElementById('charCount');
 
     const SAMPLES = [
-      "السلعة هاااااايلة بزاااااف و الخدمة فور، يعطيك الصحة! توصيل لبوسعادة و نخلصك بـ baridimob السعر زوج ملاين",
-      "السلعة ماشي عيانة بصح التوصيل روطار و السيرفيس ماشي شباب قاع، ما ننصحكمش",
-      "produit mli7 bzaf walakin livraison l wahran rotar chwiya, prix 4500 DA w khlass b edahabia",
-      "شوالا راك باغي خوية غايا درك؟ كاين توصيل للسانية ولاية 31 و نخلصك كاش عند الاستلام",
+      "salam khoya rani hab nchrih b 2 mlayen l Constantine b yalidine stop desk. num ta3i: 0661234567",
+      "السلعة هاااااايلة بزاااااف و الخدمة فور، يعطيك الصحة! توصيل لبوسعادة ياليدين ستوب ديسك كلمني في 0661234567",
+      "khedma 3ayana w sil3a khorda wlah ma thechmou 7chitohali w l colis ja mfetchech!",
+      "شوالا راك باغي خوية غايا درك؟ كاين توصيل للسانية ولاية 31 بـ zr express للدار و نخلصك كاش عند الاستلام",
       "واشنهي هادا قداش يدير ياسر باهي سيرتا نخلصك كاش بـ مية الف"
     ];
 
@@ -911,6 +1031,35 @@
         pricesBox.innerHTML = '<span class="empty-state">لا توجد أسعار مرصودة</span>';
       }
 
+      // Logistics & Phones
+      const deliveriesBox = document.getElementById('deliveriesBox');
+      const deliveryModeBox = document.getElementById('deliveryModeBox');
+      const phonesBox = document.getElementById('phonesBox');
+
+      deliveriesBox.innerHTML = '';
+      if (entities.deliveries && entities.deliveries.length > 0) {
+        entities.deliveries.forEach(d => {
+          deliveriesBox.innerHTML += `<span class="carrier-tag">${d.label}</span> `;
+        });
+      } else {
+        deliveriesBox.innerHTML = '<span class="empty-state">لم تحدد شركة توصيل</span>';
+      }
+
+      if (entities.deliveryMode) {
+        deliveryModeBox.innerHTML = `<span class="mode-tag">${entities.deliveryMode}</span>`;
+      } else {
+        deliveryModeBox.innerHTML = '<span class="empty-state">لم يحدد نمط التوصيل (مكتب / منزل)</span>';
+      }
+
+      phonesBox.innerHTML = '';
+      if (entities.phones && entities.phones.length > 0) {
+        entities.phones.forEach(ph => {
+          phonesBox.innerHTML += `<span class="phone-tag">${ph.raw} &rarr; ${ph.normalized}</span> `;
+        });
+      } else {
+        phonesBox.innerHTML = '<span class="empty-state">لا توجد أرقام هواتف مرصودة</span>';
+      }
+
       // 3. Dialect
       const dialect = detectDialect(text);
       const dBadge = document.getElementById('dialectBadge');
@@ -933,9 +1082,48 @@
       }
 
       // 4. Arabizi, Normalization, Stopwords
-      document.getElementById('arabiziBox').textContent = arabiziToArabic(text) || '-';
+      const arabiziClean = arabiziToArabic(text);
+      document.getElementById('arabiziBox').textContent = arabiziClean || '-';
       document.getElementById('normalizedBox').textContent = normalize(text) || '-';
       document.getElementById('stopwordsBox').textContent = removeStopwords(text) || '-';
+
+      // 5. AI Agent Simulator
+      const wilayaName = entities.wilayas.length > 0 ? entities.wilayas[0].name_ar + ' (' + entities.wilayas[0].code_str + ')' : null;
+      const carrierName = entities.deliveries && entities.deliveries.length > 0 ? entities.deliveries[0].label : null;
+      const priceText = entities.prices.length > 0 ? entities.prices[0].amount.toLocaleString() + ' دج' : null;
+
+      const agentPrompt = `[سياق الزبون المستخرج بدقة عبر darja-nlp-kit]:
+- الرسالة الأصلية: "${text}"
+- الترجمة التفسيرية: "${arabiziClean}"
+- اللهجة المستهدفة: ${dialect.region} (${regionNames[dialect.region] || 'عامة'})
+- المزاج والشعور: ${sent.label} (الدرجة: ${sent.score.toFixed(2)})
+- الولاية المؤكدة: ${wilayaName || 'غير محددة'}
+- شركة التوصيل: ${carrierName || 'غير محددة'}
+- نمط التوصيل: ${entities.deliveryMode || 'غير محدد'}
+- المبالغ بالدينار: ${priceText || 'غير محددة'}
+- وسائل الدفع: ${entities.payments.length > 0 ? entities.payments.map(p => p.label).join(', ') : 'غير محددة'}
+
+[التعليمات]: طابق لهجة الزبون ومزاجه، وأجب بدارجة جزائرية عفوية ومحترمة (لا فصحى معربة)، والتزم بالأسعار والولايات بدون هلوسة.`;
+
+      document.getElementById('agentPromptBox').textContent = agentPrompt;
+
+      let agentReply = '';
+      if (sent.label === 'NEGATIVE') {
+        agentReply = 'سلام عليكم خويا، حقك علينا ونعتذروا منك بزاف بزاف! ما تقلقش روحك كامل، المشكل نحلوهولك درك. قولي برك واش صرا بالضبط ونبدلولك السلعة ولا نرجعولك دراهمك في الحين.';
+      } else {
+        const targetWilaya = wilayaName ? 'لـ ' + wilayaName : 'عندك';
+        const targetPrice = priceText ? 'والحساب راهو ' + priceText : 'والسعر مضبوط';
+        const targetCarrier = carrierName ? 'مع ' + carrierName : 'مع شركة التوصيل';
+
+        if (dialect.region === 'WEST') {
+          agentReply = `وعليكم السلام خويا لعزيز! مرحبا بيك، السلعة راها كاينة ونوصلوها ${targetWilaya} ${targetCarrier}. ${targetPrice}. تقدر تفيرسي في BaridiMob ولا تخلص كاش كي توصلك السلعة غايا!`;
+        } else if (dialect.region === 'EAST') {
+          agentReply = `أهلاً وسهلاً بيك خويا ربي يحفظك! سلعة لوز وضرك نوجدوهالك ${targetWilaya} ${targetCarrier}، ${targetPrice}. تقدر تخلص بالـ BaridiMob ولا تكاشي كي يوصلهالك الليفرور، عيشك!`;
+        } else {
+          agentReply = `سلام خويا، مرحبا بيك عندنا! ما كاش مشكل خلاص، السلعة متوفرة ونوصلوها ${targetWilaya} ${targetCarrier}، ${targetPrice}. بالنسبة للدفع تحب بريدي موب ولا كاش كي تلحقك السلعة للباب؟`;
+        }
+      }
+      document.getElementById('agentReplyBox').textContent = agentReply;
     }
 
     inputArea.addEventListener('input', processText);

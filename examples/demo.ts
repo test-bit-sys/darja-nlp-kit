@@ -51,6 +51,15 @@ for (const text of samples) {
   if (entities.prices.length > 0) {
     console.log(`   الأسعار (Prices)            : ${entities.prices.map((p) => `${p.raw} -> ${p.amount} DZD`).join(', ')}`);
   }
+  if (entities.deliveries && entities.deliveries.length > 0) {
+    console.log(`   شركات التوصيل (Carriers)    : ${entities.deliveries.map((d) => d.label).join(', ')}`);
+  }
+  if (entities.deliveryMode) {
+    console.log(`   نمط التوصيل (Delivery Mode) : ${entities.deliveryMode.label}`);
+  }
+  if (entities.phones && entities.phones.length > 0) {
+    console.log(`   أرقام الهاتف (Phones)       : ${entities.phones.map((ph) => `${ph.raw} -> ${ph.normalized}`).join(', ')}`);
+  }
 
   const dialect = detectDialect(text);
   console.log(`7. اللهجة الجهوية (Dialect)    : [${dialect.region}] (الثقة: ${Math.round(dialect.confidence * 100)}%)`);

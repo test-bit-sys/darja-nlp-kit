@@ -55,7 +55,7 @@ def run_sample(text: str) -> None:
     if sentiment.negative_tokens:
         print(f"   الكلمات السلبية            : {sentiment.negative_tokens}")
 
-    # 6. Algerian Entities (69 Wilayas, Payments, Prices)
+    # 6. Algerian Entities (69 Wilayas, Payments, Prices, Deliveries, Phones)
     entities = extract_entities(text)
     if entities.wilayas:
         w_strs = [f"{w.name_ar} / {w.name_fr} ({w.code_str})" for w in entities.wilayas]
@@ -64,8 +64,16 @@ def run_sample(text: str) -> None:
         p_strs = [p.label for p in entities.payments]
         print(f"   طرق الدفع (Payments)        : {', '.join(p_strs)}")
     if entities.prices:
-        pr_strs = [f"{p.raw} -> {p.amount} DZD" for p in entities.prices]
+        pr_strs = [f"{p.raw} -> {p.amount:,.0f} DZD" for p in entities.prices if p.amount is not None]
         print(f"   الأسعار (Prices)            : {', '.join(pr_strs)}")
+    if entities.deliveries:
+        d_strs = [d.label for d in entities.deliveries]
+        print(f"   شركات التوصيل (Carriers)    : {', '.join(d_strs)}")
+    if entities.delivery_mode:
+        print(f"   نمط التوصيل (Delivery Mode) : {entities.delivery_mode.label}")
+    if entities.phones:
+        ph_strs = [f"{ph.raw} -> {ph.normalized}" for ph in entities.phones]
+        print(f"   أرقام الهاتف (Phones)       : {', '.join(ph_strs)}")
 
     # 7. Regional Dialect Identification
     dialect = detect_dialect(text)
@@ -80,11 +88,12 @@ def main() -> None:
     print("=" * 65)
 
     samples = [
-        "السلعة هاااااايلة بزاااااف و الخدمة فور، يعطيك الصحة! توصيل لبوسعادة",
+        "السلعة هاااااايلة بزاااااف و الخدمة فور، يعطيك الصحة! توصيل لبوسعادة ياليدين ستوب ديسك كلمني في 0661234567",
         "produit mli7 bzaf livraison l wahran rotar chwiya, prix 4500 DA w khlass b baridimob",
-        "سلعة عيانة و السيرفيس ماشي شباب قاع، ارناك كبيرة ما ننصحكمش",
-        "شوالا راك باغي خوية غايا درك؟ كاين توصيل للسانية ولاية 31",
+        "سلعة عيانة و السيرفيس ماشي شباب قاع، ارناك كبيرة حشيتوهالي و الكولي مكسر",
+        "شوالا راك باغي خوية غايا درك؟ كاين توصيل للسانية ولاية 31 بـ zr express للدار",
         "واشنهي هادا قداش يدير ياسر باهي سيرتا نخلصك كاش عند الاستلام بـ زوج ملاين",
+        "salam khoya rani hab nchrih b 3 mlayen l Constantine wla nversilk f ccp? num: +213 555 99 88 77",
     ]
 
     print("\n--- تشغيل عينات تجريبية من تعليقات التجارة الإلكترونية والولايات الـ 69 ---")

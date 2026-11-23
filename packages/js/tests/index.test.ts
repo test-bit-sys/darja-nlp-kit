@@ -6,6 +6,7 @@ import { tokenize, removeStopwords, isStopword } from '../src/stopwords';
 import { analyzeSentiment } from '../src/sentiment';
 import { extractEntities, getWilayas, getWilayaByCode } from '../src/entities';
 import { detectDialect } from '../src/dialect';
+import { buildAgentContext, formatAgentSystemPrompt } from '../src/agent';
 
 describe('normalize', () => {
   it('should unify alef variants', () => {
@@ -351,6 +352,51 @@ describe('wilayas & entities', () => {
     const res2 = extractEntities(text2);
     assert.ok(res2.prices.some((p) => p.amount === 20000));
     assert.ok(res2.prices.some((p) => p.amount === 1000));
+
+    const text3 = 'سومتها 3 mlayen و سلعة ثانية 5 ملاين';
+    const res3 = extractEntities(text3);
+    assert.ok(res3.prices.some((p) => p.amount === 30000));
+    assert.ok(res3.prices.some((p) => p.amount === 50000));
+  });
+
+  it('should extract Algerian delivery companies and modes', () => {
+    const text = 'ابعثهالي مع yalidine stop desk و خلاص كاش';
+    const res = extractEntities(text);
+    assert.ok(res.deliveries?.some((d) => d.company === 'YALIDINE'));
+    assert.equal(res.deliveryMode?.mode, 'STOP_DESK');
+
+    const text2 = 'livraison a domicile zr express';
+    const res2 = extractEntities(text2);
+    assert.ok(res2.deliveries?.some((d) => d.company === 'ZR_EXPRESS'));
+    assert.equal(res2.deliveryMode?.mode, 'HOME_DELIVERY');
+  });
+
+  it('should extract and normalize Algerian phone numbers', () => {
+    const text = 'عيطلي في 0661234567 ولا +213 555 12 34 56';
+    const res = extractEntities(text);
+    assert.equal(res.phones?.length, 2);
+    assert.ok(res.phones?.some((p) => p.normalized === '0661234567'));
+    assert.ok(res.phones?.some((p) => p.normalized === '0555123456'));
+  });
+});
+
+describe('AI Agent Integration', () => {
+  it('should build complete structured agent context', () => {
+    const msg = 'salam khoya rani baghi had lproduit b 2 mlayen l Constantine wla nversilk f baridimob? num ta3i 0770112233';
+    const ctx = buildAgentContext(msg);
+    assert.ok(ctx.groundedFacts.wilayas.some((w) => w.includes('قسنطينة')));
+    assert.ok(ctx.groundedFacts.pricesDzd.some((p) => p.includes('20,000')));
+    assert.ok(ctx.groundedFacts.payments.some((p) => p.includes('BaridiMob')));
+    assert.ok(ctx.groundedFacts.phones.includes('0770112233'));
+    assert.equal(ctx.dialect.region, 'WEST');
+  });
+
+  it('should format realistic ground-truth system prompt', () => {
+    const msg = 'khedma 3ayana w sil3a khorda 7chawhali';
+    const ctx = buildAgentContext(msg);
+    const prompt = formatAgentSystemPrompt(ctx);
+    assert.ok(prompt.includes('NEGATIVE'));
+    assert.ok(prompt.includes('⚠️ الزبون غاضب أو يشتكي'));
   });
 });
 

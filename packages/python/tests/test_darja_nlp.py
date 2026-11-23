@@ -10,6 +10,7 @@ from darja_nlp.stopwords import tokenize, remove_stopwords, is_stopword
 from darja_nlp.sentiment import analyze_sentiment
 from darja_nlp.entities import extract_entities, get_wilayas, get_wilaya_by_code
 from darja_nlp.dialect import detect_dialect
+from darja_nlp.agent import build_agent_context, format_agent_system_prompt
 
 
 class TestNormalize:
@@ -314,6 +315,50 @@ class TestEntities:
         res2 = extract_entities(text2)
         assert any(p.amount == 20000.0 for p in res2.prices)
         assert any(p.amount == 1000.0 for p in res2.prices)
+
+        text3 = 'سومتها 3 mlayen و سلعة ثانية 5 ملاين'
+        res3 = extract_entities(text3)
+        assert any(p.amount == 30000.0 for p in res3.prices)
+        assert any(p.amount == 50000.0 for p in res3.prices)
+
+    def test_extract_delivery_companies_and_mode(self) -> None:
+        text = 'ابعثهالي مع yalidine stop desk و خلاص كاش'
+        res = extract_entities(text)
+        assert any(d.company == 'YALIDINE' for d in res.deliveries)
+        assert res.delivery_mode is not None
+        assert res.delivery_mode.mode == 'STOP_DESK'
+
+        text2 = 'livraison a domicile zr express'
+        res2 = extract_entities(text2)
+        assert any(d.company == 'ZR_EXPRESS' for d in res2.deliveries)
+        assert res2.delivery_mode is not None
+        assert res2.delivery_mode.mode == 'HOME_DELIVERY'
+
+    def test_extract_algerian_phones(self) -> None:
+        text = 'عيطلي في 0661234567 ولا +213 555 12 34 56'
+        res = extract_entities(text)
+        assert len(res.phones) == 2
+        assert any(p.normalized == '0661234567' for p in res.phones)
+        assert any(p.normalized == '0555123456' for p in res.phones)
+
+
+class TestAIAgent:
+
+    def test_build_agent_context(self) -> None:
+        msg = 'salam khoya rani baghi had lproduit b 2 mlayen l Constantine wla nversilk f baridimob? num ta3i 0770112233'
+        ctx = build_agent_context(msg)
+        assert any('قسنطينة' in w for w in ctx['grounded_facts']['wilayas'])
+        assert any('20,000' in p for p in ctx['grounded_facts']['prices_dzd'])
+        assert any('BaridiMob' in p for p in ctx['grounded_facts']['payments'])
+        assert '0770112233' in ctx['grounded_facts']['phones']
+        assert ctx['dialect']['region'] == 'WEST'
+
+    def test_format_system_prompt(self) -> None:
+        msg = 'khedma 3ayana w sil3a khorda 7chawhali'
+        ctx = build_agent_context(msg)
+        prompt = format_agent_system_prompt(ctx)
+        assert 'NEGATIVE' in prompt
+        assert '⚠️ الزبون غاضب أو يشتكي' in prompt
 
 
 class TestDialect:
