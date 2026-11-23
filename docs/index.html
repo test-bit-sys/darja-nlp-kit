@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>darja-nlp-kit | Algerian NLP & AI Agent Playground</title>
+  <link rel="icon" type="image/jpeg" href="logo.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -53,10 +54,24 @@
       margin-bottom: 40px;
     }
 
+    .project-logo {
+      width: 96px;
+      height: 96px;
+      border-radius: 22px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.25), 0 0 10px rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .project-logo:hover {
+      transform: scale(1.05);
+    }
+
     .logo-badge {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       padding: 8px 18px;
       background: rgba(16, 185, 129, 0.1);
       border: 1px solid rgba(16, 185, 129, 0.3);
@@ -88,14 +103,14 @@
     p.subtitle {
       color: var(--text-muted);
       font-size: 1.1rem;
-      max-width: 650px;
+      max-width: 680px;
       margin: 0 auto 20px;
     }
 
     .links-bar {
       display: flex;
       justify-content: center;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
       margin-top: 10px;
     }
@@ -509,6 +524,8 @@
 
   <div class="container">
     <header>
+      <img src="logo.jpg" alt="darja-nlp-kit logo" class="project-logo">
+      <br>
       <div class="logo-badge">
         <span>DZ Open Suite</span>
         <span>Zero-Dependency</span>
@@ -902,7 +919,7 @@
     function extractQuantities(text) {
       const results = [];
       const unitWords = { 'زوج': 2, 'تلات': 3, 'تلاتة': 3, 'ربع': 4, 'ربعة': 4, 'خمس': 5, 'خمسة': 5, 'zouj': 2, 'tlata': 3 };
-      const dynReg = /(?:^|\s|[^\w؀-ۿ])(\d+(?:\.\d+)?|زوج|تلات|تلاتة|ربع|ربعة|خمس|خمسة|zouj|tlata)\s*(حبات|حبة|حبه|شكاير|شكارة|باكيات|باكية|كراتن|كراطن|كرطونة|hbat|7bat|chkayer|bakyat|boites|cartons)(?=$|\s|[^\w؀-ۿ])/gi;
+      const dynReg = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:\.\d+)?|زوج|تلات|تلاتة|ربع|ربعة|خمس|خمسة|zouj|tlata)\s*(حبات|حبة|حبه|شكاير|شكارة|باكيات|باكية|كراتن|كراطن|كرطونة|hbat|7bat|chkayer|bakyat|boites|cartons)(?=$|\s|[^\w\u0600-\u06FF])/gi;
       let m;
       let masked = text;
       while ((m = dynReg.exec(text)) !== null) {
@@ -920,8 +937,8 @@
 
       // Fixed units like دوزينة
       const fixed = [
-        { reg: /(?:^|\s|[^\w؀-ۿ])(دوزينة|دزينة|douzina|douzaine)(?=$|\s|[^\w؀-ۿ])/i, val: 12, unit: 'دوزينة' },
-        { reg: /(?:^|\s|[^\w؀-ۿ])(حبة\s*وحدة|1\s*hba)(?=$|\s|[^\w؀-ۿ])/i, val: 1, unit: 'حبة' },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(دوزينة|دزينة|douzina|douzaine)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 12, unit: 'دوزينة' },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(حبة\s*وحدة|1\s*hba)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 1, unit: 'حبة' },
       ];
       for (const item of fixed) {
         const fm = masked.match(item.reg);
@@ -935,13 +952,13 @@
     function extractProductAttributes(text) {
       const colors = [];
       const colorDefs = [
-        { reg: /(?:^|\s|[^\w؀-ۿ]|و)(كحل|كحلة|noir|noire|k7al)(?=$|\s|[^\w؀-ۿ])/i, label: 'كحل / noir' },
-        { reg: /(?:^|\s|[^\w؀-ۿ]|و)(بيض|بيضا|blanc|blanche|byad)(?=$|\s|[^\w؀-ۿ])/i, label: 'بيض / blanc' },
-        { reg: /(?:^|\s|[^\w؀-ۿ]|و)(غوج|حمرا|rouge|7mar)(?=$|\s|[^\w؀-ۿ])/i, label: 'غوج / rouge' },
-        { reg: /(?:^|\s|[^\w؀-ۿ]|و)(بلو|زرقة|bleu|bleue)(?=$|\s|[^\w؀-ۿ])/i, label: 'بلو / bleu' },
-        { reg: /(?:^|\s|[^\w؀-ۿ]|و)(خضر|خضرا|vert|verte)(?=$|\s|[^\w؀-ۿ])/i, label: 'خضر / vert' },
-        { reg: /(?:^|\s|[^\w؀-ۿ]|و)(بيج|beige)(?=$|\s|[^\w؀-ۿ])/i, label: 'بيج / beige' },
-        { reg: /(?:^|\s|[^\w؀-ۿ]|و)(مارون|قهوي|marron)(?=$|\s|[^\w؀-ۿ])/i, label: 'مارون / marron' },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(كحل|كحلة|noir|noire|k7al)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'كحل / noir' },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(بيض|بيضا|blanc|blanche|byad)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'بيض / blanc' },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(غوج|حمرا|rouge|7mar)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'غوج / rouge' },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(بلو|زرقة|bleu|bleue)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'بلو / bleu' },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(خضر|خضرا|vert|verte)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'خضر / vert' },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(بيج|beige)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'بيج / beige' },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(مارون|قهوي|marron)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'مارون / marron' },
       ];
       for (const c of colorDefs) {
         if (c.reg.test(text) && !colors.includes(c.label)) colors.push(c.label);
@@ -1034,7 +1051,7 @@
       const kStr = 'مية|ميتين|تلمية|تلاتمية|ربعمية|خمسمية|ستمية|سبعمية|تمنمية|تسعمية|عشرين|تلاتين|ربعين|خمسين|ستين|سبعين|تمانين|تسعين|mya|mitin|teltmya|khamsmya|khamsin';
 
       // 1. Compound prices (e.g. 2 mlayen w 500 alf)
-      const compReg = new RegExp(`(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?|${mStr})?\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)\s*(?:و|\+|et|w)\s*(\d+(?:[.,]\d+)?|${kStr})?\s*(?:الف|ألف|alf)(?=$|\s|[^\w\u0600-\u06FF])`, 'gi');
+      const compReg = new RegExp(`(?:^|\\s|[^\\w\\u0600-\\u06FF])(\\d+(?:[.,]\\d+)?|${mStr})?\\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)\\s*(?:و|\\+|et|w)\\s*(\\d+(?:[.,]\\d+)?|${kStr})?\\s*(?:الف|ألف|alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])`, 'gi');
       let compM;
       while ((compM = compReg.exec(text)) !== null) {
         const rM = compM[1];
@@ -1066,7 +1083,7 @@
       }
 
       // 3. Dynamic millions
-      const dynMilReg = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)(?=$|\s|[^\w\u0600-\u06FF])/gi;
+      const dynMilReg = /(?:^|\s|[^\w\u0600-\u06FF])(\\d+(?:[.,]\\d+)?)\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)(?=$|\s|[^\w\u0600-\u06FF])/gi;
       let dmDyn;
       while ((dmDyn = dynMilReg.exec(maskedText)) !== null) {
         const val = parseFloat(dmDyn[1].replace(',', '.')) * 10000;
@@ -1121,7 +1138,7 @@
 
       // Phones & Telecom Operator
       const phones = [];
-      const phoneReg = /(?:^|\s|[^\w؀-ۿ])((?:\+213|00213|0)\s*(?:[5-7](?:[\s.-]?\d){8}|(?:2[0-9]|3[0-9]|4[0-9])(?:[\s.-]?\d){6}))(?=$|\s|[^\w؀-ۿ])/gi;
+      const phoneReg = /(?:^|\s|[^\w\u0600-\u06FF])((?:\+213|00213|0)\s*(?:[5-7](?:[\s.-]?\d){8}|(?:2[0-9]|3[0-9]|4[0-9])(?:[\s.-]?\d){6}))(?=$|\s|[^\w\u0600-\u06FF])/gi;
       let phMatch;
       while ((phMatch = phoneReg.exec(text)) !== null) {
         let raw = phMatch[1].trim();

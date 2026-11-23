@@ -1,11 +1,19 @@
 {
   "name": "@dz-open-suite/darja-nlp-kit",
   "version": "1.0.0",
-  "description": "Zero-dependency NLP toolkit for Algerian Darja (Arabic/French/Arabizi code-switching)",
+  "description": "Zero-dependency NLP & AI Automation Toolkit for Algerian Darja (Arabic/Arabizi). 69 Wilayas, colloquial prices, telecom operator routing, and smart escalation.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "darja-nlp": "./dist/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/test-bit-sys/darja-nlp-kit.git"
+  },
+  "homepage": "https://test-bit-sys.github.io/darja-nlp-kit/",
+  "bugs": {
+    "url": "https://github.com/test-bit-sys/darja-nlp-kit/issues"
   },
   "files": [
     "dist",
@@ -20,12 +28,20 @@
     "nlp",
     "arabic",
     "darja",
+    "derja",
+    "algeria",
     "algerian",
     "arabizi",
+    "ai-agent",
+    "ai-automation",
+    "n8n",
+    "whatsapp-bot",
+    "ecommerce",
+    "wilayas",
     "sentiment",
     "tokenizer",
     "stopwords",
-    "code-switching"
+    "zero-dependency"
   ],
   "author": "DZ Open Suite",
   "license": "MIT",

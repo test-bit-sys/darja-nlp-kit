@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "darja-nlp-kit"
 version = "1.0.0"
-description = "Zero-dependency NLP toolkit for Algerian Darja (Arabic/French/Arabizi code-switching)"
+description = "Zero-dependency NLP & AI Automation Toolkit for Algerian Darja (Arabic/Arabizi)"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.9"
@@ -13,8 +13,9 @@ authors = [
     {name = "DZ Open Suite"}
 ]
 keywords = [
-    "nlp", "arabic", "darja", "algerian", "arabizi",
-    "sentiment", "tokenizer", "stopwords", "code-switching"
+    "nlp", "arabic", "darja", "derja", "algeria", "algerian", "arabizi",
+    "ai-agent", "ai-automation", "n8n", "whatsapp-bot", "ecommerce",
+    "wilayas", "sentiment", "tokenizer", "stopwords", "zero-dependency"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
