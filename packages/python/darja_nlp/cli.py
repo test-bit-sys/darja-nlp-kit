@@ -2,11 +2,13 @@
 Command-Line Interface (CLI) for darja-nlp-kit.
 
 Usage examples:
+  darja-nlp analyze "salam kho rani hab nchrih b 2 mlayen l wahran 0661234567"
   darja-nlp parse "نحوس على 2 حبات مقاس XL نبعثهم لوهران 0661234567"
   darja-nlp intent "شحال التوصيل لسطيف؟"
   darja-nlp escalation "سراقين حشيتوهالي رجعولي دراهمي"
   darja-nlp sentiment "سلعة بزاف شابة يعطيكم الصحة"
-  darja-nlp dialect "ارواح درك شوف الغاية"
+  darja-nlp chat "wach ya khoy"
+  darja-nlp eval
   darja-nlp server --port 8080
 """
 from __future__ import annotations
@@ -14,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
 from .normalizer import normalize
 from .arabizi import arabizi_to_arabic
@@ -26,6 +29,7 @@ from .intent import identify_intent
 from .cultural import detect_cultural_references, detect_memes
 from .dialogue import respond_to_darja
 from .profanity import detect_profanity, censor_profanity
+from .pipeline import analyze as run_analyze
 from .agent import build_agent_context, format_agent_system_prompt
 from .server import start_server
 
@@ -36,6 +40,23 @@ def main():
         description="Zero-dependency NLP & AI Automation Toolkit for Algerian Darja",
     )
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
+
+    # Command: analyze (All-in-one)
+    p_analyze = subparsers.add_parser("analyze", help="Run complete end-to-end NLP analysis on Darja text")
+    p_analyze.add_argument("text", help="Algerian Darja / Arabizi text to analyze")
+    p_analyze.add_argument("--persona", choices=["casual", "merchant", "assistant"], default="casual")
+    p_analyze.add_argument("--mode", choices=["hybrid", "lexicon", "ml"], default="hybrid")
+    p_analyze.add_argument("--json", action="store_true", help="Output raw JSON")
+
+    # Command: normalize
+    p_norm = subparsers.add_parser("normalize", help="Normalize Arabic/Arabizi Darja text")
+    p_norm.add_argument("text", help="Text to normalize")
+    p_norm.add_argument("--json", action="store_true", help="Output raw JSON")
+
+    # Command: arabizi
+    p_arab = subparsers.add_parser("arabizi", help="Convert Arabizi text to Arabic script")
+    p_arab.add_argument("text", help="Arabizi text to transliterate")
+    p_arab.add_argument("--json", action="store_true", help="Output raw JSON")
 
     # Command: parse
     p_parse = subparsers.add_parser("parse", help="Extract Algerian entities, wilayas, phones, operator, prices, and quantities")
@@ -53,8 +74,9 @@ def main():
     p_esc.add_argument("--json", action="store_true", help="Output raw JSON")
 
     # Command: sentiment
-    p_sent = subparsers.add_parser("sentiment", help="Analyze Algerian sentiment (positive, negative, neutral)")
+    p_sent = subparsers.add_parser("sentiment", help="Analyze Algerian sentiment (POSITIVE, NEGATIVE, NEUTRAL, MIXED)")
     p_sent.add_argument("text", help="Message text")
+    p_sent.add_argument("--mode", choices=["hybrid", "lexicon", "ml"], default="hybrid", help="Analysis engine mode")
     p_sent.add_argument("--json", action="store_true", help="Output raw JSON")
 
     # Command: dialect
@@ -82,6 +104,8 @@ def main():
     p_chat.add_argument("text", help="Algerian message or greeting")
     p_chat.add_argument("--persona", choices=["casual", "merchant", "assistant"], default="casual", help="Persona style")
     p_chat.add_argument("--script", choices=["auto", "arabizi", "arabic"], default="auto", help="Output script")
+    p_chat.add_argument("--strategy", choices=["auto", "rules", "retrieval"], default="auto", help="Reply strategy")
+    p_chat.add_argument("--vary", action="store_true", help="Vary responses instead of picking the top deterministic reply")
     p_chat.add_argument("--json", action="store_true", help="Output raw JSON")
 
     # Command: moderate
@@ -95,6 +119,11 @@ def main():
     p_meme.add_argument("text", help="Text containing meme or quote")
     p_meme.add_argument("--json", action="store_true", help="Output raw JSON")
 
+    # Command: eval
+    p_eval = subparsers.add_parser("eval", help="Evaluate toolkit sentiment accuracy on real held-out Algerian benchmark")
+    p_eval.add_argument("--mode", choices=["hybrid", "lexicon", "ml"], default="hybrid")
+    p_eval.add_argument("--json", action="store_true", help="Output raw JSON")
+
     # Command: server
     p_srv = subparsers.add_parser("server", help="Start local zero-dependency HTTP microservice (for n8n, Make, webhooks)")
     p_srv.add_argument("--host", default="0.0.0.0", help="Host interface (default: 0.0.0.0)")
@@ -106,7 +135,48 @@ def main():
         parser.print_help()
         sys.exit(0)
 
-    if args.command == "parse":
+    if args.command == "analyze":
+        report = run_analyze(args.text, persona=args.persona, sentiment_mode=args.mode)
+        data = report.to_dict()
+        if args.json:
+            print(json.dumps(data, ensure_ascii=False, indent=2))
+        else:
+            print("=== Darja NLP Unified Analysis ===")
+            print(f"Normalized : {report.normalized}")
+            if report.arabic != report.raw_text:
+                print(f"Arabic     : {report.arabic}")
+            if report.sentiment:
+                print(f"Sentiment  : {report.sentiment.label} ({report.sentiment.score:+.2f}) [{report.sentiment.method}]")
+            if report.intent:
+                print(f"Intent     : {report.intent.intent} ({report.intent.confidence:.2f})")
+            if report.dialect:
+                print(f"Dialect    : {report.dialect.region} ({report.dialect.confidence:.2f})")
+            if report.entities and report.entities.wilayas:
+                print("Wilayas    :", ", ".join(f"{w.name_ar} ({w.code})" for w in report.entities.wilayas))
+            if report.entities and report.entities.prices:
+                print("Prices DZD :", ", ".join(f"{p.amount:,.0f}" for p in report.entities.prices if p.amount is not None))
+            if report.entities and report.entities.phones:
+                print("Phones     :", ", ".join(p.normalized for p in report.entities.phones))
+            if report.profanity and report.profanity.is_profane:
+                print(f"Moderation : PROFANE ({report.profanity.severity}) -> {report.profanity.censored_text}")
+            if report.reply:
+                print(f"Reply      : {report.reply.reply} [{report.reply.source}]")
+
+    elif args.command == "normalize":
+        res = normalize(args.text)
+        if args.json:
+            print(json.dumps({"input": args.text, "normalized": res}, ensure_ascii=False, indent=2))
+        else:
+            print(res)
+
+    elif args.command == "arabizi":
+        res = arabizi_to_arabic(args.text)
+        if args.json:
+            print(json.dumps({"input": args.text, "arabic": res}, ensure_ascii=False, indent=2))
+        else:
+            print(res)
+
+    elif args.command == "parse":
         entities = extract_entities(args.text)
         cult = detect_cultural_references(args.text)
         res = {
@@ -165,35 +235,37 @@ def main():
             "reason": res.reason,
             "urgency": res.urgency,
             "guideline": res.guideline,
-            "matched_keywords": res.matched_keywords,
+            "matched_triggers": res.matched_triggers,
         }
         if args.json:
             print(json.dumps(data, ensure_ascii=False, indent=2))
         else:
-            status = "🚨 ESCALATION REQUIRED" if res.needs_escalation else "✅ NORMAL (No Escalation)"
+            status = "ESCALATION REQUIRED" if res.needs_escalation else "NORMAL (No Escalation)"
             print(f"Status: {status}")
             print(f"Reason: {res.reason} | Urgency: {res.urgency}")
             print(f"Guideline: {res.guideline}")
-            if res.matched_keywords:
-                print(f"Keywords: {', '.join(res.matched_keywords)}")
+            if res.matched_triggers:
+                print(f"Triggers: {', '.join(res.matched_triggers)}")
 
     elif args.command == "sentiment":
-        res = analyze_sentiment(args.text)
+        res = analyze_sentiment(args.text, mode=args.mode)
         data = {
             "label": res.label,
             "score": res.score,
-            "positive_words": res.positive_words,
-            "negative_words": res.negative_words,
+            "method": res.method,
+            "probabilities": res.probabilities,
+            "positive_tokens": res.positive_tokens,
+            "negative_tokens": res.negative_tokens,
+            "negated": res.negated,
         }
         if args.json:
             print(json.dumps(data, ensure_ascii=False, indent=2))
         else:
-            icon = "😊" if res.label == "POSITIVE" else ("😡" if res.label == "NEGATIVE" else "😐")
-            print(f"Sentiment: {icon} {res.label} (Score: {res.score:.2f})")
-            if res.positive_words:
-                print(f"Positive terms: {', '.join(res.positive_words)}")
-            if res.negative_words:
-                print(f"Negative terms: {', '.join(res.negative_words)}")
+            print(f"Sentiment: {res.label} (Score: {res.score:+.2f}, Method: {res.method})")
+            if res.positive_tokens:
+                print(f"Positive terms: {', '.join(res.positive_tokens)}")
+            if res.negative_tokens:
+                print(f"Negative terms: {', '.join(res.negative_tokens)}")
 
     elif args.command == "dialect":
         res = detect_dialect(args.text)
@@ -255,24 +327,31 @@ def main():
             print(f"Has Reference : {'Yes' if data['has_cultural_reference'] else 'No'}")
             print(f"Summary       : {data['cultural_summary']}")
             if data["proverbs"]:
-                print(f"📜 Proverbs   : {', '.join(p['canonical_name'] for p in data['proverbs'])}")
+                print(f"Proverbs      : {', '.join(p['canonical_name'] for p in data['proverbs'])}")
             if data["memes_and_trends"]:
-                print(f"🎭 Memes/Trends: {', '.join(m['canonical_name'] for m in data['memes_and_trends'])}")
+                print(f"Memes/Trends  : {', '.join(m['canonical_name'] for m in data['memes_and_trends'])}")
             if data["landmarks"]:
-                print(f"🏛️ Landmarks  : {', '.join(l['canonical_name'] for l in data['landmarks'])}")
+                print(f"Landmarks     : {', '.join(l['canonical_name'] for l in data['landmarks'])}")
             if data["gastronomy"]:
-                print(f"🍲 Gastronomy : {', '.join(g['canonical_name'] for g in data['gastronomy'])}")
+                print(f"Gastronomy    : {', '.join(g['canonical_name'] for g in data['gastronomy'])}")
             if data["slang_expressions"]:
-                print(f"💬 Slang Terms: {', '.join(s['canonical_name'] for s in data['slang_expressions'])}")
+                print(f"Slang Terms   : {', '.join(s['canonical_name'] for s in data['slang_expressions'])}")
 
     elif args.command == "chat":
-        res = respond_to_darja(args.text, persona=args.persona, script=args.script)
+        res = respond_to_darja(
+            args.text,
+            persona=args.persona,
+            script=args.script,
+            strategy=args.strategy,
+            vary=args.vary,
+        )
         data = {
             "reply": res.reply,
             "intent": res.intent,
             "script": res.script,
             "confidence": res.confidence,
-            "matched_pattern": res.matched_pattern
+            "matched_pattern": res.matched_pattern,
+            "source": res.source,
         }
         if args.json:
             print(json.dumps(data, ensure_ascii=False, indent=2))
@@ -281,6 +360,7 @@ def main():
             print(f"Reply          : {res.reply}")
             print(f"Intent         : {res.intent}")
             print(f"Script         : {res.script}")
+            print(f"Source         : {res.source}")
             print(f"Confidence     : {res.confidence:.2f}")
 
     elif args.command == "moderate":
@@ -294,7 +374,7 @@ def main():
                 {"term": m.term, "category": m.category, "severity": m.severity, "matched_text": m.matched_text}
                 for m in res.matches
             ],
-            "censored_text": censored
+            "censored_text": censored,
         }
         if args.json:
             print(json.dumps(data, ensure_ascii=False, indent=2))
@@ -318,10 +398,43 @@ def main():
             if not memes:
                 print("No viral memes detected in text.")
             for m in memes:
-                print(f"🎭 Meme: {m.canonical_name}")
-                print(f"   Meaning: {m.meaning}")
+                print(f"Meme: {m.canonical_name}")
+                print(f"  Meaning: {m.meaning}")
                 if m.metadata.get("origin"):
-                    print(f"   Origin : {m.metadata['origin']}")
+                    print(f"  Origin : {m.metadata['origin']}")
+
+    elif args.command == "eval":
+        bench_path = Path(__file__).resolve().parent / "data" / "eval_benchmark.json"
+        if not bench_path.exists():
+            print("Error: eval_benchmark.json not found in package data.", file=sys.stderr)
+            sys.exit(1)
+        bench = json.loads(bench_path.read_text(encoding="utf-8")).get("sentiment", [])
+        by_src = {}
+        ok = 0
+        for row in bench:
+            pred = analyze_sentiment(row["text"], mode=args.mode).label
+            if pred == "MIXED":
+                pred = "NEUTRAL"
+            src = row.get("source", "unknown")
+            by_src.setdefault(src, [0, 0])
+            by_src[src][1] += 1
+            if pred == row["label"]:
+                ok += 1
+                by_src[src][0] += 1
+        summary = {
+            "mode": args.mode,
+            "total": len(bench),
+            "correct": ok,
+            "accuracy": round(ok / len(bench), 4) if bench else 0.0,
+            "by_source": {k: {"correct": v[0], "total": v[1], "accuracy": round(v[0] / v[1], 4)} for k, v in by_src.items()},
+        }
+        if args.json:
+            print(json.dumps(summary, ensure_ascii=False, indent=2))
+        else:
+            print(f"=== Held-Out Sentiment Benchmark (mode={args.mode}) ===")
+            print(f"Overall Accuracy : {ok}/{len(bench)} ({summary['accuracy']:.2%})")
+            for src, stats in summary["by_source"].items():
+                print(f"  - {src:20s}: {stats['correct']}/{stats['total']} ({stats['accuracy']:.2%})")
 
     elif args.command == "agent-prompt":
         ctx = build_agent_context(args.text, store_name=args.store)

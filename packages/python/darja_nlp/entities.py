@@ -215,20 +215,26 @@ _THOUSANDS_MATCH_WORDS = r'مية|ميتين|تلمية|تلتمية|تلاتم�
 
 _COMPOUND_PRICE_PATTERN = re.compile(
     rf'(?:^|\s|[^\w\u0600-\u06FF])'
-    rf'(\d+(?:[.,]\d+)?|{_MILLIONS_MATCH_WORDS})?\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)'
+    rf'(\d+(?:[.,]\d+)?|{_MILLIONS_MATCH_WORDS})?\s*(?:ملاين|ملايين|مليون|mlyon|melyon|melyoun|mlayen|mlayin|mlayoun)'
     rf'\s*(?:و|\+|et|w)\s*'
     rf'(\d+(?:[.,]\d+)?|{_THOUSANDS_MATCH_WORDS})?\s*(?:الف|ألف|alf)'
     rf'(?=$|\s|[^\w\u0600-\u06FF])',
     re.IGNORECASE,
 )
 
+_PRICE_DORO_NUMERIC_PATTERN = re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:دورو|doro|doros)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE)
 _PRICE_NUMERIC_PATTERN = re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(da|dzd|دج|دينار|الف|ألف|alf)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE)
-_DYNAMIC_MILLIONS_PATTERN = re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE)
+_DYNAMIC_MILLIONS_PATTERN = re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:ملاين|ملايين|مليون|mlyon|melyon|melyoun|mlayen|mlayin|mlayoun)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE)
 _DARJA_AMOUNTS = [
+    (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(عشرين\s*دورو|20\s*doro)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 100.0),
+    (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(مية\s*دورو|100\s*doro)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 500.0),
+    (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(ميتين\s*دورو|200\s*doro)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 1000.0),
+    (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(خمسمية\s*دورو|500\s*doro)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 2500.0),
+    (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(ألف\s*دورو|الف\s*دورو|1000\s*doro)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 5000.0),
     (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(مية\s*الف|100\s*الف|mya|myat\s*alf)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 1000.0),
     (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(ميتين\s*الف|200\s*الف|mitin\s*alf)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 2000.0),
     (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(خمسمية\s*الف|500\s*الف|khams\s*mya|500\s*alf)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 5000.0),
-    (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(مليون|mlyon|1\s*mlyon)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 10000.0),
+    (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(مليون|mlyon|melyon|melyoun|1\s*mlyon)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 10000.0),
     (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(زوج\s*ملاين|زوج\s*ملايين|zoudj\s*mlayen|zouj\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 20000.0),
     (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(خمس\s*ملاين|khams\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 50000.0),
     (re.compile(r'(?:^|\s|[^\w\u0600-\u06FF])(عشر\s*ملاين|3achr\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])', re.IGNORECASE), 100000.0),
@@ -266,12 +272,13 @@ def _extract_wilayas(text: str, wilayas: List[Dict[str, Any]]) -> List[WilayaEnt
             if not cand or len(cand) < 2:
                 continue
             cand_lower = cand.lower()
+            if cand_lower not in lower_text:
+                continue
             escaped = re.escape(cand_lower)
             reg = re.compile(rf'(^|\s|[.,!?;:()]){escaped}($|\s|[.,!?;:()])', re.IGNORECASE)
 
-            if reg.search(lower_text) or cand_lower in lower_text:
-                if len(cand_lower) <= 3 and not reg.search(lower_text):
-                    continue
+            has_boundary = bool(reg.search(lower_text))
+            if has_boundary or len(cand_lower) > 3:
                 added_codes.add(w['code'])
                 all_communes = w.get('communes_sample', []) + w.get('communes_fr_sample', [])
                 matched_com = next((c for c in all_communes if c.lower() == cand_lower), None)
@@ -285,7 +292,7 @@ def _extract_wilayas(text: str, wilayas: List[Dict[str, Any]]) -> List[WilayaEnt
                 ))
                 break
 
-    # 3. Major Communes matching (550+ Algerian communes)
+    # 3. Major Communes matching (1,541 Algerian communes)
     for w in wilayas:
         if w['code'] in added_codes:
             continue
@@ -295,10 +302,16 @@ def _extract_wilayas(text: str, wilayas: List[Dict[str, Any]]) -> List[WilayaEnt
             if not com or len(com) < 3:
                 continue
             com_lower = com.lower()
-            escaped = re.escape(com_lower)
-            reg = re.compile(rf'(^|\s|[.,!?;:()]){escaped}($|\s|[.,!?;:()])', re.IGNORECASE)
+            if com_lower not in lower_text:
+                continue
+            if len(com_lower) >= 4:
+                matched = True
+            else:
+                escaped = re.escape(com_lower)
+                reg = re.compile(rf'(^|\s|[.,!?;:()]){escaped}($|\s|[.,!?;:()])', re.IGNORECASE)
+                matched = bool(reg.search(lower_text))
 
-            if reg.search(lower_text) or (len(com_lower) >= 4 and com_lower in lower_text):
+            if matched:
                 added_codes.add(w['code'])
                 results.append(WilayaEntity(
                     code=w['code'],
@@ -381,6 +394,18 @@ def _extract_prices(text: str) -> List[PriceEntity]:
         val = float(raw_val)
         if unit in ('الف', 'ألف', 'alf'):
             val = val * 1000.0
+        results.append(PriceEntity(
+            raw=match.group(0).strip(),
+            amount=val,
+            currency='DZD',
+        ))
+        start, end = match.start(), match.end()
+        masked_text = masked_text[:start] + (' ' * (end - start)) + masked_text[end:]
+
+    # 2b. Match numeric doro prices (1 doro = 5 DZD) on masked_text
+    for match in _PRICE_DORO_NUMERIC_PATTERN.finditer(masked_text):
+        raw_val = match.group(1).replace(',', '.')
+        val = float(raw_val) * 5.0
         results.append(PriceEntity(
             raw=match.group(0).strip(),
             amount=val,

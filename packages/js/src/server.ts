@@ -23,9 +23,11 @@ import {
   detectMemes,
   detectFrancoDarja,
 } from './cultural';
-import { respondToDarja, DialoguePersona, DialogueScript } from './dialogue';
+import { respondToDarja, DialoguePersona, DialogueScript, DialogueStrategy } from './dialogue';
 import { detectProfanity, censorProfanity } from './profanity';
 import { buildAgentContext, formatAgentSystemPrompt } from './agent';
+import { analyze as runPipelineAnalyze } from './pipeline';
+import { SentimentMode } from './types';
 
 export interface ServerOptions {
   host?: string;
@@ -67,6 +69,8 @@ export function startServer(options: ServerOptions = {}): http.Server {
           status: 'online',
           version: '1.0.0',
           endpoints: [
+            'POST /api/analyze',
+            'POST /api/batch',
             'POST /api/parse',
             'POST /api/intent',
             'POST /api/sentiment',
@@ -74,10 +78,18 @@ export function startServer(options: ServerOptions = {}): http.Server {
             'POST /api/escalation',
             'POST /api/quantities',
             'POST /api/culture',
+            'POST /api/chat',
+            'POST /api/moderate',
+            'POST /api/memes',
+            'POST /api/franco',
+            'POST /api/normalize',
+            'POST /api/arabizi',
             'POST /api/agent-context',
             'GET  /api/wilayas',
             'GET  /api/wilayas/:code',
             'GET  /api/culture',
+            'GET  /api/memes',
+            'GET  /api/franco',
           ],
         });
         return;
@@ -166,9 +178,33 @@ export function startServer(options: ServerOptions = {}): http.Server {
           }
         }
 
+        if (pathname === '/api/batch') {
+          if (!Array.isArray(body.texts)) {
+            sendError("Field 'texts' (array of strings) is required in JSON body", 400);
+            return;
+          }
+          const results = body.texts.map((t: unknown) =>
+            runPipelineAnalyze(String(t), { tasks: body.tasks })
+          );
+          sendJson({ count: results.length, results });
+          return;
+        }
+
         const text = typeof body.text === 'string' ? body.text : '';
         if (!text && pathname !== '/api/agent-context') {
           sendError("Field 'text' is required in JSON body", 400);
+          return;
+        }
+
+        if (pathname === '/api/analyze') {
+          const persona = (body.persona || 'casual') as DialoguePersona;
+          const sentimentMode = (body.sentiment_mode || body.sentimentMode || 'hybrid') as SentimentMode;
+          const report = runPipelineAnalyze(text, {
+            tasks: body.tasks,
+            persona,
+            sentimentMode,
+          });
+          sendJson(report);
           return;
         }
 
@@ -243,13 +279,17 @@ export function startServer(options: ServerOptions = {}): http.Server {
         }
 
         if (pathname === '/api/sentiment') {
-          const res = analyzeSentiment(text);
+          const mode = (body.mode || 'hybrid') as SentimentMode;
+          const res = analyzeSentiment(text, { mode });
           sendJson({
             input: text,
             label: res.label,
             score: res.score,
+            method: res.method,
+            probabilities: res.probabilities,
             positive_tokens: res.positiveTokens,
             negative_tokens: res.negativeTokens,
+            negated: res.negated,
           });
           return;
         }
@@ -349,7 +389,9 @@ export function startServer(options: ServerOptions = {}): http.Server {
         if (pathname === '/api/chat') {
           const persona = (body.persona || 'casual') as DialoguePersona;
           const script = (body.script || 'auto') as DialogueScript;
-          const res = respondToDarja(text, { persona, script });
+          const strategy = (body.strategy || 'auto') as DialogueStrategy;
+          const vary = Boolean(body.vary);
+          const res = respondToDarja(text, { persona, script, strategy, vary });
           sendJson({
             input: text,
             reply: res.reply,
@@ -357,6 +399,7 @@ export function startServer(options: ServerOptions = {}): http.Server {
             script: res.script,
             confidence: res.confidence,
             matched_pattern: res.matchedPattern,
+            source: res.source,
           });
           return;
         }

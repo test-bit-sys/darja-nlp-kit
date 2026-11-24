@@ -19,9 +19,15 @@ export {
 } from './cultural';
 export type { FrancoDarjaMatch } from './cultural';
 export { detectProfanity, isProfane, censorProfanity } from './profanity';
-export type { ProfanityMatch, ProfanityResult, ProfanitySeverity } from './profanity';
+export type { ProfanityMatch, ProfanityResult, ProfanitySeverity, ProfanityOptions } from './profanity';
 export { respondToDarja } from './dialogue';
-export type { DialogueOptions, DialogueResponse, DialoguePersona, DialogueScript } from './dialogue';
+export type { DialogueOptions, DialogueResponse, DialoguePersona, DialogueScript, DialogueStrategy, DialogueRule } from './dialogue';
+export { DarjaPipeline, analyze } from './pipeline';
+export type { AnalysisTask, PipelineOptions, AnalyzeOptions, AnalysisReport } from './pipeline';
+export { DarjaClassifier } from './classifier';
+export type { ClassifierOptions, ClassificationPrediction, ClassMetrics, EvaluationResult, SerializedClassifier } from './classifier';
+export { DarjaChat } from './chat';
+export type { ChatMessage, ChatSlots, ChatTurnResult, DarjaChatOptions } from './chat';
 export { startServer } from './server';
 export type { ServerOptions } from './server';
 export type { AgentContext, DialogueExample } from './agent';
@@ -35,6 +41,8 @@ export type {
   NegationInfo,
   SentimentResult,
   SentimentLabel,
+  SentimentMode,
+  SentimentOptions,
   StopwordsData,
   LexiconData,
   ArabiziRules,

@@ -83,6 +83,23 @@ class DialectResult:
 
 
 
+def _get_merged_markers() -> Dict[str, List[str]]:
+    """Combine built-in regional markers with dynamically enriched dialects.json markers."""
+    data = _load_dialects_json()
+    regions_data = data.get('regions', {})
+    merged: Dict[str, List[str]] = {}
+    for region in ('WEST', 'EAST', 'CENTER', 'SOUTH'):
+        seen = set()
+        items: List[str] = []
+        for m in REGIONAL_MARKERS.get(region, []) + regions_data.get(region, {}).get('markers', []):
+            low = m.lower()
+            if low not in seen:
+                seen.add(low)
+                items.append(m)
+        merged[region] = items
+    return merged
+
+
 def detect_dialect(text: str) -> DialectResult:
     """Identify Algerian regional dialect (WEST, EAST, CENTER, SOUTH, or GENERAL_DARJA)."""
     if not text:
@@ -94,7 +111,8 @@ def detect_dialect(text: str) -> DialectResult:
 
     tok_result = tokenize(text)
     tokens = [t.lower() for t in tok_result.tokens]
-    lower_text = text.lower()
+    token_set = set(tokens)
+    padded_tokens = f" {' '.join(tokens)} "
 
     scores: Dict[str, List[str]] = {
         'WEST': [],
@@ -103,10 +121,15 @@ def detect_dialect(text: str) -> DialectResult:
         'SOUTH': [],
     }
 
-    for region, markers in REGIONAL_MARKERS.items():
+    for region, markers in _get_merged_markers().items():
         for marker in markers:
-            lower_marker = marker.lower()
-            if lower_marker in tokens or lower_marker in lower_text:
+            lower_marker = marker.lower().strip()
+            if not lower_marker:
+                continue
+            if ' ' in lower_marker:
+                if f' {lower_marker} ' in padded_tokens:
+                    scores[region].append(marker)
+            elif lower_marker in token_set:
                 scores[region].append(marker)
 
     top_region: DialectRegion = 'GENERAL_DARJA'

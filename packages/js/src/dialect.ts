@@ -65,6 +65,27 @@ export function getDialectMetadata(region: DialectRegion): Record<string, any> {
   };
 }
 
+function getMergedMarkers(): Record<Exclude<DialectRegion, 'GENERAL_DARJA'>, string[]> {
+  const data = loadDialectsJson();
+  const regionsData = data?.regions || {};
+  const merged = {} as Record<Exclude<DialectRegion, 'GENERAL_DARJA'>, string[]>;
+  const regions: Array<Exclude<DialectRegion, 'GENERAL_DARJA'>> = ['WEST', 'EAST', 'CENTER', 'SOUTH'];
+  for (const region of regions) {
+    const seen = new Set<string>();
+    const items: string[] = [];
+    const combined = [...(REGIONAL_MARKERS[region] || []), ...(regionsData[region]?.markers || [])];
+    for (const m of combined) {
+      const low = String(m).toLowerCase();
+      if (!seen.has(low)) {
+        seen.add(low);
+        items.push(m);
+      }
+    }
+    merged[region] = items;
+  }
+  return merged;
+}
+
 export function detectDialect(text: string): DialectResult {
   if (!text) {
     return {
@@ -75,7 +96,9 @@ export function detectDialect(text: string): DialectResult {
   }
 
   const { tokens } = tokenize(text);
-  const lowerText = text.toLowerCase();
+  const lowerTokens = tokens.map((t) => t.toLowerCase());
+  const tokenSet = new Set(lowerTokens);
+  const paddedTokens = ` ${lowerTokens.join(' ')} `;
 
   const scores: Record<Exclude<DialectRegion, 'GENERAL_DARJA'>, string[]> = {
     WEST: [],
@@ -84,11 +107,15 @@ export function detectDialect(text: string): DialectResult {
     SOUTH: [],
   };
 
-  for (const [region, markers] of Object.entries(REGIONAL_MARKERS) as Array<[Exclude<DialectRegion, 'GENERAL_DARJA'>, string[]]>) {
+  for (const [region, markers] of Object.entries(getMergedMarkers()) as Array<[Exclude<DialectRegion, 'GENERAL_DARJA'>, string[]]>) {
     for (const marker of markers) {
-      const lowerMarker = marker.toLowerCase();
-      // Check in tokens or in text
-      if (tokens.some((t) => t.toLowerCase() === lowerMarker) || lowerText.includes(lowerMarker)) {
+      const lowerMarker = marker.toLowerCase().trim();
+      if (!lowerMarker) continue;
+      if (lowerMarker.includes(' ')) {
+        if (paddedTokens.includes(` ${lowerMarker} `)) {
+          scores[region].push(marker);
+        }
+      } else if (tokenSet.has(lowerMarker)) {
         scores[region].push(marker);
       }
     }

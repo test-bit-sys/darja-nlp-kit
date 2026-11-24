@@ -136,17 +136,23 @@ const MILLIONS_WORDS_STR = 'زوج|تلات|تلاتة|ربع|ربعة|خمس|خ
 const THOUSANDS_WORDS_STR = 'مية|ميتين|تلمية|تلتمية|تلاتمية|ربعمية|خمسمية|ستمية|سبعمية|تمنمية|تسعمية|عشرين|تلاتين|ربعين|خمسين|ستين|سبعين|تمانين|تسعين|mya|myat|mitin|mitayn|teltmya|rab3mya|khamsmya|settmya|seb3mya|tmenmya|tes3mya|3echrin|tlatin|rab3in|khamsin|settin|seb3in|tmanin|tes3in';
 
 const COMPOUND_PRICE_PATTERN = new RegExp(
-  `(?:^|\\s|[^\\w\\u0600-\\u06FF])(\\d+(?:[.,]\\d+)?|${MILLIONS_WORDS_STR})?\\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)\\s*(?:و|\\+|et|w)\\s*(\\d+(?:[.,]\\d+)?|${THOUSANDS_WORDS_STR})?\\s*(?:الف|ألف|alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])`,
+  `(?:^|\\s|[^\\w\\u0600-\\u06FF])(\\d+(?:[.,]\\d+)?|${MILLIONS_WORDS_STR})?\\s*(?:ملاين|ملايين|مليون|mlyon|melyon|melyoun|mlayen|mlayin|mlayoun)\\s*(?:و|\\+|et|w)\\s*(\\d+(?:[.,]\\d+)?|${THOUSANDS_WORDS_STR})?\\s*(?:الف|ألف|alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])`,
   'gi',
 );
 
+const PRICE_DORO_NUMERIC_PATTERN = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:دورو|doro|doros)(?=$|\s|[^\w\u0600-\u06FF])/gi;
 const PRICE_NUMERIC_PATTERN = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(da|dzd|دج|دينار|الف|ألف|alf)(?=$|\s|[^\w\u0600-\u06FF])/gi;
-const DYNAMIC_MILLIONS_PATTERN = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)(?=$|\s|[^\w\u0600-\u06FF])/gi;
+const DYNAMIC_MILLIONS_PATTERN = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:ملاين|ملايين|مليون|mlyon|melyon|melyoun|mlayen|mlayin|mlayoun)(?=$|\s|[^\w\u0600-\u06FF])/gi;
 const DARJA_AMOUNTS: Array<{ pattern: RegExp; value: number }> = [
+  { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(عشرين\s*دورو|20\s*doro)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 100 },
+  { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(مية\s*دورو|100\s*doro)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 500 },
+  { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(ميتين\s*دورو|200\s*doro)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 1000 },
+  { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(خمسمية\s*دورو|500\s*doro)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 2500 },
+  { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(ألف\s*دورو|الف\s*دورو|1000\s*doro)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 5000 },
   { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(مية\s*الف|100\s*الف|mya|myat\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 1000 },
   { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(ميتين\s*الف|200\s*الف|mitin\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 2000 },
   { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(خمسمية\s*الف|500\s*الف|khams\s*mya|500\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 5000 },
-  { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(مليون|mlyon|1\s*mlyon)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 10000 },
+  { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(مليون|mlyon|melyon|melyoun|1\s*mlyon)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 10000 },
   { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(زوج\s*ملاين|زوج\s*ملايين|zoudj\s*mlayen|zouj\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 20000 },
   { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(خمس\s*ملاين|khams\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 50000 },
   { pattern: /(?:^|\s|[^\w\u0600-\u06FF])(عشر\s*ملاين|3achr\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, value: 100000 },
@@ -185,16 +191,16 @@ function extractWilayas(text: string, wilayas: WilayaRaw[]): WilayaEntity[] {
     for (const cand of candidates) {
       if (!cand || cand.length < 2) continue;
       const candLower = cand.toLowerCase();
+      if (!lowerText.includes(candLower)) continue;
 
-      // Check boundary match
-      const escaped = candLower.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-      const reg = new RegExp(`(^|\\s|[.,!?;:()])${escaped}($|\\s|[.,!?;:()])`, 'i');
+      let matchedCand = candLower.length > 3;
+      if (!matchedCand) {
+        const escaped = candLower.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+        const reg = new RegExp(`(^|\\s|[.,!?;:()])${escaped}($|\\s|[.,!?;:()])`, 'i');
+        matchedCand = reg.test(lowerText);
+      }
 
-      if (reg.test(lowerText) || lowerText.includes(candLower)) {
-        // Extra validation for very short words
-        if (candLower.length <= 3 && !reg.test(lowerText)) {
-          continue;
-        }
+      if (matchedCand) {
         addedCodes.add(w.code);
         const allCommunes = [...(w.communes_sample || []), ...(w.communes_fr_sample || [])];
         const matchedCommune = allCommunes.find((c) => c.toLowerCase() === candLower) || null;
@@ -211,7 +217,7 @@ function extractWilayas(text: string, wilayas: WilayaRaw[]): WilayaEntity[] {
     }
   }
 
-  // 3. Major Communes matching (550+ Algerian communes)
+  // 3. Major Communes matching (1,541 Algerian communes)
   for (const w of wilayas) {
     if (addedCodes.has(w.code)) continue;
 
@@ -219,10 +225,16 @@ function extractWilayas(text: string, wilayas: WilayaRaw[]): WilayaEntity[] {
     for (const com of communes) {
       if (!com || com.length < 3) continue;
       const comLower = com.toLowerCase();
-      const escaped = comLower.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-      const reg = new RegExp(`(^|\\s|[.,!?;:()])${escaped}($|\\s|[.,!?;:()])`, 'i');
+      if (!lowerText.includes(comLower)) continue;
 
-      if (reg.test(lowerText) || (comLower.length >= 4 && lowerText.includes(comLower))) {
+      let matchedCom = comLower.length >= 4;
+      if (!matchedCom) {
+        const escaped = comLower.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+        const reg = new RegExp(`(^|\\s|[.,!?;:()])${escaped}($|\\s|[.,!?;:()])`, 'i');
+        matchedCom = reg.test(lowerText);
+      }
+
+      if (matchedCom) {
         addedCodes.add(w.code);
         results.push({
           code: w.code,
@@ -322,6 +334,22 @@ function extractPrices(text: string): PriceEntity[] {
     });
     const start = numMatch.index;
     const len = numMatch[0].length;
+    maskedText = maskedText.slice(0, start) + ' '.repeat(len) + maskedText.slice(start + len);
+  }
+
+  // 2b. Numeric doro prices (1 doro = 5 DZD)
+  const doroRegex = new RegExp(PRICE_DORO_NUMERIC_PATTERN.source, 'gi');
+  let doroMatch: RegExpExecArray | null;
+  while ((doroMatch = doroRegex.exec(maskedText)) !== null) {
+    const rawVal = doroMatch[1].replace(',', '.');
+    const val = parseFloat(rawVal) * 5;
+    results.push({
+      raw: doroMatch[0].trim(),
+      amount: val,
+      currency: 'DZD',
+    });
+    const start = doroMatch.index;
+    const len = doroMatch[0].length;
     maskedText = maskedText.slice(0, start) + ' '.repeat(len) + maskedText.slice(start + len);
   }
 

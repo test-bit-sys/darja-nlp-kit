@@ -48,13 +48,23 @@ def _normalize_for_matching(text: str) -> str:
     t = re.sub(r'(.)\1{2,}', r'\1\1', t)
     return t
 
-def detect_profanity(text: str) -> ProfanityResult:
+def detect_profanity(text: str, custom_terms: Optional[List[str]] = None) -> ProfanityResult:
     """Detect Algerian profanities, slurs, and toxic terms in Arabic script or Arabizi."""
     if not text or not text.strip():
         return ProfanityResult(is_profane=False, severity="none", matches=[], censored_text=text)
 
     data = load_profanity_data()
-    terms_list = data.get("terms", [])
+    terms_list = list(data.get("terms", []))
+    if custom_terms:
+        for ct in custom_terms:
+            if ct and ct.strip():
+                terms_list.append({
+                    "term": ct.strip(),
+                    "ar": ct.strip(),
+                    "arabizi": [ct.strip()],
+                    "category": "custom",
+                    "severity": "medium",
+                })
     
     matches: List[ProfanityMatch] = []
     norm_text = _normalize_for_matching(text)
@@ -112,13 +122,13 @@ def detect_profanity(text: str) -> ProfanityResult:
         censored_text="".join(censored)
     )
 
-def is_profane(text: str) -> bool:
+def is_profane(text: str, custom_terms: Optional[List[str]] = None) -> bool:
     """Quick boolean check if text contains Algerian profanity."""
-    return detect_profanity(text).is_profane
+    return detect_profanity(text, custom_terms=custom_terms).is_profane
 
-def censor_profanity(text: str, mask: str = "***") -> str:
+def censor_profanity(text: str, mask: str = "***", custom_terms: Optional[List[str]] = None) -> str:
     """Replace profane substrings with mask."""
-    result = detect_profanity(text)
+    result = detect_profanity(text, custom_terms=custom_terms)
     if not result.is_profane:
         return text
     # Replace contiguous sequences of asterisks with mask

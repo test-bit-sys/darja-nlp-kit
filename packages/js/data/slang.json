@@ -230,6 +230,34 @@
       "meaning": "قوي جداً وممتاز ويفوق التوقعات.",
       "type": "qualities",
       "polarity": "POSITIVE"
+    },
+    {
+      "term": "الحرڤة",
+      "arabizi": "lharga / 7arga",
+      "meaning": "الهجرة غير الشرعية عبر البحر",
+      "type": "youth_slang",
+      "polarity": "NEUTRAL"
+    },
+    {
+      "term": "دير الميز",
+      "arabizi": "dir lmiz",
+      "meaning": "قيم الوضع وقدّر الموقف بذكاء",
+      "type": "street_wisdom",
+      "polarity": "POSITIVE"
+    },
+    {
+      "term": "تحلب",
+      "arabizi": "ta7leb",
+      "meaning": "تفطن وتعلم القوالب ولم يعد مغفلاً",
+      "type": "youth_slang",
+      "polarity": "NEUTRAL"
+    },
+    {
+      "term": "يقرعج",
+      "arabizi": "y9ar3ej",
+      "meaning": "يتطفل ويتجسس لمعرفة أخبار الناس",
+      "type": "youth_slang",
+      "polarity": "NEGATIVE"
     }
   ]
 }

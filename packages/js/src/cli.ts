@@ -3,12 +3,19 @@
  * Command-Line Interface (CLI) for darja-nlp-kit.
  *
  * Usage:
+ *   darja-nlp analyze "salam kho rani hab nchrih b 2 mlayen l wahran 0661234567"
  *   darja-nlp parse "نحوس على 2 حبات مقاس XL نبعثهم لوهران 0661234567"
  *   darja-nlp intent "شحال التوصيل لسطيف؟"
  *   darja-nlp escalation "سراقين حشيتوهالي رجعولي دراهمي"
+ *   darja-nlp chat "wach ya khoy"
+ *   darja-nlp eval
  *   darja-nlp server --port 8080
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
+import { normalize } from './normalizer';
+import { arabiziToArabic } from './arabizi';
 import { extractEntities } from './entities';
 import { identifyIntent } from './intent';
 import { detectEscalation } from './escalation';
@@ -16,10 +23,12 @@ import { analyzeSentiment } from './sentiment';
 import { detectDialect } from './dialect';
 import { extractQuantities, extractProductAttributes } from './quantities';
 import { detectCulturalReferences, detectMemes } from './cultural';
-import { respondToDarja, DialoguePersona, DialogueScript } from './dialogue';
+import { respondToDarja, DialoguePersona, DialogueScript, DialogueStrategy } from './dialogue';
 import { detectProfanity, censorProfanity } from './profanity';
+import { analyze as runAnalyze } from './pipeline';
 import { buildAgentContext, formatAgentSystemPrompt } from './agent';
 import { startServer } from './server';
+import { SentimentMode } from './types';
 
 function printHelp() {
   console.log(`
@@ -29,21 +38,31 @@ Usage:
   darja-nlp <command> [options] [text]
 
 Commands:
+  analyze <text>       Run complete end-to-end NLP analysis
+  normalize <text>     Normalize Arabic/Arabizi Darja text
+  arabizi <text>       Convert Arabizi text to Arabic script
   parse <text>         Extract Algerian entities (wilayas, communes, phones, prices, quantities)
   intent <text>        Identify customer business intent (ORDER, PRICE, DELIVERY, etc.)
   escalation <text>    Detect angry customers, legal threats, or human agent requests
-  sentiment <text>     Analyze Algerian sentiment (POSITIVE, NEGATIVE, NEUTRAL)
+  sentiment <text>     Analyze Algerian sentiment (POSITIVE, NEGATIVE, NEUTRAL, MIXED)
   dialect <text>       Detect Algerian regional dialect (Center, East, West, South)
   quantities <text>    Extract colloquial quantities and product attributes
   culture <text>       Detect Algerian proverbs, viral memes, landmarks, dishes, and slang
   chat <text>          Generate natural Algerian Darja response (e.g. 'wach ya khoy' -> 'we cv')
   moderate <text>      Detect profanities, toxic slurs, and censor Algerian text
   memes <text>         Detect Algerian viral memes and TV comedy quotes
+  eval                 Evaluate sentiment accuracy on held-out real Algerian benchmark
   agent-prompt <text>  Build grounded prompt for AI LLM agents (GPT-4o, Claude, etc.)
   server               Start zero-dependency HTTP microservice (for n8n, Make, Docker)
 
 Options:
   --json               Output raw JSON
+  --mode <mode>        Sentiment mode: hybrid | lexicon | ml (default: hybrid)
+  --persona <p>        Chat persona: casual | merchant | assistant (default: casual)
+  --script <s>         Chat script: auto | arabizi | arabic (default: auto)
+  --strategy <st>      Chat strategy: auto | rules | retrieval (default: auto)
+  --vary               Vary responses instead of picking the top deterministic reply
+  --mask <str>         Censor mask for moderate (default: ***)
   --port <number>      Port for server (default: 8080)
   --host <string>      Host for server (default: 0.0.0.0)
   --store <string>     Store name for agent-prompt (default: "Bazar El Djazair")
@@ -56,14 +75,13 @@ function parseArgs(args: string[]) {
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (arg === '--json') {
-      flags.json = true;
-    } else if (arg === '--port' && i + 1 < args.length) {
-      flags.port = args[++i];
-    } else if (arg === '--host' && i + 1 < args.length) {
-      flags.host = args[++i];
-    } else if (arg === '--store' && i + 1 < args.length) {
-      flags.store = args[++i];
+    if (arg === '--json' || arg === '--vary') {
+      flags[arg.slice(2)] = true;
+    } else if (
+      ['--port', '--host', '--store', '--mode', '--persona', '--script', '--strategy', '--mask'].includes(arg) &&
+      i + 1 < args.length
+    ) {
+      flags[arg.slice(2)] = args[++i];
     } else if (!arg.startsWith('--')) {
       positional.push(arg);
     }
@@ -84,6 +102,71 @@ function main() {
   const text = positional.slice(1).join(' ');
 
   switch (command) {
+    case 'analyze': {
+      if (!text) {
+        console.error('Error: Please provide text to analyze.');
+        process.exit(1);
+      }
+      const persona = (typeof flags.persona === 'string' ? flags.persona : 'casual') as DialoguePersona;
+      const mode = (typeof flags.mode === 'string' ? flags.mode : 'hybrid') as SentimentMode;
+      const report = runAnalyze(text, { persona, sentimentMode: mode });
+      if (flags.json) {
+        console.log(JSON.stringify(report, null, 2));
+      } else {
+        console.log('=== Darja NLP Unified Analysis ===');
+        console.log(`Normalized : ${report.normalized}`);
+        if (report.arabic !== report.rawText) console.log(`Arabic     : ${report.arabic}`);
+        if (report.sentiment) {
+          console.log(`Sentiment  : ${report.sentiment.label} (${report.sentiment.score.toFixed(2)}) [${report.sentiment.method}]`);
+        }
+        if (report.intent) {
+          console.log(`Intent     : ${report.intent.intent} (${report.intent.confidence.toFixed(2)})`);
+        }
+        if (report.dialect) {
+          console.log(`Dialect    : ${report.dialect.region} (${report.dialect.confidence.toFixed(2)})`);
+        }
+        if (report.entities && report.entities.wilayas.length > 0) {
+          console.log('Wilayas    :', report.entities.wilayas.map((w) => `${w.nameAr} (${w.code})`).join(', '));
+        }
+        if (report.entities && report.entities.prices.length > 0) {
+          console.log(
+            'Prices DZD :',
+            report.entities.prices.filter((p) => p.amount !== null).map((p) => p.amount).join(', ')
+          );
+        }
+        if (report.entities && report.entities.phones && report.entities.phones.length > 0) {
+          console.log('Phones     :', report.entities.phones.map((p) => p.normalized).join(', '));
+        }
+        if (report.profanity && report.profanity.isProfane) {
+          console.log(`Moderation : PROFANE (${report.profanity.severity}) -> ${report.profanity.censoredText}`);
+        }
+        if (report.reply) {
+          console.log(`Reply      : ${report.reply.reply} [${report.reply.source}]`);
+        }
+      }
+      break;
+    }
+
+    case 'normalize': {
+      if (!text) {
+        console.error('Error: Please provide text to normalize.');
+        process.exit(1);
+      }
+      const res = normalize(text);
+      console.log(flags.json ? JSON.stringify({ input: text, normalized: res }, null, 2) : res);
+      break;
+    }
+
+    case 'arabizi': {
+      if (!text) {
+        console.error('Error: Please provide Arabizi text.');
+        process.exit(1);
+      }
+      const res = arabiziToArabic(text);
+      console.log(flags.json ? JSON.stringify({ input: text, arabic: res }, null, 2) : res);
+      break;
+    }
+
     case 'parse': {
       if (!text) {
         console.error('Error: Please provide text to parse.');
@@ -193,12 +276,12 @@ function main() {
       if (flags.json) {
         console.log(JSON.stringify(res, null, 2));
       } else {
-        const status = res.needsEscalation ? '🚨 ESCALATION REQUIRED' : '✅ NORMAL (No Escalation)';
+        const status = res.needsEscalation ? 'ESCALATION REQUIRED' : 'NORMAL (No Escalation)';
         console.log(`Status: ${status}`);
         console.log(`Reason: ${res.reason} | Urgency: ${res.urgency}`);
         console.log(`Guideline: ${res.guideline}`);
         if (res.matchedTriggers.length > 0) {
-          console.log(`Keywords: ${res.matchedTriggers.join(', ')}`);
+          console.log(`Triggers: ${res.matchedTriggers.join(', ')}`);
         }
       }
       break;
@@ -209,12 +292,12 @@ function main() {
         console.error('Error: Please provide text for sentiment analysis.');
         process.exit(1);
       }
-      const res = analyzeSentiment(text);
+      const mode = (typeof flags.mode === 'string' ? flags.mode : 'hybrid') as SentimentMode;
+      const res = analyzeSentiment(text, { mode });
       if (flags.json) {
         console.log(JSON.stringify(res, null, 2));
       } else {
-        const icon = res.label === 'POSITIVE' ? '😊' : res.label === 'NEGATIVE' ? '😡' : '😐';
-        console.log(`Sentiment: ${icon} ${res.label} (Score: ${res.score.toFixed(2)})`);
+        console.log(`Sentiment: ${res.label} (Score: ${res.score.toFixed(2)}, Method: ${res.method})`);
         if (res.positiveTokens.length > 0) {
           console.log(`Positive terms: ${res.positiveTokens.join(', ')}`);
         }
@@ -314,21 +397,11 @@ function main() {
         console.log('=== Algerian Cultural References & Slang ===');
         console.log(`Has Reference : ${res.has_cultural_reference ? 'Yes' : 'No'}`);
         console.log(`Summary       : ${res.cultural_summary}`);
-        if (res.proverbs.length > 0) {
-          console.log(`📜 Proverbs   : ${res.proverbs.map((p) => p.canonical_name).join(', ')}`);
-        }
-        if (res.memes_and_trends.length > 0) {
-          console.log(`🎭 Memes/Trends: ${res.memes_and_trends.map((m) => m.canonical_name).join(', ')}`);
-        }
-        if (res.landmarks.length > 0) {
-          console.log(`🏛️ Landmarks  : ${res.landmarks.map((l) => l.canonical_name).join(', ')}`);
-        }
-        if (res.gastronomy.length > 0) {
-          console.log(`🍲 Gastronomy : ${res.gastronomy.map((g) => g.canonical_name).join(', ')}`);
-        }
-        if (res.slang_expressions.length > 0) {
-          console.log(`💬 Slang Terms: ${res.slang_expressions.map((s) => s.canonical_name).join(', ')}`);
-        }
+        if (res.proverbs.length > 0) console.log(`Proverbs      : ${res.proverbs.map((p) => p.canonical_name).join(', ')}`);
+        if (res.memes_and_trends.length > 0) console.log(`Memes/Trends  : ${res.memes_and_trends.map((m) => m.canonical_name).join(', ')}`);
+        if (res.landmarks.length > 0) console.log(`Landmarks     : ${res.landmarks.map((l) => l.canonical_name).join(', ')}`);
+        if (res.gastronomy.length > 0) console.log(`Gastronomy    : ${res.gastronomy.map((g) => g.canonical_name).join(', ')}`);
+        if (res.slang_expressions.length > 0) console.log(`Slang Terms   : ${res.slang_expressions.map((s) => s.canonical_name).join(', ')}`);
       }
       break;
     }
@@ -340,7 +413,9 @@ function main() {
       }
       const persona = (typeof flags.persona === 'string' ? flags.persona : 'casual') as DialoguePersona;
       const script = (typeof flags.script === 'string' ? flags.script : 'auto') as DialogueScript;
-      const res = respondToDarja(text, { persona, script });
+      const strategy = (typeof flags.strategy === 'string' ? flags.strategy : 'auto') as DialogueStrategy;
+      const vary = Boolean(flags.vary);
+      const res = respondToDarja(text, { persona, script, strategy, vary });
       if (flags.json) {
         console.log(JSON.stringify(res, null, 2));
       } else {
@@ -348,6 +423,7 @@ function main() {
         console.log(`Reply          : ${res.reply}`);
         console.log(`Intent         : ${res.intent}`);
         console.log(`Script         : ${res.script}`);
+        console.log(`Source         : ${res.source}`);
         console.log(`Confidence     : ${res.confidence.toFixed(2)}`);
       }
       break;
@@ -360,7 +436,7 @@ function main() {
       }
       const mask = typeof flags.mask === 'string' ? flags.mask : '***';
       const res = detectProfanity(text);
-      const censored = censorProfanity(text, mask);
+      const censored = censor_profanity_compat(text, mask);
       const output = {
         is_profane: res.isProfane,
         severity: res.severity,
@@ -404,11 +480,55 @@ function main() {
           console.log('No viral memes detected in text.');
         }
         for (const m of memes) {
-          console.log(`🎭 Meme: ${m.canonicalName}`);
-          console.log(`   Meaning: ${m.meaning}`);
-          if (m.metadata?.origin) {
-            console.log(`   Origin : ${m.metadata.origin}`);
-          }
+          console.log(`Meme: ${m.canonicalName}`);
+          console.log(`  Meaning: ${m.meaning}`);
+          if (m.metadata?.origin) console.log(`  Origin : ${m.metadata.origin}`);
+        }
+      }
+      break;
+    }
+
+    case 'eval': {
+      const mode = (typeof flags.mode === 'string' ? flags.mode : 'hybrid') as SentimentMode;
+      const benchPath = path.resolve(__dirname, '../data/eval_benchmark.json');
+      if (!fs.existsSync(benchPath)) {
+        console.error('Error: eval_benchmark.json not found in package data.');
+        process.exit(1);
+      }
+      const bench = JSON.parse(fs.readFileSync(benchPath, 'utf-8')).sentiment || [];
+      const bySource: Record<string, { correct: number; total: number }> = {};
+      let ok = 0;
+      for (const row of bench) {
+        let pred = analyzeSentiment(row.text, { mode }).label;
+        if (pred === 'MIXED') pred = 'NEUTRAL';
+        const src = row.source || 'unknown';
+        if (!bySource[src]) bySource[src] = { correct: 0, total: 0 };
+        bySource[src].total++;
+        if (pred === row.label) {
+          ok++;
+          bySource[src].correct++;
+        }
+      }
+      const acc = bench.length ? Math.round((ok / bench.length) * 10000) / 10000 : 0;
+      const summary = {
+        mode,
+        total: bench.length,
+        correct: ok,
+        accuracy: acc,
+        by_source: Object.fromEntries(
+          Object.entries(bySource).map(([k, v]) => [
+            k,
+            { ...v, accuracy: Math.round((v.correct / v.total) * 10000) / 10000 },
+          ])
+        ),
+      };
+      if (flags.json) {
+        console.log(JSON.stringify(summary, null, 2));
+      } else {
+        console.log(`=== Held-Out Sentiment Benchmark (mode=${mode}) ===`);
+        console.log(`Overall Accuracy : ${ok}/${bench.length} (${(acc * 100).toFixed(2)}%)`);
+        for (const [src, st] of Object.entries(summary.by_source)) {
+          console.log(`  - ${src.padEnd(20)}: ${st.correct}/${st.total} (${(st.accuracy * 100).toFixed(2)}%)`);
         }
       }
       break;
@@ -438,6 +558,10 @@ function main() {
       printHelp();
       process.exit(1);
   }
+}
+
+function censor_profanity_compat(text: string, mask: string): string {
+  return censorProfanity(text, mask);
 }
 
 main();

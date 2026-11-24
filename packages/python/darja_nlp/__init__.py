@@ -9,7 +9,7 @@ from .stopwords import (
     TokenizeResult,
     NegationInfo,
 )
-from .sentiment import analyze_sentiment, SentimentResult
+from .sentiment import analyze_sentiment, SentimentResult, SentimentMode
 from .entities import (
     extract_entities,
     get_wilayas,
@@ -64,6 +64,22 @@ from .profanity import (
 from .dialogue import (
     respond_to_darja,
     DialogueResponse,
+    DialogueStrategy,
+)
+from .pipeline import (
+    DarjaPipeline,
+    AnalysisReport,
+    analyze,
+)
+from .classifier import (
+    DarjaClassifier,
+    ClassificationPrediction,
+    EvaluationResult,
+)
+from .chat import (
+    DarjaChat,
+    ChatTurnResult,
+    ChatMessage,
 )
 from .server import start_server
 
@@ -82,6 +98,7 @@ __all__ = [
     'NegationInfo',
     'analyze_sentiment',
     'SentimentResult',
+    'SentimentMode',
     'extract_entities',
     'get_wilayas',
     'get_wilaya_by_code',
@@ -127,5 +144,15 @@ __all__ = [
     'ProfanityMatch',
     'respond_to_darja',
     'DialogueResponse',
+    'DialogueStrategy',
+    'DarjaPipeline',
+    'AnalysisReport',
+    'analyze',
+    'DarjaClassifier',
+    'ClassificationPrediction',
+    'EvaluationResult',
+    'DarjaChat',
+    'ChatTurnResult',
+    'ChatMessage',
     'start_server',
 ]

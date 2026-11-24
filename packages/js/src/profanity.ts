@@ -54,7 +54,11 @@ function normalizeForMatching(text: string): string {
   return t;
 }
 
-export function detectProfanity(text: string): ProfanityResult {
+export interface ProfanityOptions {
+  customTerms?: string[];
+}
+
+export function detectProfanity(text: string, options?: ProfanityOptions): ProfanityResult {
   if (!text || !text.trim()) {
     return {
       isProfane: false,
@@ -65,7 +69,20 @@ export function detectProfanity(text: string): ProfanityResult {
   }
 
   const data = loadProfanityData();
-  const termsList = data.terms || [];
+  const termsList = [...(data.terms || [])];
+  if (options?.customTerms) {
+    for (const ct of options.customTerms) {
+      if (ct && ct.trim()) {
+        termsList.push({
+          term: ct.trim(),
+          ar: ct.trim(),
+          arabizi: [ct.trim()],
+          category: 'custom',
+          severity: 'medium',
+        });
+      }
+    }
+  }
   const matches: ProfanityMatch[] = [];
   const normText = normalizeForMatching(text);
   const censoredChars = text.split('');
@@ -124,12 +141,12 @@ export function detectProfanity(text: string): ProfanityResult {
   };
 }
 
-export function isProfane(text: string): boolean {
-  return detectProfanity(text).isProfane;
+export function isProfane(text: string, options?: ProfanityOptions): boolean {
+  return detectProfanity(text, options).isProfane;
 }
 
-export function censorProfanity(text: string, mask: string = '***'): string {
-  const result = detectProfanity(text);
+export function censorProfanity(text: string, mask: string = '***', options?: ProfanityOptions): string {
+  const result = detectProfanity(text, options);
   if (!result.isProfane) return text;
   return result.censoredText.replace(/\*+/g, mask);
 }

@@ -199,6 +199,34 @@
       "meaning": "من انقطعت به السبل ولا يملك نفوذاً أو واسطة، فإن الله كافيه وناصره.",
       "category": "faith",
       "region": "GENERAL"
+    },
+    {
+      "text": "العود اللي تحقرو يعميك",
+      "arabizi": "el 3oud li ta7gro ya3mik",
+      "meaning": "لا تستهزئ بالشيء أو الشخص الضعيف فقد يغلبك",
+      "category": "wisdom",
+      "region": "NATIONAL"
+    },
+    {
+      "text": "اللي يخلط روحو للنخالة ينقبو الدجاج",
+      "arabizi": "li ykhelet rou7o l nokhala yna9bo djaj",
+      "meaning": "من يضع نفسه في مواقف مشبوهة يتحمل نتائجها",
+      "category": "wisdom",
+      "region": "NATIONAL"
+    },
+    {
+      "text": "جا يعاونو في قبر باباه هربلو بالفاس",
+      "arabizi": "ja y3awno f 9ber babah hreblo b lfass",
+      "meaning": "طلبت عوناً من شخص فزادك ورطة",
+      "category": "humor",
+      "region": "NATIONAL"
+    },
+    {
+      "text": "الخيل مربوطة والحمير تبوط",
+      "arabizi": "el khil marbouta w lhmir tbout",
+      "meaning": "أصحاب الكفاءة محاصرون وغير الأكفاء يتصدرون المشهد",
+      "category": "satire",
+      "region": "NATIONAL"
     }
   ],
   "memes_and_trends": [

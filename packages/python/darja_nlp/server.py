@@ -19,10 +19,19 @@ from .quantities import extract_quantities, extract_product_attributes
 from .escalation import detect_escalation
 from .dialect import detect_dialect
 from .intent import identify_intent
-from .cultural import detect_cultural_references, get_cultural_data, get_slang_data, get_memes_data, get_franco_darja_data, detect_memes, detect_franco_darja
+from .cultural import (
+    detect_cultural_references,
+    get_cultural_data,
+    get_slang_data,
+    get_memes_data,
+    get_franco_darja_data,
+    detect_memes,
+    detect_franco_darja,
+)
 from .dialogue import respond_to_darja
 from .profanity import detect_profanity, censor_profanity
 from .agent import build_agent_context, format_agent_system_prompt
+from .pipeline import analyze as run_pipeline_analyze
 
 
 class DarjaRequestHandler(BaseHTTPRequestHandler):
@@ -66,6 +75,8 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                 "status": "online",
                 "version": "1.0.0",
                 "endpoints": [
+                    "POST /api/analyze",
+                    "POST /api/batch",
                     "POST /api/parse",
                     "POST /api/intent",
                     "POST /api/sentiment",
@@ -73,11 +84,19 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                     "POST /api/escalation",
                     "POST /api/quantities",
                     "POST /api/culture",
+                    "POST /api/chat",
+                    "POST /api/moderate",
+                    "POST /api/memes",
+                    "POST /api/franco",
+                    "POST /api/normalize",
+                    "POST /api/arabizi",
                     "POST /api/agent-context",
                     "GET  /api/wilayas",
                     "GET  /api/wilayas/<code_1_to_69>",
                     "GET  /api/culture",
-                ]
+                    "GET  /api/memes",
+                    "GET  /api/franco",
+                ],
             })
         elif path == "/api/culture":
             c_data = get_cultural_data()
@@ -96,15 +115,15 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                 "count": len(wilayas),
                 "wilayas": [
                     {
-                        "code": w.code,
-                        "code_str": w.code_str,
-                        "name_ar": w.name_ar,
-                        "name_fr": w.name_fr,
-                        "region": w.region,
-                        "communes_sample": w.communes_sample,
+                        "code": w.get("code"),
+                        "code_str": w.get("code_str"),
+                        "name_ar": w.get("name_ar"),
+                        "name_fr": w.get("name_fr"),
+                        "era": w.get("era"),
+                        "communes_sample": w.get("communes_sample", []),
                     }
                     for w in wilayas
-                ]
+                ],
             })
         elif path.startswith("/api/wilayas/"):
             param = path.split("/")[-1]
@@ -112,13 +131,14 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                 w = get_wilaya_by_code(int(param))
                 if w:
                     self._send_json({
-                        "code": w.code,
-                        "code_str": w.code_str,
-                        "name_ar": w.name_ar,
-                        "name_fr": w.name_fr,
-                        "region": w.region,
-                        "communes_sample": w.communes_sample,
-                        "communes_fr_sample": w.communes_fr_sample,
+                        "code": w.get("code"),
+                        "code_str": w.get("code_str"),
+                        "name_ar": w.get("name_ar"),
+                        "name_fr": w.get("name_fr"),
+                        "era": w.get("era"),
+                        "phone_code": w.get("phone_code"),
+                        "communes_sample": w.get("communes_sample", []),
+                        "communes_fr_sample": w.get("communes_fr_sample", []),
                     })
                 else:
                     self._send_error(f"Wilaya {param} not found (must be 1-69)", 404)
@@ -135,13 +155,34 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/")
         body = self._read_json_body()
-        text = body.get("text", "")
 
+        if path == "/api/batch":
+            texts = body.get("texts")
+            if not isinstance(texts, list):
+                self._send_error("Field 'texts' (array of strings) is required in JSON body")
+                return
+            tasks = body.get("tasks")
+            results = [run_pipeline_analyze(str(t), tasks=tasks).to_dict() for t in texts]
+            self._send_json({"count": len(results), "results": results})
+            return
+
+        text = body.get("text", "")
         if not text and path != "/api/agent-context":
             self._send_error("Field 'text' is required in JSON body")
             return
 
-        if path == "/api/parse":
+        if path == "/api/analyze":
+            tasks = body.get("tasks")
+            persona = body.get("persona", "casual")
+            sentiment_mode = body.get("sentiment_mode", "hybrid")
+            report = run_pipeline_analyze(
+                text,
+                tasks=tasks,
+                persona=persona,
+                sentiment_mode=sentiment_mode,
+            )
+            self._send_json(report.to_dict())
+        elif path == "/api/parse":
             entities = extract_entities(text)
             cult = detect_cultural_references(text)
             self._send_json({
@@ -152,7 +193,7 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                         "code_str": w.code_str,
                         "name_ar": w.name_ar,
                         "name_fr": w.name_fr,
-                        "region": w.region,
+                        "matched_text": w.matched_text,
                         "commune": w.commune,
                     }
                     for w in entities.wilayas
@@ -172,12 +213,18 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                     }
                     for ph in entities.phones
                 ],
-                "payments": [{"raw": p.raw, "method": p.method, "label": p.label} for p in entities.payments],
-                "deliveries": [{"raw": d.raw, "company": d.company, "label": d.label} for d in entities.deliveries],
+                "payments": [
+                    {"type": p.type, "label": p.label, "matched_text": p.matched_text}
+                    for p in entities.payments
+                ],
+                "deliveries": [
+                    {"company": d.company, "label": d.label, "matched_text": d.matched_text}
+                    for d in entities.deliveries
+                ],
                 "delivery_mode": {
-                    "raw": entities.delivery_mode.raw,
                     "mode": entities.delivery_mode.mode,
                     "label": entities.delivery_mode.label,
+                    "matched_text": entities.delivery_mode.matched_text,
                 } if entities.delivery_mode else None,
                 "quantities": [
                     {"raw": q.raw, "value": q.value, "unit": q.unit}
@@ -199,16 +246,19 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                 "intent": res.intent,
                 "confidence": res.confidence,
                 "matched_keywords": res.matched_keywords,
-                "all_scores": res.all_scores,
             })
         elif path == "/api/sentiment":
-            res = analyze_sentiment(text)
+            mode = body.get("mode", "hybrid")
+            res = analyze_sentiment(text, mode=mode)
             self._send_json({
                 "input": text,
                 "label": res.label,
                 "score": res.score,
-                "positive_words": res.positive_words,
-                "negative_words": res.negative_words,
+                "method": res.method,
+                "probabilities": res.probabilities,
+                "positive_tokens": res.positive_tokens,
+                "negative_tokens": res.negative_tokens,
+                "negated": res.negated,
             })
         elif path == "/api/dialect":
             res = detect_dialect(text)
@@ -217,7 +267,6 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                 "region": res.region,
                 "confidence": res.confidence,
                 "detected_markers": res.detected_markers,
-                "scores": res.scores,
             })
         elif path == "/api/escalation":
             res = detect_escalation(text)
@@ -226,7 +275,7 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                 "needs_escalation": res.needs_escalation,
                 "reason": res.reason,
                 "urgency": res.urgency,
-                "matched_keywords": res.matched_keywords,
+                "matched_triggers": res.matched_triggers,
                 "guideline": res.guideline,
             })
         elif path == "/api/quantities":
@@ -279,7 +328,9 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
         elif path == "/api/chat":
             persona = body.get("persona", "casual")
             script = body.get("script", "auto")
-            res = respond_to_darja(text, persona=persona, script=script)
+            strategy = body.get("strategy", "auto")
+            vary = bool(body.get("vary", False))
+            res = respond_to_darja(text, persona=persona, script=script, strategy=strategy, vary=vary)
             self._send_json({
                 "input": text,
                 "reply": res.reply,
@@ -287,6 +338,7 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                 "script": res.script,
                 "confidence": res.confidence,
                 "matched_pattern": res.matched_pattern,
+                "source": res.source,
             })
         elif path == "/api/moderate":
             mask = body.get("mask", "***")
@@ -325,23 +377,24 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
         sys.stderr.write(f"[{self.log_date_time_string()}] {format % args}\n")
 
 
-def start_server(host: str = "0.0.0.0", port: int = 8080) -> None:
+def start_server(host: str = "0.0.0.0", port: int = 8080) -> HTTPServer:
     """Start the zero-dependency Algerian NLP microservice."""
     server_address = (host, port)
     httpd = HTTPServer(server_address, DarjaRequestHandler)
-    print(f"🚀 darja-nlp-kit Microservice running on http://{host}:{port}")
-    print(f"📦 Ready for n8n, Make.com, webhooks, and local AI automations.")
+    print(f"darja-nlp-kit Microservice running on http://{host}:{port}")
+    print("Ready for n8n, Make.com, webhooks, and local AI automations.")
     print("Endpoints:")
-    print(f"  • GET  http://{host}:{port}/api/health")
-    print(f"  • GET  http://{host}:{port}/api/wilayas")
-    print(f"  • POST http://{host}:{port}/api/parse")
-    print(f"  • POST http://{host}:{port}/api/intent")
-    print(f"  • POST http://{host}:{port}/api/sentiment")
-    print(f"  • POST http://{host}:{port}/api/dialect")
-    print(f"  • POST http://{host}:{port}/api/escalation")
-    print(f"  • POST http://{host}:{port}/api/agent-context")
+    print(f"  - GET  http://{host}:{port}/api/health")
+    print(f"  - GET  http://{host}:{port}/api/wilayas")
+    print(f"  - POST http://{host}:{port}/api/analyze")
+    print(f"  - POST http://{host}:{port}/api/batch")
+    print(f"  - POST http://{host}:{port}/api/parse")
+    print(f"  - POST http://{host}:{port}/api/chat")
+    print(f"  - POST http://{host}:{port}/api/moderate")
+    print(f"  - POST http://{host}:{port}/api/sentiment")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         print("\nStopping server...")
         httpd.server_close()
+    return httpd

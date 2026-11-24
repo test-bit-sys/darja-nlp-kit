@@ -26,7 +26,10 @@ def main() -> None:
         'dialogue_rules.json',
         'profanity.json',
         'franco_darja.json',
-        'memes.json'
+        'memes.json',
+        'eval_benchmark.json',
+        'dialogue_kb.json',
+        'sentiment_model.json'
     ]
 
     for src_name in data_files:

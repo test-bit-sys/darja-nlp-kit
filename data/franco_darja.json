@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "description": "Massive lexicon of French loanwords, hybrid verbs, and expressions heavily used in Algerian Darja.",
-  "count": 52,
+  "count": 60,
   "words": [
     {
       "darja_ar": "نكوموندي",
@@ -418,6 +418,70 @@
       "category": "daily_slang",
       "meaning_ar": "قادر أو محتمل",
       "example": "كابابل توصلك اليوم العشية"
+    },
+    {
+      "darja_ar": "نفليكسي",
+      "arabizi": "nflexy",
+      "fr_origin": "flexy",
+      "category": "verbs_telecom",
+      "meaning_ar": "أرسل رصيد هاتف",
+      "example": "راني نفليكسي مية الف فالتليفون"
+    },
+    {
+      "darja_ar": "نبوانتي",
+      "arabizi": "nbwanti",
+      "fr_origin": "pointer",
+      "category": "verbs_work",
+      "meaning_ar": "أسجل حضوري في العمل",
+      "example": "لازم نروح نبوانتي على الثمانية"
+    },
+    {
+      "darja_ar": "نريغلي",
+      "arabizi": "nregli",
+      "fr_origin": "régler",
+      "category": "verbs_service",
+      "meaning_ar": "أحل الإشكال أو أسوي الحساب",
+      "example": "ارواح نريغليوها درك"
+    },
+    {
+      "darja_ar": "نديباني",
+      "arabizi": "ndepanni",
+      "fr_origin": "dépanner",
+      "category": "verbs_service",
+      "meaning_ar": "أساعد مؤقتاً أو أفك ضيقة",
+      "example": "ديبانيتو بـ 100 ألف باش يسلك أمورو"
+    },
+    {
+      "darja_ar": "نفاليدي",
+      "arabizi": "nvalidi",
+      "fr_origin": "valider",
+      "category": "verbs_commerce",
+      "meaning_ar": "أؤكد وأعتمد الطلب",
+      "example": "ابعثلي النميرو ونفاليديلك الكوموند"
+    },
+    {
+      "darja_ar": "نروتورني",
+      "arabizi": "nretourni",
+      "fr_origin": "retourner",
+      "category": "verbs_commerce",
+      "meaning_ar": "أعيد السلعة أو أرجع",
+      "example": "إذا ما جاتكش الطاي نروتورنيها عادي"
+    },
+    {
+      "darja_ar": "نسيي",
+      "arabizi": "nsiyi",
+      "fr_origin": "essayer",
+      "category": "verbs_commerce",
+      "meaning_ar": "أجرب أو أقيس",
+      "example": "نقدر نسيي السبردينة قبل ما نخلص؟"
+    },
+    {
+      "darja_ar": "نكومبيلي",
+      "arabizi": "ncompili",
+      "fr_origin": "compiler",
+      "category": "verbs_tech",
+      "meaning_ar": "أجمع الكود أو أنسق الملفات",
+      "example": "راني نكومبيلي فالمشروع"
     }
   ]
 }

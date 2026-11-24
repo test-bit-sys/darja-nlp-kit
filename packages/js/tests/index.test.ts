@@ -24,6 +24,10 @@ import {
 } from '../src/cultural';
 import { respondToDarja } from '../src/dialogue';
 import { detectProfanity, isProfane, censorProfanity } from '../src/profanity';
+import { DarjaPipeline, analyze } from '../src/pipeline';
+import { DarjaClassifier } from '../src/classifier';
+import { DarjaChat } from '../src/chat';
+import { startServer } from '../src/server';
 
 describe('normalize', () => {
   it('should unify alef variants', () => {
@@ -827,5 +831,188 @@ describe('Memes and Franco-Darja Loanwords', () => {
     assert.ok(origins.includes('commander'));
     assert.ok(origins.includes('disponible'));
     assert.ok(origins.includes('cabas'));
+  });
+});
+
+describe('Sentiment v2 Multi-Word & 55K-Trained ML Model', () => {
+  it('should match multi-word Darja sentiment phrases', () => {
+    const pos = analyzeSentiment('ما شاء الله خدمة متقونة يعطيكم الصحة');
+    assert.equal(pos.label, 'POSITIVE');
+    assert.ok(pos.score > 0.5);
+
+    const neg = analyzeSentiment('الله لا تربحك يا حقار');
+    assert.equal(neg.label, 'NEGATIVE');
+    assert.ok(neg.score < -0.5);
+  });
+
+  it('should use ML fallback on unseen Arabizi praise', () => {
+    const res = analyzeSentiment('Thbliiii bravo souade');
+    assert.equal(res.label, 'POSITIVE');
+    assert.ok(res.score > 0);
+    assert.ok(res.method === 'ml' || res.method === 'hybrid');
+    assert.ok(res.probabilities);
+  });
+
+  it('should support explicit ml and lexicon modes', () => {
+    const mlOnly = analyzeSentiment('حتى السعودية قاتلكم ماكمش عرب اتفوووو', { mode: 'ml' });
+    assert.equal(mlOnly.label, 'NEGATIVE');
+    assert.equal(mlOnly.method, 'ml');
+
+    const lexOnly = analyzeSentiment('ماشي عيان', { mode: 'lexicon' });
+    assert.equal(lexOnly.label, 'POSITIVE');
+    assert.equal(lexOnly.method, 'lexicon');
+  });
+});
+
+describe('Dialect Merged Markers & Doro/Melyoun Entities', () => {
+  it('should detect enriched markers loaded from dialects.json', () => {
+    const east = detectDialect('جيبلي السنارية و المصلحة من فضلك');
+    assert.equal(east.region, 'EAST');
+
+    const west = detectDialect('ڨارعلي عند الشرجم في تلمسان');
+    assert.equal(west.region, 'WEST');
+  });
+
+  it('should extract doro and melyoun currency variants', () => {
+    const res1 = extractEntities('زيدني 50 دورو ولا مية دورو');
+    const amounts1 = res1.prices.map((p) => p.amount);
+    assert.ok(amounts1.includes(250));
+    assert.ok(amounts1.includes(500));
+
+    const res2 = extractEntities('pc gamer 15 melyoun');
+    assert.ok(res2.prices.some((p) => p.amount === 150000));
+  });
+});
+
+describe('Dialogue KB Retrieval & Custom Rules', () => {
+  it('should handle rule fallback gracefully without errors', () => {
+    const res = respondToDarja('شحال السومة تاع السبردينة؟', { strategy: 'rules' });
+    assert.ok(res.intent === 'PRICE_INQUIRY' || res.intent === 'DELIVERY_INQUIRY');
+    assert.ok(res.reply.length > 0);
+  });
+
+  it('should retrieve grounded Algerian replies from DziriAlign/DziriEval KB', () => {
+    const res = respondToDarja('Khoya, had sabat chhal mellekher? Ghali chwiya.', { strategy: 'retrieval' });
+    assert.equal(res.source, 'kb_retrieval');
+    assert.ok(res.reply.length > 10);
+    assert.ok(res.confidence >= 0.7);
+  });
+
+  it('should prioritize custom rules ahead of built-in rules', () => {
+    const res = respondToDarja('وقتاش تفتحو خويا؟', {
+      customRules: [
+        {
+          intent: 'HOURS',
+          patterns_arabizi: ['wa9tech taftah'],
+          patterns_arabic: ['وقتاش تفتحو'],
+          responses_arabizi: ['Naftahou kol youm men 9h l 21h!'],
+          responses_arabic: ['نفتحو كل يوم من 9 صباحاً لـ 9 ليلاً!'],
+        },
+      ],
+    });
+    assert.equal(res.intent, 'HOURS');
+    assert.equal(res.source, 'custom_rule');
+  });
+});
+
+describe('DarjaPipeline Unified Facade', () => {
+  it('should run one-call analyze() across all modules', () => {
+    const report = analyze('salam kho hab nchri 2 hbat noir l wahran 0661234567');
+    assert.equal(report.intent?.intent, 'ORDER');
+    assert.ok(report.dialect && ['WEST', 'GENERAL_DARJA'].includes(report.dialect.region));
+    assert.ok(report.entities?.wilayas.some((w) => w.code === 31));
+    assert.ok(report.sentiment);
+    assert.ok(report.reply);
+  });
+
+  it('should support fluent customization and batch analysis', () => {
+    const nlp = new DarjaPipeline({ storeName: 'DzShop', persona: 'merchant' })
+      .extendLexicon({ ممتازجدا: 0.95 }, { كارثي: -0.9 })
+      .addStopwords(['كلمةزايدة'])
+      .addProfanity(['منبوذ']);
+
+    assert.equal(nlp.moderate('انت منبوذ').isProfane, true);
+    const cleaned = nlp.clean('المنتج تاع كلمةزايدة ممتازجدا');
+    assert.ok(!cleaned.includes('كلمةزايدة'));
+
+    const batch = nlp.analyzeBatch(['wach ya khoy', 'سلعة ممتازجدا']);
+    assert.equal(batch.length, 2);
+    assert.equal(batch[1].sentiment?.label, 'POSITIVE');
+  });
+});
+
+describe('DarjaClassifier Zero-Dep Trainer', () => {
+  it('should fit, predict, evaluate, and roundtrip serialize to JSON', () => {
+    const texts = [
+      'سلام حاب نكوموندي حبة لوهران', 'ابعثلي زوج حبات للجزائر', 'راني باغي نشري',
+      'شحال السومة تاعها', 'بشحال يدير هذا', 'شحال بري تاعو',
+      'سلعة مكسرة رجعولي دراهمي', 'خردة وحشيتوهالي', 'ما وصلتش روتور',
+    ];
+    const labels = ['ORDER', 'ORDER', 'ORDER', 'PRICE', 'PRICE', 'PRICE', 'COMPLAINT', 'COMPLAINT', 'COMPLAINT'];
+    const clf = new DarjaClassifier().fit(texts, labels);
+    const pred = clf.predict('شحال السومة لوهران');
+    assert.ok(pred.label === 'PRICE' || pred.label === 'ORDER');
+    const probSum = Object.values(pred.probabilities).reduce((a, b) => a + b, 0);
+    assert.ok(Math.abs(probSum - 1) < 0.02);
+
+    const metrics = clf.evaluate(texts, labels);
+    assert.ok(metrics.accuracy >= 0.85);
+
+    clf.partialFit(['حاب نحجز وحدة لسطيف'], ['ORDER']);
+    const restored = DarjaClassifier.fromJSON(clf.toJSON());
+    assert.equal(restored.predict('حشيتوهالي خردة').label, 'COMPLAINT');
+  });
+});
+
+describe('DarjaChat Multi-Turn Stateful Session', () => {
+  it('should accumulate slots across turns and confirm order', () => {
+    const chat = new DarjaChat({ storeName: 'DzStore', persona: 'merchant' });
+
+    const t1 = chat.send('salam kho hab nchri 2 hbat noir XL');
+    assert.equal(t1.readyToConfirm, false);
+    assert.ok(t1.missingSlots.includes('wilaya') && t1.missingSlots.includes('phone'));
+
+    const t2 = chat.send('l wahran');
+    assert.equal(t2.readyToConfirm, false);
+    assert.deepEqual(t2.missingSlots, ['phone']);
+    assert.ok(t2.extractedSlots.wilayas.some((w) => w.code === 31));
+
+    const t3 = chat.send('0661234567');
+    assert.equal(t3.readyToConfirm, true);
+    assert.deepEqual(t3.missingSlots, []);
+    assert.equal(t3.intent, 'ORDER_CONFIRMED');
+    assert.ok(t3.reply.includes('0661234567'));
+
+    chat.reset();
+    assert.equal(chat.history.length, 0);
+  });
+});
+
+describe('HTTP Microservice Integration', () => {
+  it('should serve /api/wilayas/:code and /api/analyze endpoints cleanly', async () => {
+    const server = startServer({ host: '127.0.0.1', port: 0 });
+    await new Promise<void>((resolve) => server.once('listening', () => resolve()));
+    const addr = server.address();
+    const port = typeof addr === 'object' && addr ? addr.port : 0;
+
+    try {
+      const wRes = await fetch(`http://127.0.0.1:${port}/api/wilayas/16`);
+      assert.equal(wRes.status, 200);
+      const w16: any = await wRes.json();
+      assert.equal(w16.code, 16);
+      assert.equal(w16.name_fr, 'Alger');
+
+      const aRes = await fetch(`http://127.0.0.1:${port}/api/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: 'حاب نكوموندي لسطيف بسومة 2000 دج 0661234567' }),
+      });
+      assert.equal(aRes.status, 200);
+      const body: any = await aRes.json();
+      assert.equal(body.intent.intent, 'ORDER');
+      assert.ok(body.entities.wilayas.some((w: any) => w.code === 19));
+    } finally {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
   });
 });

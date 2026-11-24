@@ -19,6 +19,13 @@ export interface NegationInfo {
 }
 
 export type SentimentLabel = 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL' | 'MIXED';
+export type SentimentMode = 'hybrid' | 'lexicon' | 'ml';
+
+export interface SentimentOptions {
+  mode?: SentimentMode;
+  customPositive?: Record<string, number>;
+  customNegative?: Record<string, number>;
+}
 
 export interface SentimentResult {
   score: number;
@@ -26,6 +33,8 @@ export interface SentimentResult {
   positiveTokens: string[];
   negativeTokens: string[];
   negated: boolean;
+  method?: string;
+  probabilities?: Record<string, number>;
 }
 
 export interface StopwordsData {

@@ -746,5 +746,185 @@ class TestMemesAndFrancoDarja:
         assert "cabas" in origins
 
 
+class TestSentimentV2AndML:
+
+    def test_multiword_lexicon_phrases(self) -> None:
+        pos = analyze_sentiment("ما شاء الله خدمة متقونة يعطيكم الصحة")
+        assert pos.label == "POSITIVE"
+        assert pos.score > 0.5
+        neg = analyze_sentiment("الله لا تربحك يا حقار")
+        assert neg.label == "NEGATIVE"
+        assert neg.score < -0.5
+
+    def test_ml_fallback_on_unseen_arabizi(self) -> None:
+        res = analyze_sentiment("Thbliiii bravo souade")
+        assert res.label == "POSITIVE"
+        assert res.score > 0
+        assert res.method in ("ml", "hybrid")
+        assert res.probabilities is not None
+
+    def test_ml_and_lexicon_modes(self) -> None:
+        ml_only = analyze_sentiment("حتى السعودية قاتلكم ماكمش عرب اتفوووو", mode="ml")
+        assert ml_only.label == "NEGATIVE"
+        assert ml_only.method == "ml"
+
+        lex_only = analyze_sentiment("ماشي عيان", mode="lexicon")
+        assert lex_only.label == "POSITIVE"
+        assert lex_only.method == "lexicon"
+
+
+class TestDialectAndEntitiesV2:
+
+    def test_merged_dialects_json_markers(self) -> None:
+        east = detect_dialect("جيبلي السنارية و المصلحة من فضلك")
+        assert east.region == "EAST"
+        west = detect_dialect("ڨارعلي عند الشرجم في تلمسان")
+        assert west.region == "WEST"
+
+    def test_doro_and_melyoun_prices(self) -> None:
+        res1 = extract_entities("زيدني 50 دورو ولا مية دورو")
+        amounts1 = [p.amount for p in res1.prices]
+        assert 250.0 in amounts1
+        assert 500.0 in amounts1
+
+        res2 = extract_entities("pc gamer 15 melyoun")
+        assert any(p.amount == 150000.0 for p in res2.prices)
+
+
+class TestDialogueKBRetrieval:
+
+    def test_intent_fallback_no_crash(self) -> None:
+        res = respond_to_darja("شحال السومة تاع السبردينة؟", strategy="rules")
+        assert res.intent in ("PRICE_INQUIRY", "DELIVERY_INQUIRY")
+        assert len(res.reply) > 0
+
+    def test_kb_retrieval_from_real_corpora(self) -> None:
+        res = respond_to_darja("Khoya, had sabat chhal mellekher? Ghali chwiya.", strategy="retrieval")
+        assert res.source == "kb_retrieval"
+        assert len(res.reply) > 10
+        assert res.confidence >= 0.7
+
+    def test_vary_and_custom_rules(self) -> None:
+        custom = [{
+            "intent": "HOURS",
+            "patterns_arabizi": ["wa9tech taftah"],
+            "patterns_arabic": ["وقتاش تفتحو"],
+            "responses_arabizi": ["Naftahou kol youm men 9h l 21h!"],
+            "responses_arabic": ["نفتحو كل يوم من 9 صباحاً لـ 9 ليلاً!"],
+        }]
+        res = respond_to_darja("وقتاش تفتحو خويا؟", custom_rules=custom)
+        assert res.intent == "HOURS"
+        assert res.source == "custom_rule"
+
+
+class TestDarjaPipelineUnified:
+
+    def test_analyze_shortcut_and_to_dict(self) -> None:
+        from darja_nlp import analyze
+        report = analyze("salam kho hab nchri 2 hbat noir l wahran 0661234567")
+        assert report.intent is not None and report.intent.intent == "ORDER"
+        assert report.dialect is not None and report.dialect.region in ("WEST", "GENERAL_DARJA")
+        assert report.entities is not None and any(w.code == 31 for w in report.entities.wilayas)
+        d = report.to_dict()
+        assert d["raw_text"].startswith("salam")
+        assert "sentiment" in d and "entities" in d
+
+    def test_custom_pipeline_configuration(self) -> None:
+        from darja_nlp import DarjaPipeline
+        nlp = DarjaPipeline(store_name="DzShop", persona="merchant")
+        nlp.extend_lexicon(positive={"ممتازجدا": 0.95}, negative={"كارثي": -0.9})
+        nlp.add_stopwords(["كلمةزايدة"])
+        nlp.add_profanity(["منبوذ"])
+
+        assert nlp.moderate("انت منبوذ").is_profane is True
+        cleaned = nlp.clean("المنتج تاع كلمةزايدة ممتازجدا")
+        assert "كلمةزايدة" not in cleaned
+        batch = nlp.analyze_batch(["wach ya khoy", "سلعة ممتازجدا"])
+        assert len(batch) == 2
+        assert batch[1].sentiment is not None and batch[1].sentiment.label == "POSITIVE"
+
+
+class TestDarjaClassifier:
+
+    def test_fit_predict_evaluate_and_json_roundtrip(self) -> None:
+        from darja_nlp import DarjaClassifier
+        texts = [
+            "سلام حاب نكوموندي حبة لوهران", "ابعثلي زوج حبات للجزائر", "راني باغي نشري",
+            "شحال السومة تاعها", "بشحال يدير هذا", "شحال بري تاعو",
+            "سلعة مكسرة رجعولي دراهمي", "خردة وحشيتوهالي", "ما وصلتش روتور",
+        ]
+        labels = ["ORDER", "ORDER", "ORDER", "PRICE", "PRICE", "PRICE", "COMPLAINT", "COMPLAINT", "COMPLAINT"]
+        clf = DarjaClassifier().fit(texts, labels)
+        pred = clf.predict("شحال السومة لوهران")
+        assert pred.label in ("PRICE", "ORDER")
+        assert abs(sum(pred.probabilities.values()) - 1.0) < 0.02
+
+        metrics = clf.evaluate(texts, labels)
+        assert metrics.accuracy >= 0.85
+
+        clf.partial_fit(["حاب نحجز وحدة لسطيف"], ["ORDER"])
+        restored = DarjaClassifier.from_dict(clf.to_dict())
+        assert restored.predict("حشيتوهالي خردة").label == "COMPLAINT"
+
+
+class TestDarjaChatSession:
+
+    def test_multi_turn_slot_filling_and_confirmation(self) -> None:
+        from darja_nlp import DarjaChat
+        chat = DarjaChat(store_name="DzStore", persona="merchant")
+
+        t1 = chat.send("salam kho hab nchri 2 hbat noir XL")
+        assert t1.ready_to_confirm is False
+        assert "wilaya" in t1.missing_slots and "phone" in t1.missing_slots
+
+        t2 = chat.send("l wahran")
+        assert t2.ready_to_confirm is False
+        assert t2.missing_slots == ["phone"]
+        assert any(w["code"] == 31 for w in t2.extracted_slots["wilayas"])
+
+        t3 = chat.send("0661234567")
+        assert t3.ready_to_confirm is True
+        assert t3.missing_slots == []
+        assert t3.intent == "ORDER_CONFIRMED"
+        assert "0661234567" in t3.reply
+
+        chat.reset()
+        assert len(chat.history) == 0
+
+
+class TestHTTPServerIntegration:
+
+    def test_server_endpoints_and_fixes(self) -> None:
+        import json
+        import threading
+        import urllib.request
+        from http.server import HTTPServer
+        from darja_nlp.server import DarjaRequestHandler
+
+        httpd = HTTPServer(("127.0.0.1", 0), DarjaRequestHandler)
+        port = httpd.server_address[1]
+        thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/wilayas/16", timeout=5) as resp:
+                w16 = json.loads(resp.read().decode("utf-8"))
+                assert w16["code"] == 16 and w16["name_fr"] == "Alger"
+
+            req = urllib.request.Request(
+                f"http://127.0.0.1:{port}/api/analyze",
+                data=json.dumps({"text": "حاب نكوموندي لسطيف بسومة 2000 دج 0661234567"}).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                body = json.loads(resp.read().decode("utf-8"))
+                assert body["intent"]["intent"] == "ORDER"
+                assert any(w["code"] == 19 for w in body["entities"]["wilayas"])
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+
+
+
 
 

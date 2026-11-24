@@ -45,6 +45,12 @@ def main() -> None:
     with open(data_dir / 'franco_darja.json', 'r', encoding='utf-8') as f:
         franco_data = json.load(f)
 
+    sentiment_model_path = data_dir / 'sentiment_model.json'
+    sentiment_model_data = json.load(open(sentiment_model_path, 'r', encoding='utf-8')) if sentiment_model_path.exists() else {}
+
+    dialogue_kb_path = data_dir / 'dialogue_kb.json'
+    dialogue_kb_data = json.load(open(dialogue_kb_path, 'r', encoding='utf-8')) if dialogue_kb_path.exists() else {'entries': []}
+
     template = r"""<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -576,8 +582,8 @@ def main() -> None:
       <div class="logo-badge">
         <span>DZ Open Suite</span>
         <span>Zero-Dependency</span>
-        <span>69 Wilayas & 550+ Communes</span>
-        <span>AI Automation Ready</span>
+        <span>69 Wilayas & 1,541 Communes</span>
+        <span>55K-Trained Hybrid ML</span>
       </div>
       <h1>darja-nlp-kit</h1>
       <p class="subtitle">حزمة الذكاء الاصطناعي والمعالجة اللغوية للدارجة الجزائرية: تفكيك النوايا، الولايات الـ 69، المشغلين، والتصعيد الذكي</p>
@@ -614,6 +620,8 @@ def main() -> None:
         <button class="sample-chip" style="border-color:#10b981; color:#34d399;" onclick="loadSample(8)">💬 رد حواري: wach ya khoy</button>
         <button class="sample-chip" style="border-color:#f43f5e; color:#fb7185;" onclick="loadSample(9)">🛡️ كشف الشتائم: يا حمار</button>
         <button class="sample-chip" style="border-color:#ec4899; color:#f472b6;" onclick="loadSample(10)">🎭 ميمز: فاك يا حشيشة و زوخ وطير</button>
+        <button class="sample-chip" style="border-color:#06b6d4; color:#67e8f9;" onclick="loadSample(11)">🤝 مفاوضة DziriAlign: صباط غالي شوية</button>
+        <button class="sample-chip" style="border-color:#8b5cf6; color:#c4b5fd;" onclick="loadSample(12)">🧠 تحليل آلي بالدارجة: Thbliiii bravo souade</button>
       </div>
     </div>
 
@@ -780,6 +788,8 @@ def main() -> None:
     const DIALOGUE_RULES_DATA = __DIALOGUE_RULES_DATA__;
     const MEMES_DATA = __MEMES_DATA__;
     const FRANCO_DATA = __FRANCO_DATA__;
+    const SENTIMENT_MODEL = __SENTIMENT_MODEL__;
+    const DIALOGUE_KB_DATA = __DIALOGUE_KB_DATA__;
 
     // Core Algorithms
     const ALEF_VARIANTS = /[\u0622\u0623\u0625]/g;
@@ -851,15 +861,81 @@ def main() -> None:
       return filtered.join(' ');
     }
 
+    function predictMlSentiment(text) {
+      if (!SENTIMENT_MODEL || !SENTIMENT_MODEL.priors || !SENTIMENT_MODEL.weights) return null;
+      let t = text.toLowerCase().replace(/https?:\/\/\S+|@\w+/g, ' ')
+                  .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+                  .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
+                  .replace(/(.)\1{2,}/g, '$1$1');
+      const toks = t.match(/[a-zA-Z0-9\u0621-\u064A\u0671-\u06D3]+|[\u{1F300}-\u{1FAFF}\u2600-\u27BF]+/gu) || [];
+      if (toks.length === 0) return null;
+      const feats = [...toks];
+      for (let i = 0; i < toks.length - 1; i++) feats.push(toks[i] + '_' + toks[i + 1]);
+      for (const w of toks) {
+        if (w.length >= 5 && /^[a-zA-Z\u0621-\u064A\u0671-\u06D3]+$/.test(w)) {
+          feats.push('p3:' + w.slice(0, 3));
+          feats.push('s3:' + w.slice(-3));
+        }
+      }
+      const scores = [...SENTIMENT_MODEL.priors];
+      const mPos = [], mNeg = [];
+      let hits = 0;
+      for (const f of feats) {
+        const wt = SENTIMENT_MODEL.weights[f];
+        if (wt) {
+          hits++;
+          scores[0] += wt[0]; scores[1] += wt[1]; scores[2] += wt[2];
+          if (!f.includes('_') && !f.startsWith('p3:') && !f.startsWith('s3:')) {
+            if (wt[2] - wt[0] > 0.4 && !mPos.includes(f)) mPos.push(f);
+            else if (wt[0] - wt[2] > 0.4 && !mNeg.includes(f)) mNeg.push(f);
+          }
+        }
+      }
+      if (hits === 0) return null;
+      const maxS = Math.max(...scores);
+      const exps = scores.map(s => Math.exp(Math.max(-50, s - maxS)));
+      const sumE = exps.reduce((a, b) => a + b, 0) || 1;
+      const probs = exps.map(e => e / sumE);
+      let label = 'NEUTRAL';
+      if (probs[2] >= probs[0] && probs[2] >= probs[1]) label = 'POSITIVE';
+      else if (probs[0] >= probs[2] && probs[0] >= probs[1]) label = 'NEGATIVE';
+      const pol = Math.round(Math.max(-1, Math.min(1, probs[2] - probs[0])) * 100) / 100;
+      return { score: pol, label, positiveTokens: mPos.slice(0, 6), negativeTokens: mNeg.slice(0, 6), negated: false, method: 'ml' };
+    }
+
     function analyzeSentiment(text) {
-      if (!text) return { score: 0, label: 'NEUTRAL', positiveTokens: [], negativeTokens: [], negated: false };
+      if (!text) return { score: 0, label: 'NEUTRAL', positiveTokens: [], negativeTokens: [], negated: false, method: 'hybrid' };
       const clean = normalize(text);
       const words = clean.split(/[\s,،!?;:.]+/).filter(Boolean);
       let total = 0, count = 0, hasNeg = false;
       const pos = [], neg = [];
+      const covered = new Set();
+
+      // Multi-word phrase check
+      const lowerWords = words.map(w => w.toLowerCase());
+      for (const win of [4, 3, 2]) {
+        for (let i = 0; i <= lowerWords.length - win; i++) {
+          let skip = false;
+          for (let k = i; k < i + win; k++) if (covered.has(k)) { skip = true; break; }
+          if (skip) continue;
+          const phrase = lowerWords.slice(i, i + win).join(' ');
+          let pScore = null;
+          if (LEXICON_DATA.positive[phrase] !== undefined) pScore = LEXICON_DATA.positive[phrase];
+          else if (LEXICON_DATA.negative[phrase] !== undefined) pScore = LEXICON_DATA.negative[phrase];
+          if (pScore !== null) {
+            const origPhrase = words.slice(i, i + win).join(' ');
+            const prev = i > 0 ? lowerWords[i - 1] : null;
+            if (prev && LEXICON_DATA.negators.includes(prev)) { pScore = -pScore * 0.8; hasNeg = true; }
+            total += pScore; count++;
+            if (pScore > 0) pos.push(origPhrase); else if (pScore < 0) neg.push(origPhrase);
+            for (let k = i; k < i + win; k++) covered.add(k);
+          }
+        }
+      }
 
       for (let i = 0; i < words.length; i++) {
-        const w = words[i].toLowerCase();
+        if (covered.has(i)) continue;
+        const w = lowerWords[i];
         let score = null;
         let t = words[i];
 
@@ -871,7 +947,7 @@ def main() -> None:
 
         if (score === null) continue;
 
-        const prev = i > 0 ? words[i - 1].toLowerCase() : null;
+        const prev = i > 0 ? lowerWords[i - 1] : null;
         if (prev && LEXICON_DATA.negators.includes(prev)) {
           score = -score * 0.8;
           hasNeg = true;
@@ -885,6 +961,11 @@ def main() -> None:
         if (score > 0) pos.push(t); else if (score < 0) neg.push(t);
       }
 
+      if (count === 0) {
+        const mlRes = predictMlSentiment(text);
+        if (mlRes && mlRes.label !== 'NEUTRAL' && Math.abs(mlRes.score) >= 0.15) return mlRes;
+      }
+
       const finalScore = count > 0 ? Math.max(-1, Math.min(1, total / count)) : 0;
       const rounded = Math.round(finalScore * 100) / 100;
       let label = 'NEUTRAL';
@@ -892,7 +973,7 @@ def main() -> None:
       else if (rounded > 0.05) label = 'POSITIVE';
       else if (rounded < -0.05) label = 'NEGATIVE';
 
-      return { score: rounded, label, positiveTokens: pos, negativeTokens: neg, negated: hasNeg };
+      return { score: rounded, label, positiveTokens: pos, negativeTokens: neg, negated: hasNeg, method: 'hybrid' };
     }
 
     function identifyIntent(text) {
@@ -1173,8 +1254,17 @@ def main() -> None:
         maskedText = maskedText.slice(0, pm.index) + ' '.repeat(pm[0].length) + maskedText.slice(pm.index + pm[0].length);
       }
 
+      // 2b. Numeric doro prices (1 doro = 5 DZD)
+      const doroNumReg = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:دورو|doro|doros)(?=$|\s|[^\w\u0600-\u06FF])/gi;
+      let dmDoro;
+      while ((dmDoro = doroNumReg.exec(maskedText)) !== null) {
+        const val = parseFloat(dmDoro[1].replace(',', '.')) * 5;
+        prices.push({ raw: dmDoro[0].trim(), amount: val });
+        maskedText = maskedText.slice(0, dmDoro.index) + ' '.repeat(dmDoro[0].length) + maskedText.slice(dmDoro.index + dmDoro[0].length);
+      }
+
       // 3. Dynamic millions
-      const dynMilReg = /(?:^|\s|[^\w\u0600-\u06FF])(\\d+(?:[.,]\\d+)?)\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)(?=$|\s|[^\w\u0600-\u06FF])/gi;
+      const dynMilReg = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:ملاين|ملايين|مليون|mlyon|melyon|melyoun|mlayen|mlayin|mlayoun)(?=$|\s|[^\w\u0600-\u06FF])/gi;
       let dmDyn;
       while ((dmDyn = dynMilReg.exec(maskedText)) !== null) {
         const val = parseFloat(dmDyn[1].replace(',', '.')) * 10000;
@@ -1184,10 +1274,12 @@ def main() -> None:
 
       // 4. Fixed colloquial amounts
       const darjaAmounts = [
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(عشرين\s*دورو|20\s*doro)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 100 },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(مية\s*دورو|100\s*doro)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 500 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(مية\s*الف|100\s*الف|mya|myat\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 1000 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(ميتين\s*الف|200\s*الف|mitin\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 2000 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(خمسمية\s*الف|500\s*الف|khams\s*mya|500\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 5000 },
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(مليون|mlyon|1\s*mlyon)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 10000 },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(مليون|mlyon|melyon|melyoun|1\s*mlyon)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 10000 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(زوج\s*ملاين|زوج\s*ملايين|zoudj\s*mlayen|zouj\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 20000 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(خمس\s*ملاين|khams\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 50000 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(عشر\s*ملاين|3achr\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 100000 },
@@ -1258,11 +1350,20 @@ def main() -> None:
         CENTER: ['واشنو', 'حكاية', 'دروك', 'هكدا', 'هكداك', 'حوايج', 'البهجة', 'العاصمة', 'دزاير', 'wachnou', 'hakda', 'hakdak'],
         SOUTH: ['واه', 'لاه', 'حتة', 'سوف', 'ميزاب', 'غرداية', 'ادرار', 'wah', 'lah', '7ata'],
       };
-      const lower = text.toLowerCase();
+      const { tokens } = tokenize(text);
+      const lowerTokens = tokens.map((t) => t.toLowerCase());
+      const tokenSet = new Set(lowerTokens);
+      const paddedTokens = ` ${lowerTokens.join(' ')} `;
       const scores = { WEST: [], EAST: [], CENTER: [], SOUTH: [] };
       for (const [reg, words] of Object.entries(markers)) {
         for (const w of words) {
-          if (lower.includes(w.toLowerCase())) scores[reg].push(w);
+          const lw = w.toLowerCase().trim();
+          if (!lw) continue;
+          if (lw.includes(' ')) {
+            if (paddedTokens.includes(` ${lw} `)) scores[reg].push(w);
+          } else if (tokenSet.has(lw)) {
+            scores[reg].push(w);
+          }
         }
       }
       let top = 'GENERAL_DARJA';
@@ -1482,42 +1583,76 @@ def main() -> None:
       return arabicCount > latinCount ? 'arabic' : 'arabizi';
     }
 
+    function kbTokenize(text) {
+      const stop = new Set(['el','al','la','le','de','du','wa','w','f','fi','fel','l','li','ta3','men','mn','b','ala','3la','ya','في','من','على','الى','عن','مع','و','او','ال','لي','تاع','نتاع','وش','واش']);
+      const clean = text.toLowerCase().replace(/[!?.,;:\-_/\\]+/g, ' ').replace(/[\u064B-\u065F\u0670\u0640]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
+      return (clean.match(/[a-z0-9\u0600-\u06FF']+/g) || []).filter(t => t.length >= 2 && !stop.has(t));
+    }
+
     function respondToDarja(text, persona = 'casual') {
       if (!text || !text.trim()) {
-        return { reply: 'مرحباً بيك خويا، كاش ما نسحقو نخدموك؟', intent: 'EMPTY', script: 'arabic' };
+        return { reply: 'مرحباً بيك خويا، كاش ما نسحقو نخدموك؟', intent: 'EMPTY', script: 'arabic', source: 'default' };
       }
       const resolvedScript = detectScript(text);
-      const normInput = text.toLowerCase().replace(/[!?.,;:\-_/\\]+/g, ' ').replace(/\s+/g, ' ').trim();
+      const normInput = text.toLowerCase().replace(/[!?.,;:\-_/\\]+/g, ' ').replace(/[\u064B-\u065F\u0670\u0640]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/(.)\1{2,}/g, '$1').replace(/\s+/g, ' ').trim();
       const rules = (DIALOGUE_RULES_DATA && DIALOGUE_RULES_DATA.rules) || [];
 
+      let bestRule = null;
       for (const rule of rules) {
         const patterns = resolvedScript === 'arabizi' ? rule.patterns_arabizi : rule.patterns_arabic;
         const altPatterns = resolvedScript === 'arabizi' ? rule.patterns_arabic : rule.patterns_arabizi;
 
-        for (const p of patterns) {
+        for (const p of (patterns || [])) {
           const normP = p.toLowerCase().trim();
-          if (normInput.includes(normP) || normP.includes(normInput)) {
-            const responses = resolvedScript === 'arabizi' ? rule.responses_arabizi : rule.responses_arabic;
-            let chosen = responses[0] || '';
-            if (persona === 'merchant' && rule.intent === 'WELLBEING_INQUIRY') {
-              chosen = resolvedScript === 'arabizi' ? 'We cv hamdoulah kho! Marhba bik f la boutique ta3na, kash ma khasek sel3a?' : 'لاباس الحمد لله ربي يحفظك خويا! مرحباً بيك في متجرنا، كاش ما راك تحوس سلعة؟';
-            }
-            return { reply: chosen, intent: rule.intent, script: resolvedScript };
-          }
+          let score = 0;
+          if (normInput === normP) score = normP.length + 200;
+          else if (normInput.includes(normP)) score = normP.length + 25;
+          else if (normInput.length >= 4 && normP.includes(normInput)) score = normInput.length + 5;
+          if (score > 0 && (!bestRule || score > bestRule.score)) bestRule = { score, rule };
         }
-        for (const p of altPatterns) {
+        for (const p of (altPatterns || [])) {
           const normP = p.toLowerCase().trim();
           if (normInput.includes(normP)) {
-            const responses = resolvedScript === 'arabizi' ? rule.responses_arabizi : rule.responses_arabic;
-            return { reply: responses[0] || '', intent: rule.intent, script: resolvedScript };
+            const score = normP.length + 10;
+            if (!bestRule || score > bestRule.score) bestRule = { score, rule };
           }
         }
       }
 
-      if (resolvedScript === 'arabizi') {
-        return { reply: 'We cv hamdoulah w nta kho? Marhba bik!', intent: 'CASUAL_CHAT', script: 'arabizi' };
+      if (bestRule) {
+        const rule = bestRule.rule;
+        const responses = resolvedScript === 'arabizi' ? rule.responses_arabizi : rule.responses_arabic;
+        let chosen = (responses && responses[0]) || '';
+        if (persona === 'merchant' && rule.intent === 'WELLBEING_INQUIRY') {
+          chosen = resolvedScript === 'arabizi' ? 'We cv hamdoulah kho! Marhba bik f la boutique ta3na, kash ma khasek sel3a?' : 'لاباس الحمد لله ربي يحفظك خويا! مرحباً بيك في متجرنا، كاش ما راك تحوس سلعة؟';
+        }
+        return { reply: chosen, intent: rule.intent, script: resolvedScript, source: 'rule' };
       }
-      return { reply: 'مرحباً بيك خويا العزيز! واش راك وكاش ما نسحقو نخدموك؟', intent: 'CASUAL_CHAT', script: 'arabic' };
+
+      // KB Retrieval over DziriAlign + DziriEval
+      const entries = (DIALOGUE_KB_DATA && DIALOGUE_KB_DATA.entries) || [];
+      const qToks = new Set(kbTokenize(text));
+      if (qToks.size >= 2 && entries.length > 0) {
+        let bestKb = null, bestSim = 0;
+        for (const entry of entries) {
+          const dToks = new Set(kbTokenize(entry.prompt || ''));
+          if (dToks.size === 0) continue;
+          let inter = 0;
+          for (const t of qToks) if (dToks.has(t)) inter++;
+          if (inter === 0) continue;
+          let sim = inter / Math.sqrt(qToks.size * dToks.size);
+          if (entry.script === resolvedScript) sim += 0.06;
+          if (sim > bestSim) { bestSim = sim; bestKb = entry; }
+        }
+        if (bestKb && bestSim >= 0.34) {
+          return { reply: bestKb.reply, intent: bestKb.intent || 'CONVERSATION', script: bestKb.script, source: 'kb_retrieval' };
+        }
+      }
+
+      if (resolvedScript === 'arabizi') {
+        return { reply: 'We cv hamdoulah w nta kho? Marhba bik!', intent: 'CASUAL_CHAT', script: 'arabizi', source: 'default' };
+      }
+      return { reply: 'مرحباً بيك خويا العزيز! واش راك وكاش ما نسحقو نخدموك؟', intent: 'CASUAL_CHAT', script: 'arabic', source: 'default' };
     }
 
     function detectProfanity(text) {
@@ -1572,7 +1707,9 @@ def main() -> None:
       "تيكي تاكا يا خويا الكولي وصلني وسلعتكم كابا أصلية ولوز وهبال يعطيكم الصحة",
       "wach ya khoy",
       "يا حمار ما تبعثليش سلعة خردة وناقصة",
-      "قالو فاك يا حشيشة و زوخ وطير و وان تو ثري فيفا لالجيري"
+      "قالو فاك يا حشيشة و زوخ وطير و وان تو ثري فيفا لالجيري",
+      "Khoya, had sabat chhal mellekher? Ghali chwiya.",
+      "Thbliiii bravo souade"
     ];
 
     function loadSample(idx) {
@@ -1977,6 +2114,10 @@ def main() -> None:
         '__MEMES_DATA__', json.dumps(memes_data, ensure_ascii=False)
     ).replace(
         '__FRANCO_DATA__', json.dumps(franco_data, ensure_ascii=False)
+    ).replace(
+        '__SENTIMENT_MODEL__', json.dumps(sentiment_model_data, ensure_ascii=False, separators=(',', ':'))
+    ).replace(
+        '__DIALOGUE_KB_DATA__', json.dumps(dialogue_kb_data, ensure_ascii=False, separators=(',', ':'))
     )
 
     out_file = docs_dir / 'index.html'
