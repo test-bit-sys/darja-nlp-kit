@@ -6,6 +6,8 @@ in authentic Algerian Darja like a human merchant/representative.
 """
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 from .normalizer import normalize
 from .arabizi import arabizi_to_arabic
@@ -14,6 +16,78 @@ from .entities import extract_entities, get_wilaya_by_code
 from .dialect import detect_dialect
 from .intent import identify_intent, IntentType
 from .escalation import detect_escalation
+
+_DATA_DIR = Path(__file__).parent / 'data'
+_dialogues_cache: Optional[List[Dict[str, Any]]] = None
+
+
+def _load_dialogues() -> List[Dict[str, Any]]:
+    global _dialogues_cache
+    if _dialogues_cache is not None:
+        return _dialogues_cache
+    dialogues_path = _DATA_DIR / 'dialogues.json'
+    if dialogues_path.exists():
+        try:
+            with open(dialogues_path, 'r', encoding='utf-8') as f:
+                _dialogues_cache = json.load(f)
+                return _dialogues_cache
+        except Exception:
+            pass
+    _dialogues_cache = []
+    return _dialogues_cache
+
+
+def get_few_shot_dialogues(
+    region: str = "GENERAL_DARJA",
+    intent: Optional[str] = None,
+    limit: int = 2
+) -> List[Dict[str, Any]]:
+    """
+    Retrieve real Algerian dialogue exchanges matching the customer's dialect region
+    and/or intent to serve as grounding few-shot examples for LLMs.
+    """
+    all_dialogues = _load_dialogues()
+    if not all_dialogues:
+        return []
+
+    # Filter by region
+    region_upper = region.upper()
+    regional = [d for d in all_dialogues if d.get('region', '').upper() == region_upper]
+    if not regional:
+        regional = [d for d in all_dialogues if d.get('region', '').upper() == 'GENERAL_DARJA']
+
+    # Filter or prioritize by intent if provided
+    selected: List[Dict[str, Any]] = []
+    if intent and intent.upper() != "UNKNOWN":
+        intent_upper = intent.upper()
+        matching_intent = [d for d in regional if d.get('intent', '').upper() == intent_upper]
+        selected.extend(matching_intent[:limit])
+
+    # If we need more to reach limit, fill with other regional dialogues
+    for d in regional:
+        if len(selected) >= limit:
+            break
+        if d not in selected:
+            selected.append(d)
+
+    # Fallback to general if still below limit
+    if len(selected) < limit:
+        for d in all_dialogues:
+            if len(selected) >= limit:
+                break
+            if d not in selected:
+                selected.append(d)
+
+    return [
+        {
+            "id": d.get("id"),
+            "region": d.get("region"),
+            "intent": d.get("intent"),
+            "customer_message": d.get("customer_message"),
+            "merchant_response": d.get("merchant_response"),
+        }
+        for d in selected[:limit]
+    ]
 
 
 INTENT_GUIDELINES: Dict[str, str] = {
@@ -124,6 +198,11 @@ def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> D
             "quantities": quantities_summary,
             "product_attributes": product_attributes_summary,
         },
+        "few_shot_examples": get_few_shot_dialogues(
+            region=dialect.region,
+            intent=intent.intent,
+            limit=2
+        ),
     }
 
 
@@ -153,6 +232,13 @@ def format_agent_system_prompt(context: Dict[str, Any]) -> str:
     colors_str = ", ".join(colors_list) if colors_list else "غير محدد"
     sizes_str = ", ".join(sizes_list) if sizes_list else "غير محدد"
 
+    few_shots = context.get("few_shot_examples") or context.get("fewShotExamples") or []
+    few_shots_section = ""
+    if few_shots:
+        few_shots_section = "\n[أمثلة واقعية لنبرة الرد بالدارجة الجزائرية المستهدفة]:\n"
+        for i, ex in enumerate(few_shots, 1):
+            few_shots_section += f"{i}. رسالة الزبون: \"{ex['customer_message']}\"\n   رد التاجر الطبيعي: \"{ex['merchant_response']}\"\n"
+
     prompt = f"""أنت مساعد خدمة عملاء ذكي وبشري جداً لمتجر إلكتروني جزائري '{store}'.
 مهمتك الرد على الزبون الجزائري بدارجة واقعية ومتقنة 100%، كأنك تاجر جزائري محترف ولطيف.{escalation_notice}
 [السياق المستخرج من رسالة الزبون]:
@@ -170,7 +256,7 @@ def format_agent_system_prompt(context: Dict[str, Any]) -> str:
 - شركات التوصيل: {', '.join(facts['delivery_companies']) if facts['delivery_companies'] else 'غير محددة'}
 - نمط التوصيل: {facts['delivery_mode'] if facts['delivery_mode'] else 'غير محدد'}
 - أرقام الهاتف: {', '.join(facts['phones']) if facts['phones'] else 'غير متوفرة'}
-
+{few_shots_section}
 [قواعد صارمة للرد]:
 1. تحدث بدارجة جزائرية عفوية ومحترمة (لا تستخدم فصحى معربة أو لهجات مشرقية إطلاقاً).
 2. طابق نبرة ولهجة الزبون ({dialect['region']}) لتبني الثقة والقرب.

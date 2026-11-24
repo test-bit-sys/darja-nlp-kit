@@ -5,12 +5,12 @@ export { analyzeSentiment } from './sentiment';
 export { extractEntities, getWilayas, getWilayaByCode } from './entities';
 export { extractQuantities, extractProductAttributes } from './quantities';
 export { detectEscalation } from './escalation';
-export { detectDialect } from './dialect';
+export { detectDialect, getDialectMetadata } from './dialect';
 export { identifyIntent } from './intent';
-export { buildAgentContext, formatAgentSystemPrompt } from './agent';
+export { buildAgentContext, formatAgentSystemPrompt, getFewShotDialogues } from './agent';
 export { startServer } from './server';
 export type { ServerOptions } from './server';
-export type { AgentContext } from './agent';
+export type { AgentContext, DialogueExample } from './agent';
 export type {
   NormalizeOptions,
   ArabiziOptions,

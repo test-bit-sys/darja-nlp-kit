@@ -21,6 +21,12 @@ def main() -> None:
     with open(data_dir / 'wilayas.json', 'r', encoding='utf-8') as f:
         wilayas_data = json.load(f)
 
+    with open(data_dir / 'dialects.json', 'r', encoding='utf-8') as f:
+        dialects_data = json.load(f)
+
+    with open(data_dir / 'dialogues.json', 'r', encoding='utf-8') as f:
+        dialogues_data = json.load(f)
+
     template = r"""<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -696,6 +702,10 @@ def main() -> None:
             <div style="font-size: 12px; color: #34d399; font-weight: 700; margin-bottom: 6px;">💬 رد الذكاء الاصطناعي البشري الواقعي (AI Agent Response):</div>
             <div id="agentReplyBox" style="background:#080c14; border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:16px; font-size:15px; color:#f0fdf4; line-height:1.7; min-height:80px; display:flex; align-items:center;"></div>
           </div>
+          <div style="grid-column: 1 / -1; margin-top: 4px;">
+            <div style="font-size: 12px; color: #fbbf24; font-weight: 700; margin-bottom: 6px;">📚 عينة تدريب حقيقية مطابقة للهجة المستهدفة من قاعدة البيانات (100+ Dialogues Few-Shot):</div>
+            <div id="matchingDialogueBox" style="background:#080c14; border:1px solid rgba(251,191,36,0.25); border-radius:10px; padding:12px 16px; font-size:13px; color:#fef3c7; line-height:1.7;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -712,6 +722,8 @@ def main() -> None:
     const LEXICON_DATA = __LEXICON_DATA__;
     const ARABIZI_RULES = __ARABIZI_RULES__;
     const WILAYAS_DATA = __WILAYAS_DATA__;
+    const DIALECTS_DATA = __DIALECTS_DATA__;
+    const DIALOGUES_DATA = __DIALOGUES_DATA__;
 
     // Core Algorithms
     const ALEF_VARIANTS = /[\u0622\u0623\u0625]/g;
@@ -1498,11 +1510,26 @@ def main() -> None:
           agentReply = `وعليكم السلام خويا لعزيز! مرحبا بيك، السلعة راها كاينة ونوصلوها ${targetWilaya} ${targetCarrier}. ${targetPrice}. تقدر تفيرسي في BaridiMob ولا تخلص كاش كي توصلك السلعة غايا!`;
         } else if (dialect.region === 'EAST') {
           agentReply = `أهلاً وسهلاً بيك خويا ربي يحفظك! سلعة لوز وضرك نوجدوهالك ${targetWilaya} ${targetCarrier}، ${targetPrice}. تقدر تخلص بالـ BaridiMob ولا تكاشي كي يوصلهالك الليفرور، عيشك!`;
+        } else if (dialect.region === 'SOUTH') {
+          agentReply = `أهلاً وسهلاً بيك خويا وعلى الراس والعين! السلعة زينة ومضمونة وتوصلكم ${targetWilaya} ${targetCarrier}، ${targetPrice}. وربي يباركلك في رزقك. مرحب بيك في كل وقت!`;
         } else {
           agentReply = `سلام خويا، مرحبا بيك عندنا! ما كاش مشكل خلاص، السلعة متوفرة ونوصلوها ${targetWilaya} ${targetCarrier}، ${targetPrice}. بالنسبة للدفع تحب بريدي موب ولا كاش كي تلحقك السلعة للباب؟`;
         }
       }
       document.getElementById('agentReplyBox').textContent = agentReply;
+
+      // Match few-shot dialogue
+      const matchedDialogue = (DIALOGUES_DATA || []).find(d => d.region === dialect.region && d.intent === intentRes.intent)
+        || (DIALOGUES_DATA || []).find(d => d.region === dialect.region)
+        || (DIALOGUES_DATA || [])[0];
+
+      const diagBox = document.getElementById('matchingDialogueBox');
+      if (matchedDialogue && diagBox) {
+        diagBox.innerHTML = `
+          <div style="margin-bottom:6px;"><span style="background:#3b82f6; color:#fff; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:700;">${matchedDialogue.region}</span> <span style="color:#f59e0b; font-weight:700;">سؤال الزبون:</span> "${matchedDialogue.customer_message}"</div>
+          <div><span style="background:#10b981; color:#fff; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:700;">رد التاجر البشري</span> <span style="color:#34d399; font-weight:700;">رد التاجر الواقعي:</span> "${matchedDialogue.merchant_response}"</div>
+        `;
+      }
     }
 
     inputArea.addEventListener('input', processText);
@@ -1520,6 +1547,10 @@ def main() -> None:
         '__ARABIZI_RULES__', json.dumps(arabizi_rules, ensure_ascii=False)
     ).replace(
         '__WILAYAS_DATA__', json.dumps(wilayas_data, ensure_ascii=False)
+    ).replace(
+        '__DIALECTS_DATA__', json.dumps(dialects_data, ensure_ascii=False)
+    ).replace(
+        '__DIALOGUES_DATA__', json.dumps(dialogues_data, ensure_ascii=False)
     )
 
     out_file = docs_dir / 'index.html'

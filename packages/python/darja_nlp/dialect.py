@@ -1,35 +1,78 @@
 """Algerian regional dialect identification."""
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
-from typing import Dict, List, Literal
+from pathlib import Path
+from typing import Any, Dict, List, Literal, Optional
 
 from .stopwords import tokenize
 
 
 DialectRegion = Literal['WEST', 'EAST', 'CENTER', 'SOUTH', 'GENERAL_DARJA']
 
+_DATA_DIR = Path(__file__).parent / 'data'
+_dialects_data: Optional[Dict[str, Any]] = None
+
+
+def _load_dialects_json() -> Dict[str, Any]:
+    global _dialects_data
+    if _dialects_data is not None:
+        return _dialects_data
+    json_path = _DATA_DIR / 'dialects.json'
+    if json_path.exists():
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                _dialects_data = json.load(f)
+                return _dialects_data
+        except Exception:
+            pass
+    _dialects_data = {'regions': {}}
+    return _dialects_data
+
+
 REGIONAL_MARKERS: Dict[str, List[str]] = {
     'WEST': [
         'شوالا', 'شاكاين', 'شا', 'غايا', 'باغي', 'حرز', 'راك عاقل',
-        'شراكم', 'كيراك', 'كيراكم', 'درك', 'حشمان', 'طاير',
-        'chwala', 'chakayn', 'ghaya', 'baghi', 'kirak', 'kirakom', 'drk'
+        'شراكم', 'كيراك', 'كيراكم', 'درك', 'حشمان', 'طاير', 'صايي',
+        'طليت', 'تالمون', 'بلا مزية', 'نوليلك', 'غادي',
+        'chwala', 'chakayn', 'ghaya', 'baghi', 'kirak', 'kirakom', 'drk',
+        'sayi', 'bla mziya', 'ghadi'
     ],
     'EAST': [
         'واشنهي', 'قداش', 'ياسر', 'ضرك', 'زي', 'باهي', 'علاشنهي',
-        'واشبيك', 'كفاه', 'ضروك', 'سيرتا', 'بونة',
-        '9dach', 'yaser', 'bahi', 'kach'
+        'واشبيك', 'كفاه', 'ضروك', 'سيرتا', 'بونة', 'عيشك', 'يعيشك',
+        'على عيني', 'قندورة',
+        '9dach', 'yaser', 'bahi', 'kach', '3aychek', 'wachnahi'
     ],
     'CENTER': [
         'واشنو', 'حكاية', 'دروك', 'هكدا', 'هكداك', 'حوايج', 'البهجة',
-        'العاصمة', 'دزاير', 'تشوف',
-        'wachnou', 'hakda', 'hakdak', 'hwaiej'
+        'العاصمة', 'دزاير', 'تشوف', 'مريڤل', 'حطة', 'هبال', 'كاش ما تسحق',
+        'رانا هنا', 'صحيت',
+        'wachnou', 'hakda', 'hakdak', 'hwaiej', 'mreguel', 'mrigel', '7atta', 'hbal'
     ],
     'SOUTH': [
-        'واه', 'لاه', 'حتة', 'سوف', 'ميزاب', 'غرداية', 'ادرار',
-        'wah', 'lah', '7ata'
+        'واه', 'لاه', 'حتة', 'سوف', 'ميزاب', 'غرداية', 'ادرار', 'بسكرة',
+        'ورقلة', 'بشار', 'على الراس والعين', 'مرحب بيك', 'بارك الله فيك',
+        'سومة زينة', 'واش حالك',
+        'wah', 'lah', '7ata', 'mr7eb bik', 'zin'
     ],
 }
+
+
+def get_dialect_metadata(region: DialectRegion) -> Dict[str, Any]:
+    """Retrieve extended metadata, tone guide, and greetings for an Algerian dialect region."""
+    data = _load_dialects_json()
+    regions = data.get('regions', {})
+    if region in regions:
+        return regions[region]
+    return {
+        'name_ar': region,
+        'tone_guide': 'دارجة جزائرية عفوية ومحترمة.',
+        'greetings': [],
+        'closure': [],
+        'markers': REGIONAL_MARKERS.get(region, []),
+    }
 
 
 @dataclass
@@ -37,6 +80,7 @@ class DialectResult:
     region: DialectRegion
     confidence: float
     detected_markers: List[str] = field(default_factory=list)
+
 
 
 def detect_dialect(text: str) -> DialectResult:

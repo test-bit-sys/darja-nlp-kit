@@ -9,11 +9,11 @@ from darja_nlp.arabizi import arabizi_to_arabic, ArabiziOptions
 from darja_nlp.stopwords import tokenize, remove_stopwords, is_stopword
 from darja_nlp.sentiment import analyze_sentiment
 from darja_nlp.entities import extract_entities, get_wilayas, get_wilaya_by_code
-from darja_nlp.dialect import detect_dialect
+from darja_nlp.dialect import detect_dialect, get_dialect_metadata
 from darja_nlp.intent import identify_intent
 from darja_nlp.quantities import extract_quantities, extract_product_attributes
 from darja_nlp.escalation import detect_escalation
-from darja_nlp.agent import build_agent_context, format_agent_system_prompt
+from darja_nlp.agent import build_agent_context, format_agent_system_prompt, get_few_shot_dialogues
 
 
 class TestNormalize:
@@ -557,3 +557,35 @@ class TestAgentContextWithEscalation:
         prompt = format_agent_system_prompt(ctx)
         assert 'Escalation Triggered' in prompt
         assert 'ANGRY_CUSTOMER' in prompt
+
+
+class TestDialectDataAndFewShot:
+
+    def test_get_dialect_metadata(self) -> None:
+        west_meta = get_dialect_metadata('WEST')
+        assert 'الغرب' in west_meta['name_ar']
+        assert len(west_meta['markers']) > 0
+
+        east_meta = get_dialect_metadata('EAST')
+        assert 'الشرق' in east_meta['name_ar']
+
+        south_meta = get_dialect_metadata('SOUTH')
+        assert 'الجنوب' in south_meta['name_ar']
+
+    def test_get_few_shot_dialogues(self) -> None:
+        west_dialogues = get_few_shot_dialogues('WEST', limit=2)
+        assert len(west_dialogues) == 2
+        assert all(d['region'] == 'WEST' for d in west_dialogues)
+
+        east_dialogues = get_few_shot_dialogues('EAST', intent='ORDER', limit=2)
+        assert len(east_dialogues) == 2
+        assert any(d['intent'] == 'ORDER' for d in east_dialogues)
+
+    def test_agent_context_includes_few_shots(self) -> None:
+        msg = 'salam khoya kirak ghaya baghi nchri sberdina'
+        ctx = build_agent_context(msg)
+        assert 'few_shot_examples' in ctx
+        assert len(ctx['few_shot_examples']) > 0
+        prompt = format_agent_system_prompt(ctx)
+        assert 'أمثلة واقعية لنبرة الرد' in prompt
+

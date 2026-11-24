@@ -7,9 +7,9 @@ import { analyzeSentiment } from '../src/sentiment';
 import { extractEntities, getWilayas, getWilayaByCode } from '../src/entities';
 import { extractQuantities, extractProductAttributes } from '../src/quantities';
 import { detectEscalation } from '../src/escalation';
-import { detectDialect } from '../src/dialect';
+import { detectDialect, getDialectMetadata } from '../src/dialect';
 import { identifyIntent } from '../src/intent';
-import { buildAgentContext, formatAgentSystemPrompt } from '../src/agent';
+import { buildAgentContext, formatAgentSystemPrompt, getFewShotDialogues } from '../src/agent';
 
 describe('normalize', () => {
   it('should unify alef variants', () => {
@@ -620,5 +620,37 @@ describe('Agent Context with Escalation and Attributes', () => {
     const prompt = formatAgentSystemPrompt(ctx);
     assert.ok(prompt.includes('Escalation Triggered'));
     assert.ok(prompt.includes('ANGRY_CUSTOMER'));
+  });
+});
+
+describe('Dialect Data and Few-Shot Dialogues', () => {
+  it('should return dialect metadata for regional dialects', () => {
+    const westMeta = getDialectMetadata('WEST');
+    assert.ok(westMeta.name_ar.includes('الغرب'));
+    assert.ok(westMeta.markers.length > 0);
+
+    const eastMeta = getDialectMetadata('EAST');
+    assert.ok(eastMeta.name_ar.includes('الشرق'));
+
+    const southMeta = getDialectMetadata('SOUTH');
+    assert.ok(southMeta.name_ar.includes('الجنوب'));
+  });
+
+  it('should retrieve few-shot dialogues by region and intent', () => {
+    const westDialogues = getFewShotDialogues('WEST', undefined, 2);
+    assert.equal(westDialogues.length, 2);
+    assert.ok(westDialogues.every((d) => d.region === 'WEST'));
+
+    const eastDialogues = getFewShotDialogues('EAST', 'ORDER', 2);
+    assert.equal(eastDialogues.length, 2);
+    assert.ok(eastDialogues.some((d) => d.intent === 'ORDER'));
+  });
+
+  it('should include few-shot examples in agent context and system prompt', () => {
+    const msg = 'salam khoya kirak ghaya baghi nchri sberdina';
+    const ctx = buildAgentContext(msg);
+    assert.ok(ctx.fewShotExamples && ctx.fewShotExamples.length > 0);
+    const prompt = formatAgentSystemPrompt(ctx);
+    assert.ok(prompt.includes('أمثلة واقعية لنبرة الرد'));
   });
 });

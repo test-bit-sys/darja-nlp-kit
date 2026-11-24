@@ -35,12 +35,13 @@ from .escalation import (
     EscalationUrgency,
     EscalationReason,
 )
-from .dialect import detect_dialect, DialectResult
+from .dialect import detect_dialect, DialectResult, get_dialect_metadata
 from .intent import identify_intent, IntentResult, IntentType
 from .agent import (
     build_agent_context,
     format_agent_system_prompt,
     get_openai_tool_definitions,
+    get_few_shot_dialogues,
 )
 from .server import start_server
 
@@ -80,11 +81,13 @@ __all__ = [
     'EscalationReason',
     'detect_dialect',
     'DialectResult',
+    'get_dialect_metadata',
     'identify_intent',
     'IntentResult',
     'IntentType',
     'build_agent_context',
     'format_agent_system_prompt',
     'get_openai_tool_definitions',
+    'get_few_shot_dialogues',
     'start_server',
 ]

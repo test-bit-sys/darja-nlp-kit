@@ -1,27 +1,69 @@
 import { DialectResult, DialectRegion } from './types';
 import { tokenize } from './stopwords';
+import * as path from 'path';
+import * as fs from 'fs';
+
+let _dialectsData: any = null;
+
+function loadDialectsJson(): any {
+  if (_dialectsData) {
+    return _dialectsData;
+  }
+  try {
+    const dataPath = path.join(__dirname, '..', 'data', 'dialects.json');
+    if (fs.existsSync(dataPath)) {
+      const raw = fs.readFileSync(dataPath, 'utf-8');
+      _dialectsData = JSON.parse(raw);
+      return _dialectsData;
+    }
+  } catch {
+    // fallback
+  }
+  _dialectsData = { regions: {} };
+  return _dialectsData;
+}
 
 const REGIONAL_MARKERS: Record<Exclude<DialectRegion, 'GENERAL_DARJA'>, string[]> = {
   WEST: [
     'شوالا', 'شاكاين', 'شا', 'غايا', 'باغي', 'حرز', 'راك عاقل',
-    'شراكم', 'كيراك', 'كيراكم', 'درك', 'حشمان', 'طاير',
-    'chwala', 'chakayn', 'ghaya', 'baghi', 'kirak', 'kirakom', 'drk'
+    'شراكم', 'كيراك', 'كيراكم', 'درك', 'حشمان', 'طاير', 'صايي',
+    'طليت', 'تالمون', 'بلا مزية', 'نوليلك', 'غادي',
+    'chwala', 'chakayn', 'ghaya', 'baghi', 'kirak', 'kirakom', 'drk',
+    'sayi', 'bla mziya', 'ghadi'
   ],
   EAST: [
     'واشنهي', 'قداش', 'ياسر', 'ضرك', 'زي', 'باهي', 'علاشنهي',
-    'واشبيك', 'كفاه', 'ضروك', 'سيرتا', 'بونة',
-    '9dach', 'yaser', 'bahi', 'kach'
+    'واشبيك', 'كفاه', 'ضروك', 'سيرتا', 'بونة', 'عيشك', 'يعيشك',
+    'على عيني', 'قندورة',
+    '9dach', 'yaser', 'bahi', 'kach', '3aychek', 'wachnahi'
   ],
   CENTER: [
     'واشنو', 'حكاية', 'دروك', 'هكدا', 'هكداك', 'حوايج', 'البهجة',
-    'العاصمة', 'دزاير', 'تشوف',
-    'wachnou', 'hakda', 'hakdak', 'hwaiej'
+    'العاصمة', 'دزاير', 'تشوف', 'مريڤل', 'حطة', 'هبال', 'كاش ما تسحق',
+    'رانا هنا', 'صحيت',
+    'wachnou', 'hakda', 'hakdak', 'hwaiej', 'mreguel', 'mrigel', '7atta', 'hbal'
   ],
   SOUTH: [
-    'واه', 'لاه', 'حتة', 'سوف', 'ميزاب', 'غرداية', 'ادرار',
-    'wah', 'lah', '7ata'
+    'واه', 'لاه', 'حتة', 'سوف', 'ميزاب', 'غرداية', 'ادرار', 'بسكرة',
+    'ورقلة', 'بشار', 'على الراس والعين', 'مرحب بيك', 'بارك الله فيك',
+    'سومة زينة', 'واش حالك',
+    'wah', 'lah', '7ata', 'mr7eb bik', 'zin'
   ],
 };
+
+export function getDialectMetadata(region: DialectRegion): Record<string, any> {
+  const data = loadDialectsJson();
+  if (data?.regions?.[region]) {
+    return data.regions[region];
+  }
+  return {
+    name_ar: region,
+    tone_guide: 'دارجة جزائرية عفوية ومحترمة.',
+    greetings: [],
+    closure: [],
+    markers: (REGIONAL_MARKERS as any)[region] || [],
+  };
+}
 
 export function detectDialect(text: string): DialectResult {
   if (!text) {

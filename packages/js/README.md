@@ -386,9 +386,57 @@ All linguistic data lives in `/data` and is synced to both packages:
 | File | Description |
 |---|---|
 | `wilayas.json` | All 69 Algerian Wilayas with Arabic/French names, codes, popular aliases, and **550+ commercial communes** |
+| `dialects.json` | Dialect regions (WEST, EAST, CENTER, SOUTH, GENERAL_DARJA) with vocabulary markers, greetings, closure, and tone guides |
+| `dialogues.json` | 100+ authentic multi-dialect Algerian customer-merchant dialogues across 7 intents and domains |
 | `stopwords.json` | 590+ categorized regional and general stopwords across 13 grammatical categories |
 | `lexicon.json` | Algerian sentiment dictionary with 410+ authentic positive/negative phrases, idioms, 33 negators, and 44 intensifiers |
 | `arabizi_rules.json` | Transliteration rules, 240+ French whitelist terms, and 130+ irregular Darja overrides |
+| `data/fine_tuning/` | Pre-exported AI training datasets: `alpaca_darja.json`, `sharegpt_darja.json`, `openai_finetune_darja.jsonl` |
+
+### `getFewShotDialogues(region, intent, limit)` & Dialect Grounding
+
+Retrieves real-world customer-merchant dialogues tailored to the customer's region and intent to anchor LLMs in authentic Algerian phrasing:
+
+**TypeScript:**
+```typescript
+import { getFewShotDialogues, getDialectMetadata } from '@dz-open-suite/darja-nlp-kit';
+
+// 1. Get regional metadata
+const westInfo = getDialectMetadata('WEST');
+// westInfo.name_ar => "لهجة الغرب الجزائري (الوهراني / التلمساني / المستغانمي)"
+
+// 2. Retrieve authentic few-shot dialogues
+const dialogues = getFewShotDialogues('WEST', 'ORDER', 2);
+// dialogues[0].customerMessage => "خويا باغي نكوموندي زوج حبات كيت بلوتوث لوهران درك..."
+// dialogues[0].merchantResponse => "مرحبا بيك خويا في وهران الباهية! زوج حبات نحسبهملك 4,400 دج..."
+```
+
+**Python:**
+```python
+from darja_nlp import get_few_shot_dialogues, get_dialect_metadata
+
+# Retrieve real few-shot dialogues from the dataset
+dialogues = get_few_shot_dialogues(region='EAST', intent='PRICE_INQUIRY', limit=2)
+# dialogues[0]['customer_message'] -> "عيشك خويا قداش السومة تاع هاد لفيستا الكحلة؟"
+# dialogues[0]['merchant_response'] -> "يعيشك خويا العزيز ومرحبا بيك! السومة تاع لفيستا راهي 6,800 دج..."
+```
+
+### LLM Fine-Tuning Pipeline (Alpaca, ShareGPT, OpenAI JSONL)
+
+`darja-nlp-kit` provides ready-to-train datasets and fine-tuning scripts to train Llama-3, Mistral, Qwen, or OpenAI models on authentic Algerian Darja:
+
+- **Alpaca Format**: `data/fine_tuning/alpaca_darja.json`
+- **ShareGPT Format**: `data/fine_tuning/sharegpt_darja.json`
+- **OpenAI Fine-Tuning**: `data/fine_tuning/openai_finetune_darja.jsonl`
+- **Training Guide & Script**: `examples/fine_tune_llama_darja.py` (Unsloth & Hugging Face TRL SFTTrainer)
+
+```bash
+# Export or regenerate datasets
+python scripts/export_datasets.py
+
+# Run LoRA/QLoRA fine-tuning on Llama-3-8B
+python examples/fine_tune_llama_darja.py
+```
 
 ### `buildAgentContext(message)` & `formatAgentSystemPrompt(context)`
 

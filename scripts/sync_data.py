@@ -14,7 +14,14 @@ def main() -> None:
         root / 'packages' / 'python' / 'darja_nlp' / 'data',
     ]
 
-    data_files = ['stopwords.json', 'lexicon.json', 'arabizi_rules.json', 'wilayas.json']
+    data_files = [
+        'stopwords.json',
+        'lexicon.json',
+        'arabizi_rules.json',
+        'wilayas.json',
+        'dialects.json',
+        'dialogues.json'
+    ]
 
     for src_name in data_files:
         src_path = data_dir / src_name

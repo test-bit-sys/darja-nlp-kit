@@ -6,6 +6,16 @@ import { detectDialect } from './dialect';
 import { identifyIntent } from './intent';
 import { detectEscalation } from './escalation';
 import { DialectRegion, EscalationResult, IntentType, SentimentLabel } from './types';
+import * as path from 'path';
+import * as fs from 'fs';
+
+export interface DialogueExample {
+  id: string;
+  region: DialectRegion;
+  intent: string;
+  customerMessage: string;
+  merchantResponse: string;
+}
 
 export interface AgentContext {
   storeName: string;
@@ -41,6 +51,75 @@ export interface AgentContext {
     quantities: string[];
     productAttributes: { colors: string[]; sizes: string[] };
   };
+  fewShotExamples?: DialogueExample[];
+}
+
+let _dialoguesCache: any[] | null = null;
+
+function loadDialogues(): any[] {
+  if (_dialoguesCache) {
+    return _dialoguesCache;
+  }
+  try {
+    const dataPath = path.join(__dirname, '..', 'data', 'dialogues.json');
+    if (fs.existsSync(dataPath)) {
+      const raw = fs.readFileSync(dataPath, 'utf-8');
+      _dialoguesCache = JSON.parse(raw);
+      return _dialoguesCache || [];
+    }
+  } catch {
+    // fallback
+  }
+  _dialoguesCache = [];
+  return _dialoguesCache;
+}
+
+export function getFewShotDialogues(
+  region: DialectRegion = 'GENERAL_DARJA',
+  intent?: string,
+  limit = 2
+): DialogueExample[] {
+  const allDialogues = loadDialogues();
+  if (!allDialogues || allDialogues.length === 0) {
+    return [];
+  }
+
+  const regionUpper = (region || 'GENERAL_DARJA').toUpperCase();
+  let regional = allDialogues.filter((d: any) => (d.region || '').toUpperCase() === regionUpper);
+  if (regional.length === 0) {
+    regional = allDialogues.filter((d: any) => (d.region || '').toUpperCase() === 'GENERAL_DARJA');
+  }
+
+  const selected: any[] = [];
+  if (intent && intent.toUpperCase() !== 'UNKNOWN') {
+    const intentUpper = intent.toUpperCase();
+    const matchingIntent = regional.filter((d: any) => (d.intent || '').toUpperCase() === intentUpper);
+    selected.push(...matchingIntent.slice(0, limit));
+  }
+
+  for (const d of regional) {
+    if (selected.length >= limit) break;
+    if (!selected.includes(d)) {
+      selected.push(d);
+    }
+  }
+
+  if (selected.length < limit) {
+    for (const d of allDialogues) {
+      if (selected.length >= limit) break;
+      if (!selected.includes(d)) {
+        selected.push(d);
+      }
+    }
+  }
+
+  return selected.slice(0, limit).map((d: any) => ({
+    id: d.id,
+    region: d.region,
+    intent: d.intent,
+    customerMessage: d.customer_message || d.customerMessage,
+    merchantResponse: d.merchant_response || d.merchantResponse,
+  }));
 }
 
 const INTENT_GUIDELINES: Record<IntentType, string> = {
@@ -140,6 +219,7 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
       quantities: quantitiesSummary,
       productAttributes: productAttributesSummary,
     },
+    fewShotExamples: getFewShotDialogues(dialect.region, intent.intent, 2),
   };
 }
 
@@ -159,6 +239,15 @@ export function formatAgentSystemPrompt(context: AgentContext): string {
   const colorsStr = facts.productAttributes.colors.length > 0 ? facts.productAttributes.colors.join(', ') : 'غير محدد';
   const sizesStr = facts.productAttributes.sizes.length > 0 ? facts.productAttributes.sizes.join(', ') : 'غير محدد';
 
+  const fewShots = context.fewShotExamples || [];
+  let fewShotsSection = '';
+  if (fewShots.length > 0) {
+    fewShotsSection = '\n[أمثلة واقعية لنبرة الرد بالدارجة الجزائرية المستهدفة]:\n';
+    fewShots.forEach((ex, idx) => {
+      fewShotsSection += `${idx + 1}. رسالة الزبون: "${ex.customerMessage}"\n   رد التاجر الطبيعي: "${ex.merchantResponse}"\n`;
+    });
+  }
+
   return `أنت مساعد خدمة عملاء ذكي وبشري جداً لمتجر إلكتروني جزائري '${store}'.
 مهمتك الرد على الزبون الجزائري بدارجة واقعية ومتقنة 100%، كأنك تاجر جزائري محترف ولطيف.${escalationNotice}
 [السياق المستخرج من رسالة الزبون]:
@@ -176,7 +265,7 @@ export function formatAgentSystemPrompt(context: AgentContext): string {
 - شركات التوصيل: ${facts.deliveryCompanies.length > 0 ? facts.deliveryCompanies.join(', ') : 'غير محددة'}
 - نمط التوصيل: ${facts.deliveryMode || 'غير محدد'}
 - أرقام الهاتف: ${facts.phones.length > 0 ? facts.phones.join(', ') : 'غير متوفرة'}
-
+${fewShotsSection}
 [قواعد صارمة للرد]:
 1. تحدث بدارجة جزائرية عفوية ومحترمة (لا تستخدم فصحى معربة أو لهجات مشرقية إطلاقاً).
 2. طابق نبرة ولهجة الزبون (${dialect.region}) لتبني الثقة والقرب.
