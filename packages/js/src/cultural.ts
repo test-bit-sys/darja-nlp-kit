@@ -4,6 +4,8 @@ import { CulturalAnalysisResult, CulturalMatch } from './types';
 
 let _cultureCache: any = null;
 let _slangCache: any = null;
+let _memesCache: any = null;
+let _francoCache: any = null;
 
 const GENERIC_STOP = new Set(['سلعة', 'سوق', 'حي', 'شارع', 'باب', 'واد', 'ساحة', 'جبل', 'جبال', 'طاجين', 'طبق', 'أكلة']);
 
@@ -72,6 +74,40 @@ export function getSlangData(): any {
   return _slangCache;
 }
 
+export function getMemesData(): any {
+  if (_memesCache) {
+    return _memesCache;
+  }
+  try {
+    const dataPath = path.join(__dirname, '..', 'data', 'memes.json');
+    if (fs.existsSync(dataPath)) {
+      _memesCache = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+      return _memesCache;
+    }
+  } catch {
+    // fallback
+  }
+  _memesCache = { memes: [] };
+  return _memesCache;
+}
+
+export function getFrancoDarjaData(): any {
+  if (_francoCache) {
+    return _francoCache;
+  }
+  try {
+    const dataPath = path.join(__dirname, '..', 'data', 'franco_darja.json');
+    if (fs.existsSync(dataPath)) {
+      _francoCache = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+      return _francoCache;
+    }
+  } catch {
+    // fallback
+  }
+  _francoCache = { words: [] };
+  return _francoCache;
+}
+
 export function detectCulturalReferences(text: string): CulturalAnalysisResult {
   if (!text || !text.trim()) {
     return {
@@ -111,7 +147,7 @@ export function detectCulturalReferences(text: string): CulturalAnalysisResult {
     }
   }
 
-  // 2. Memes & Trends
+  // 2. Memes & Trends (from culture.json and memes.json)
   for (const m of cultureDb.memes_and_trends || []) {
     const mPhrase = m.phrase || '';
     const mArabizi = m.arabizi || '';
@@ -123,6 +159,23 @@ export function detectCulturalReferences(text: string): CulturalAnalysisResult {
         meaning: m.meaning || '',
         metadata: { tone: m.tone, context: m.context },
       });
+    }
+  }
+
+  const memesDb = getMemesData();
+  for (const m of memesDb.memes || []) {
+    const mPhrase = m.phrase || '';
+    const mArabizi = m.arabizi || '';
+    if ((mPhrase && text.includes(mPhrase)) || (mArabizi && lowerText.includes(mArabizi.toLowerCase()))) {
+      if (!matchedMemes.some((x) => x.canonicalName === mPhrase)) {
+        matchedMemes.push({
+          matchedText: text.includes(mPhrase) ? mPhrase : mArabizi,
+          category: 'meme_trend',
+          canonicalName: mPhrase,
+          meaning: m.meaning || '',
+          metadata: { origin: m.origin, category: m.category, tags: m.tags },
+        });
+      }
     }
   }
 
@@ -248,4 +301,56 @@ export function detectCulturalReferences(text: string): CulturalAnalysisResult {
     allMatches,
     culturalSummary,
   };
+}
+
+export function detectMemes(text: string): CulturalMatch[] {
+  const res = detectCulturalReferences(text);
+  return res.memesAndTrends;
+}
+
+export interface FrancoDarjaMatch {
+  matchedText: string;
+  darjaAr: string;
+  arabizi: string;
+  frOrigin: string;
+  category: string;
+  meaningAr: string;
+  example: string;
+}
+
+export function detectFrancoDarja(text: string): FrancoDarjaMatch[] {
+  if (!text || !text.trim()) return [];
+
+  const lowerText = text.toLowerCase();
+  const francoDb = getFrancoDarjaData();
+  const matches: FrancoDarjaMatch[] = [];
+
+  for (const item of francoDb.words || []) {
+    const arTerm = item.darja_ar || '';
+    const arabiziTerm = item.arabizi || '';
+    const frOrigin = item.fr_origin || '';
+
+    let matchedKey: string | null = null;
+    if (arTerm && text.includes(arTerm)) {
+      matchedKey = arTerm;
+    } else if (arabiziTerm && lowerText.includes(arabiziTerm.toLowerCase())) {
+      matchedKey = arabiziTerm;
+    } else if (frOrigin && lowerText.includes(frOrigin.toLowerCase())) {
+      matchedKey = frOrigin;
+    }
+
+    if (matchedKey) {
+      matches.push({
+        matchedText: matchedKey,
+        darjaAr: arTerm,
+        arabizi: arabiziTerm,
+        frOrigin,
+        category: item.category,
+        meaningAr: item.meaning_ar,
+        example: item.example,
+      });
+    }
+  }
+
+  return matches;
 }

@@ -1,0 +1,428 @@
+{
+  "version": "1.0.0",
+  "description": "Algerian Darja profanity, vulgarities, slurs, and toxic keywords in Arabic script and Arabizi.",
+  "severity_levels": [
+    "low",
+    "medium",
+    "high"
+  ],
+  "categories": [
+    "severe_vulgarity",
+    "insult_street",
+    "religious_curse",
+    "harassment_toxic",
+    "provocation"
+  ],
+  "terms": [
+    {
+      "term": "nik",
+      "ar": "نيك",
+      "arabizi": [
+        "nik",
+        "nyk",
+        "neek",
+        "nique"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "nik mok",
+      "ar": "نيك موك",
+      "arabizi": [
+        "nik mok",
+        "nik mouk",
+        "nik omok",
+        "nyk mk"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "zebi",
+      "ar": "زبي",
+      "arabizi": [
+        "zebi",
+        "zbi",
+        "zzebi",
+        "zebb"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "kahba",
+      "ar": "قحبة",
+      "arabizi": [
+        "kahba",
+        "9ahba",
+        "9a7ba",
+        "qahba",
+        "kehba"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "wald kahba",
+      "ar": "ولد القحبة",
+      "arabizi": [
+        "weld l9ahba",
+        "wld 9ahba",
+        "wald kahba",
+        "wld lkahba"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "9lawi",
+      "ar": "قلاوي",
+      "arabizi": [
+        "9lawi",
+        "qlawi",
+        "klawi",
+        "9laywa"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "tiz",
+      "ar": "طيز",
+      "arabizi": [
+        "tiz",
+        "tyz",
+        "teez",
+        "tizi"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "zamel",
+      "ar": "زامل",
+      "arabizi": [
+        "zamel",
+        "zammel",
+        "zwaml",
+        "zamla"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "nayek",
+      "ar": "نايك",
+      "arabizi": [
+        "nayek",
+        "nayeq",
+        "mnayek",
+        "mneiyek"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "mnayek",
+      "ar": "منيك",
+      "arabizi": [
+        "mnayek",
+        "mneyek",
+        "mnayak"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "hchewa",
+      "ar": "حشوة",
+      "arabizi": [
+        "hchewa",
+        "7chwa",
+        "hchwa",
+        "hchewhalkoum"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "mhashi",
+      "ar": "محشي",
+      "arabizi": [
+        "mhashi",
+        "m7achi",
+        "m7achya"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "attay",
+      "ar": "عطاي",
+      "arabizi": [
+        "attay",
+        "3atay",
+        "3attay",
+        "3ataya"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "9ahbat",
+      "ar": "قحاب",
+      "arabizi": [
+        "9ahbat",
+        "9hab",
+        "khab"
+      ],
+      "category": "severe_vulgarity",
+      "severity": "high"
+    },
+    {
+      "term": "din rabek",
+      "ar": "دين ربك",
+      "arabizi": [
+        "din rabek",
+        "din rbek",
+        "rabek",
+        "rabk"
+      ],
+      "category": "religious_curse",
+      "severity": "high"
+    },
+    {
+      "term": "din mok",
+      "ar": "دين موك",
+      "arabizi": [
+        "din mok",
+        "din mouk",
+        "din mmak"
+      ],
+      "category": "religious_curse",
+      "severity": "high"
+    },
+    {
+      "term": "yen3al",
+      "ar": "ينعل",
+      "arabizi": [
+        "yen3al",
+        "yenal",
+        "yn3al"
+      ],
+      "category": "religious_curse",
+      "severity": "high"
+    },
+    {
+      "term": "ne3lat",
+      "ar": "لعنة",
+      "arabizi": [
+        "ne3lat",
+        "naalat"
+      ],
+      "category": "religious_curse",
+      "severity": "medium"
+    },
+    {
+      "term": "tahhan",
+      "ar": "طحان",
+      "arabizi": [
+        "tahhan",
+        "ta7an",
+        "ta77an",
+        "t7an",
+        "thhan"
+      ],
+      "category": "insult_street",
+      "severity": "medium"
+    },
+    {
+      "term": "tahana",
+      "ar": "طحانة",
+      "arabizi": [
+        "tahana",
+        "ta7ana",
+        "thana"
+      ],
+      "category": "insult_street",
+      "severity": "medium"
+    },
+    {
+      "term": "chmata",
+      "ar": "شماطة",
+      "arabizi": [
+        "chmata",
+        "chmat",
+        "chmitta"
+      ],
+      "category": "insult_street",
+      "severity": "medium"
+    },
+    {
+      "term": "hmar",
+      "ar": "حمار",
+      "arabizi": [
+        "hmar",
+        "7mar",
+        "7maar",
+        "hmar kbir"
+      ],
+      "category": "insult_street",
+      "severity": "medium"
+    },
+    {
+      "term": "kelb",
+      "ar": "كلب",
+      "arabizi": [
+        "kelb",
+        "kalb",
+        "kleb"
+      ],
+      "category": "insult_street",
+      "severity": "medium"
+    },
+    {
+      "term": "khra",
+      "ar": "خرا",
+      "arabizi": [
+        "khra",
+        "5ra",
+        "khera",
+        "khrayen"
+      ],
+      "category": "insult_street",
+      "severity": "medium"
+    },
+    {
+      "term": "khnara",
+      "ar": "خنارة",
+      "arabizi": [
+        "khnara",
+        "5nara",
+        "khenzira"
+      ],
+      "category": "insult_street",
+      "severity": "medium"
+    },
+    {
+      "term": "rakhis",
+      "ar": "رخيس",
+      "arabizi": [
+        "rakhis",
+        "rkhes",
+        "rkhiss",
+        "rkhes menk ma choftech"
+      ],
+      "category": "insult_street",
+      "severity": "medium"
+    },
+    {
+      "term": "bahloul",
+      "ar": "بهلول",
+      "arabizi": [
+        "bahloul",
+        "behloul",
+        "bhayeel"
+      ],
+      "category": "insult_street",
+      "severity": "low"
+    },
+    {
+      "term": "habes",
+      "ar": "حابس",
+      "arabizi": [
+        "habes",
+        "7abes",
+        "habes f rassek"
+      ],
+      "category": "insult_street",
+      "severity": "low"
+    },
+    {
+      "term": "jahel",
+      "ar": "جاهل",
+      "arabizi": [
+        "jahel",
+        "johl"
+      ],
+      "category": "insult_street",
+      "severity": "low"
+    },
+    {
+      "term": "mweffakh",
+      "ar": "موسخ",
+      "arabizi": [
+        "mweffakh",
+        "mwessakh",
+        "mwasakh"
+      ],
+      "category": "insult_street",
+      "severity": "low"
+    },
+    {
+      "term": "hayawan",
+      "ar": "حيوان",
+      "arabizi": [
+        "hayawan",
+        "7ayawan"
+      ],
+      "category": "insult_street",
+      "severity": "low"
+    },
+    {
+      "term": "sere9",
+      "ar": "سراق",
+      "arabizi": [
+        "sere9",
+        "sarra9",
+        "saraq",
+        "sere9 lkhobz"
+      ],
+      "category": "harassment_toxic",
+      "severity": "medium"
+    },
+    {
+      "term": "kedab",
+      "ar": "كذاب",
+      "arabizi": [
+        "kedab",
+        "keddab",
+        "kaddab"
+      ],
+      "category": "harassment_toxic",
+      "severity": "low"
+    },
+    {
+      "term": "hram",
+      "ar": "حرامي",
+      "arabizi": [
+        "hrami",
+        "weld lhram",
+        "wld l7ram"
+      ],
+      "category": "insult_street",
+      "severity": "medium"
+    },
+    {
+      "term": "maskhout",
+      "ar": "مسخوط",
+      "arabizi": [
+        "maskhout",
+        "maskhot"
+      ],
+      "category": "insult_street",
+      "severity": "low"
+    },
+    {
+      "term": "fassed",
+      "ar": "فاسد",
+      "arabizi": [
+        "fassed",
+        "fassed"
+      ],
+      "category": "insult_street",
+      "severity": "low"
+    }
+  ]
+}

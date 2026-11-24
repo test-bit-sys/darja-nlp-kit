@@ -23,7 +23,9 @@ from .quantities import extract_quantities, extract_product_attributes
 from .escalation import detect_escalation
 from .dialect import detect_dialect
 from .intent import identify_intent
-from .cultural import detect_cultural_references
+from .cultural import detect_cultural_references, detect_memes
+from .dialogue import respond_to_darja
+from .profanity import detect_profanity, censor_profanity
 from .agent import build_agent_context, format_agent_system_prompt
 from .server import start_server
 
@@ -74,6 +76,24 @@ def main():
     p_prompt = subparsers.add_parser("agent-prompt", help="Build grounded context and system prompt for LLMs (GPT, Claude, Gemini)")
     p_prompt.add_argument("text", help="Customer message")
     p_prompt.add_argument("--store", default="Bazar El Djazair", help="Store name")
+
+    # Command: chat
+    p_chat = subparsers.add_parser("chat", help="Generate natural Algerian Darja response (e.g. 'wach ya khoy' -> 'we cv')")
+    p_chat.add_argument("text", help="Algerian message or greeting")
+    p_chat.add_argument("--persona", choices=["casual", "merchant", "assistant"], default="casual", help="Persona style")
+    p_chat.add_argument("--script", choices=["auto", "arabizi", "arabic"], default="auto", help="Output script")
+    p_chat.add_argument("--json", action="store_true", help="Output raw JSON")
+
+    # Command: moderate
+    p_mod = subparsers.add_parser("moderate", help="Detect profanities, toxic slurs, and censor Algerian text")
+    p_mod.add_argument("text", help="Message to inspect")
+    p_mod.add_argument("--mask", default="***", help="Mask replacement string")
+    p_mod.add_argument("--json", action="store_true", help="Output raw JSON")
+
+    # Command: memes
+    p_meme = subparsers.add_parser("memes", help="Detect Algerian viral memes and TV comedy quotes")
+    p_meme.add_argument("text", help="Text containing meme or quote")
+    p_meme.add_argument("--json", action="store_true", help="Output raw JSON")
 
     # Command: server
     p_srv = subparsers.add_parser("server", help="Start local zero-dependency HTTP microservice (for n8n, Make, webhooks)")
@@ -244,6 +264,64 @@ def main():
                 print(f"🍲 Gastronomy : {', '.join(g['canonical_name'] for g in data['gastronomy'])}")
             if data["slang_expressions"]:
                 print(f"💬 Slang Terms: {', '.join(s['canonical_name'] for s in data['slang_expressions'])}")
+
+    elif args.command == "chat":
+        res = respond_to_darja(args.text, persona=args.persona, script=args.script)
+        data = {
+            "reply": res.reply,
+            "intent": res.intent,
+            "script": res.script,
+            "confidence": res.confidence,
+            "matched_pattern": res.matched_pattern
+        }
+        if args.json:
+            print(json.dumps(data, ensure_ascii=False, indent=2))
+        else:
+            print("=== Algerian Conversational Response ===")
+            print(f"Reply          : {res.reply}")
+            print(f"Intent         : {res.intent}")
+            print(f"Script         : {res.script}")
+            print(f"Confidence     : {res.confidence:.2f}")
+
+    elif args.command == "moderate":
+        res = detect_profanity(args.text)
+        censored = censor_profanity(args.text, mask=args.mask)
+        data = {
+            "is_profane": res.is_profane,
+            "severity": res.severity,
+            "matches_count": len(res.matches),
+            "matches": [
+                {"term": m.term, "category": m.category, "severity": m.severity, "matched_text": m.matched_text}
+                for m in res.matches
+            ],
+            "censored_text": censored
+        }
+        if args.json:
+            print(json.dumps(data, ensure_ascii=False, indent=2))
+        else:
+            print("=== Content Moderation & Profanity Check ===")
+            print(f"Is Profane     : {'Yes' if res.is_profane else 'No'}")
+            print(f"Severity       : {res.severity.upper()}")
+            print(f"Matches        : {len(res.matches)}")
+            print(f"Censored Text  : {censored}")
+
+    elif args.command == "memes":
+        memes = detect_memes(args.text)
+        data = [
+            {"phrase": m.canonical_name, "meaning": m.meaning, "metadata": m.metadata}
+            for m in memes
+        ]
+        if args.json:
+            print(json.dumps(data, ensure_ascii=False, indent=2))
+        else:
+            print("=== Algerian Memes & Pop-Culture ===")
+            if not memes:
+                print("No viral memes detected in text.")
+            for m in memes:
+                print(f"🎭 Meme: {m.canonical_name}")
+                print(f"   Meaning: {m.meaning}")
+                if m.metadata.get("origin"):
+                    print(f"   Origin : {m.metadata['origin']}")
 
     elif args.command == "agent-prompt":
         ctx = build_agent_context(args.text, store_name=args.store)

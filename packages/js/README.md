@@ -24,12 +24,16 @@ Handles Arabic script, Arabizi (Latin transliteration with numbers), and French/
 
 ## Features
 
+- **Conversational Dialogue & Natural Responses** — Authentic colloquial conversational response engine (e.g., `wach ya khoy` $\rightarrow$ `We cv hamdoulah w nta kho? Koulchi mlih?`), with automatic script parity (Arabizi & Arabic) and multiple personas (`casual`, `merchant`, `assistant`)
+- **Content Moderation & Profanity Shield** — Filter and censor 120+ Algerian insults, street slurs, and vulgar expressions in Arabic script and Arabizi with numerical substitutions (7, 3, 9, 2, 5) and severity grading (`low`, `medium`, `high`)
+- **Algeria-Geo 69 Wilayas & 1,541 Communes** — 100% synchronized with [`algeria-geo`](https://github.com/test-bit-sys/algeria-geo), covering all 69 official Wilayas (including new wilayas 59–69: Aflou, Barika, El Kantara, Bir El Ater, El Aricha, Ksar Chellala, Ain Ouessara, Messaad, Ksar El Boukhari, Bou Saada, El Abiodh Sidi Cheikh), 538 Dairas, and 1,541 Communes
+- **Franco-Darja Lexicon & Algerian Memes** — 130+ French-Darja loanwords and hybrid verbs (`ncommandi`, `caba`, `dispo`, `mrigel`, `pointure`), plus iconic Algerian TV memes and viral quotes (`فاك يا حشيشة`, `يا راجل كبر عقلك`, `زوخ وطير`, `وان تو ثري فيفا لالجيري`)
 - **Text Normalization** — Unify Arabic letter variants, strip diacritics, reduce character elongation
 - **Arabizi-to-Arabic Transliteration** — Smart conversion with 220+ French loanwords whitelist, digraph mappings, and context-sensitive numbers
 - **Stopword Removal** — 545+ categorized Algerian Darja stopwords (Arabic script + Arabizi) with prefix stripping
 - **Tokenization** — Mixed-script tokenization with circumfix negation detection (ما...ش / ma...ch)
 - **Sentiment Analysis** — Score-based analysis with negation inversion, double negation, intensifier scaling, and code-switching support (330+ entries)
-- **Algerian Geo, Logistics & Entity Extraction** — Full coverage of all 69 wilayas (Law 26-06 reform), carriers (Yalidine, ZR Express, Maystro, Procolis, EMS, Kazitour, Guepex), delivery mode (Stop Desk / Home Delivery), Algerian phone numbers, payments (BaridiMob, Edahabia, CCP, COD), and Darja colloquial prices (`زوج ملاين` $\rightarrow$ 20,000 DZD, `3 mlayen` $\rightarrow$ 30,000 DZD)
+- **Algerian Geo, Logistics & Entity Extraction** — Full coverage of all 69 wilayas (Law 26-06 reform / algeria-geo), carriers (Yalidine, ZR Express, Maystro, Procolis, EMS, Kazitour, Guepex), delivery mode (Stop Desk / Home Delivery), Algerian phone numbers, payments (BaridiMob, Edahabia, CCP, COD), and Darja colloquial prices (`زوج ملاين` $\rightarrow$ 20,000 DZD, `3 mlayen` $\rightarrow$ 30,000 DZD)
 - **Regional Dialect Identification** — Detect regional dialects: WEST (Oran/Tlemcen), EAST (Constantine/Setif), CENTER (Algiers/Blida), SOUTH, or GENERAL_DARJA
 - **Colloquial Quantities & Product Attributes** — Extract colloquial quantities (`حبة`, `زوج حبات`, `شكارة`, `باكية`, `كرطونة`, `دوزينة` = 12), clothing sizes (XS–3XL), shoe sizes (35–48), and Algerian color names (`كحل / noir`, `بيض / blanc`, etc.)
 - **Telecom Operator Routing & Direct WhatsApp URLs** — Classify Algerian phone numbers by operator (`MOBILIS`, `DJEZZY`, `OOREDOO`, `ALGERIE_TELECOM`) and generate instant 1-click WhatsApp deep links (`https://wa.me/213...`)
@@ -38,7 +42,7 @@ Handles Arabic script, Arabizi (Latin transliteration with numbers), and French/
 - **Street & Commercial Slang Analysis** — Detect Algerian youth slang, e-commerce verification terms (`سلعة كابا`, `سلعة لوز`, `سلعة صحيحة`), Arabizi slang expressions, and emotional states
 - **Algerian LLM Fine-Tuning Datasets** — 222+ curated instruction and multi-turn dialogue pairs in Alpaca, ShareGPT, and OpenAI JSONL formats for fine-tuning Llama 3, Mistral, Qwen, and GPT-4o-mini
 - **Zero-Dependency CLI & Local HTTP Microservice** — Instantly run a production-ready, CORS-enabled REST API and CLI commands with zero external packages for n8n, Make.com, webhooks, and local containers
-- **AI Agent & LLM Middleware** — Pre-packaged grounding engine & dialect-mirroring system prompt generator for AI Agents (GPT-4o, Claude, Gemini, Llama) to deliver ultra-realistic human responses to Algerian customers without hallucination
+- **AI Agent & LLM Middleware** — Pre-packaged grounding engine & dialect-mirroring system prompt generator for AI Agents (GPT-4o, Claude, Gemini, Llama) with 6 standard OpenAI Tool Definitions to deliver ultra-realistic human responses without hallucination
 
 ## Installation
 

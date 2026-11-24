@@ -1,0 +1,445 @@
+{
+  "version": "1.0.0",
+  "description": "Algerian memes, viral series quotes (Achour 10, Dakious & Makious, Bouzid Days), football anthems, and iconic street culture phrases.",
+  "count": 30,
+  "memes": [
+    {
+      "id": "meme_001",
+      "phrase": "فاك يا حشيشة",
+      "arabizi": "fak ya hchicha",
+      "origin": "دقيوس ومقيوس (Dakious & Makious)",
+      "category": "tv_comedy",
+      "sentiment": "NEUTRAL",
+      "intent": "CASUAL_CHAT",
+      "meaning": "تعبير كوميدي شهير يُقال عند الصدمة أو الاستغراب أو حدوث أمر غير متوقع.",
+      "tags": [
+        "dakious",
+        "comedy",
+        "viral_quote"
+      ]
+    },
+    {
+      "id": "meme_002",
+      "phrase": "ما تخلطش شعبان مع رمضان",
+      "arabizi": "ma tkheletch cha3ban m3a ramdan",
+      "origin": "دقيوس ومقيوس والمثل الشعبي الجزائري",
+      "category": "tv_comedy",
+      "sentiment": "NEUTRAL",
+      "intent": "CASUAL_CHAT",
+      "meaning": "دعوة لعدم خلط المواضيع المنفصلة ببعضها البعض.",
+      "tags": [
+        "proverb",
+        "dakious",
+        "logic"
+      ]
+    },
+    {
+      "id": "meme_003",
+      "phrase": "الراس فالكاس",
+      "arabizi": "rass fel kess",
+      "origin": "دقيوس ومقيوس",
+      "category": "tv_comedy",
+      "sentiment": "NEUTRAL",
+      "intent": "CASUAL_CHAT",
+      "meaning": "التركيز التام على شرب الشاي أو الاسترخاء والهروب من وجع الرأس.",
+      "tags": [
+        "tea",
+        "focus",
+        "dakious"
+      ]
+    },
+    {
+      "id": "meme_004",
+      "phrase": "هبط يدك يا بنادم",
+      "arabizi": "hbet ydek ya bnadem",
+      "origin": "ترند شوارع ومواقع التواصل بالجزائر",
+      "category": "street_viral",
+      "sentiment": "NEGATIVE",
+      "intent": "CASUAL_CHAT",
+      "meaning": "عبارة شهيرة انتشرت كفيديو ترند للمطالبة بالهدوء وعدم الإشارة باليد أثناء النقاش.",
+      "tags": [
+        "street_slang",
+        "viral",
+        "trend"
+      ]
+    },
+    {
+      "id": "meme_005",
+      "phrase": "يا راجل كبر عقلك",
+      "arabizi": "ya rajel kber 3a9lek",
+      "origin": "عاشور العاشر (سلطان العاشوريين)",
+      "category": "tv_comedy",
+      "sentiment": "NEUTRAL",
+      "intent": "CASUAL_CHAT",
+      "meaning": "تعبير يُقال للشخص عندما يتصرف بسذاجة أو طيش لتذكيره بالحكمة والتعقل.",
+      "tags": [
+        "achour10",
+        "wisdom",
+        "comedy"
+      ]
+    },
+    {
+      "id": "meme_006",
+      "phrase": "شكون نتا",
+      "arabizi": "chkoune nta",
+      "origin": "عاشور العاشر / الثقافة الشعبية",
+      "category": "tv_comedy",
+      "sentiment": "NEGATIVE",
+      "intent": "CASUAL_CHAT",
+      "meaning": "سؤال استنكاري يعبر عن التجاهل أو التقليل من شأن الطرف المقابل بأسلوب هزلي.",
+      "tags": [
+        "achour10",
+        "pride",
+        "comedy"
+      ]
+    },
+    {
+      "id": "meme_007",
+      "phrase": "البرهان ولا البهتان",
+      "arabizi": "el borhan wela el bohtan",
+      "origin": "عاشور العاشر (شخصية الوزير قنديل)",
+      "category": "tv_comedy",
+      "sentiment": "NEUTRAL",
+      "intent": "INQUIRY",
+      "meaning": "المطالبة بالدليل القاطع وإلا اعتُبر الأمر افتراءً واختلاقاً.",
+      "tags": [
+        "achour10",
+        "proof",
+        "court"
+      ]
+    },
+    {
+      "id": "meme_008",
+      "phrase": "متقوليش نتا تاني",
+      "arabizi": "matgoulich nta tani",
+      "origin": "ترند جزائري ومسلسلات فكاهية",
+      "category": "social_trend",
+      "sentiment": "NEGATIVE",
+      "intent": "CASUAL_CHAT",
+      "meaning": "التعبير عن خيبة الأمل من تكرار نفس الطلب أو خذلان من شخص لم يكن متوقعاً منه.",
+      "tags": [
+        "disappointment",
+        "viral",
+        "trend"
+      ]
+    },
+    {
+      "id": "meme_009",
+      "phrase": "زوخ وطير",
+      "arabizi": "zoukh w tir",
+      "origin": "الأمثال الشعبية والمسلسلات الكوميدية",
+      "category": "street_culture",
+      "sentiment": "NEUTRAL",
+      "intent": "CASUAL_CHAT",
+      "meaning": "السخرية من شخص يبالغ في التفاخر بممتلكاته أو إنجازاته الوهمية.",
+      "tags": [
+        "pride",
+        "proverb",
+        "street"
+      ]
+    },
+    {
+      "id": "meme_010",
+      "phrase": "في خاطر ولاد بلادي",
+      "arabizi": "fi khater wlad bladi",
+      "origin": "الإهداءات الشعبية والراي الجزائري",
+      "category": "culture_folk",
+      "sentiment": "POSITIVE",
+      "intent": "GREETING",
+      "meaning": "إهداء حار مخصص لكل أبناء وبنات الجزائر في الداخل والخارج.",
+      "tags": [
+        "patriotism",
+        "folk",
+        "dedication"
+      ]
+    },
+    {
+      "id": "meme_011",
+      "phrase": "وان تو ثري فيفا لالجيري",
+      "arabizi": "1 2 3 viva l'algerie",
+      "origin": "الهتاف التاريخي للمنتخب الجزائري والشعب",
+      "category": "national_sport",
+      "sentiment": "POSITIVE",
+      "intent": "CELEBRATION",
+      "meaning": "الشعار الرياضي والوطني الأشهر الذي يعبر عن الفخر والوحدة الجزائرية.",
+      "tags": [
+        "football",
+        "patriotism",
+        "anthem"
+      ]
+    },
+    {
+      "id": "meme_012",
+      "phrase": "هادي هي لالجيري",
+      "arabizi": "hadi hiya l'algerie",
+      "origin": "ثقافة الشارع ومواقع التواصل",
+      "category": "street_culture",
+      "sentiment": "NEUTRAL",
+      "intent": "CASUAL_CHAT",
+      "meaning": "تعبير عن تقبل الواقع الجزائري بكل مفارقاته وجماله بابتسامة وهدوء.",
+      "tags": [
+        "identity",
+        "street_philosophy"
+      ]
+    },
+    {
+      "id": "meme_013",
+      "phrase": "زوالي وفحل",
+      "arabizi": "zwali w fhel",
+      "origin": "الأغنية والوعي الجمعي الجزائري",
+      "category": "culture_folk",
+      "sentiment": "POSITIVE",
+      "intent": "PRIDE",
+      "meaning": "الاعتزاز بنبل الأخلاق والشرف والمروءة رغم بساطة الحال والمستوى المادي.",
+      "tags": [
+        "pride",
+        "dignity",
+        "values"
+      ]
+    },
+    {
+      "id": "meme_014",
+      "phrase": "خليه يريح",
+      "arabizi": "khelih yriyeh",
+      "origin": "ترند السوشيال ميديا وكرة القدم",
+      "category": "social_trend",
+      "sentiment": "NEUTRAL",
+      "intent": "CASUAL_CHAT",
+      "meaning": "دعوة لتجاهل شخص معين أو تركه يستريح وعدم إعطائه اهتماماً أكبر من حجمه.",
+      "tags": [
+        "meme",
+        "relax",
+        "trend"
+      ]
+    },
+    {
+      "id": "meme_015",
+      "phrase": "طير انت وياه",
+      "arabizi": "tir nta wiyaho",
+      "origin": "كوميديا الشارع الجزائري",
+      "category": "street_comedy",
+      "sentiment": "NEGATIVE",
+      "intent": "CASUAL_CHAT",
+      "meaning": "صيغة هزلية لرفض كلام شخصين وطردهم من الحوار.",
+      "tags": [
+        "street_slang",
+        "dismissal"
+      ]
+    },
+    {
+      "id": "meme_016",
+      "phrase": "ما كاين والو",
+      "arabizi": "ma kayen walou",
+      "origin": "الدارجة الجزائرية اليومية",
+      "category": "daily_slang",
+      "sentiment": "NEUTRAL",
+      "intent": "CASUAL_CHAT",
+      "meaning": "تطمين الطرف الآخر بأنه لا يوجد أي مشكل أو خطر، أو وصف حالة الفراغ.",
+      "tags": [
+        "daily_life",
+        "peace"
+      ]
+    },
+    {
+      "id": "meme_017",
+      "phrase": "راك فالموزمبيق",
+      "arabizi": "rak fel mozambique",
+      "origin": "الميمات والترندات الهزلية",
+      "category": "social_trend",
+      "sentiment": "NEGATIVE",
+      "intent": "CASUAL_CHAT",
+      "meaning": "سخرية عند وقوع أمر سريالي أو مخالف تماماً للمنطق أو المعايير.",
+      "tags": [
+        "meme",
+        "sarcasm",
+        "viral"
+      ]
+    },
+    {
+      "id": "meme_018",
+      "phrase": "بلاد ميكي",
+      "arabizi": "bled miki",
+      "origin": "الثقافة الساخرة",
+      "category": "social_criticism",
+      "sentiment": "NEGATIVE",
+      "intent": "COMPLAINT",
+      "meaning": "انتقاد الفوضى وسوء التنظيم في بعض الإدارات أو المرافق.",
+      "tags": [
+        "satire",
+        "criticism"
+      ]
+    },
+    {
+      "id": "meme_019",
+      "phrase": "عيش تسمع",
+      "arabizi": "3ich tesma3",
+      "origin": "المثل الشعبي الجزائري",
+      "category": "proverbs",
+      "sentiment": "NEUTRAL",
+      "intent": "SURPRISE",
+      "meaning": "الدهشة والتعجب من غرابة الأخبار والمواقف المتجددة.",
+      "tags": [
+        "proverb",
+        "amazement"
+      ]
+    },
+    {
+      "id": "meme_020",
+      "phrase": "عفسة شابة",
+      "arabizi": "3afsa chaba",
+      "origin": "الدارجة الشبابية",
+      "category": "street_slang",
+      "sentiment": "POSITIVE",
+      "intent": "APPRECIATION",
+      "meaning": "وصف فكرة ذكية، تقنية جديدة، أو منتج مميز وأنيق.",
+      "tags": [
+        "cool",
+        "innovation",
+        "youth"
+      ]
+    },
+    {
+      "id": "meme_021",
+      "phrase": "طايح خشين",
+      "arabizi": "tayeh khchine",
+      "origin": "الدارجة الشبابية",
+      "category": "street_slang",
+      "sentiment": "NEGATIVE",
+      "intent": "CRITICISM",
+      "meaning": "انتقاد شخص يتصرف بتعالي وقوة مبالغ فيها.",
+      "tags": [
+        "slang",
+        "attitude"
+      ]
+    },
+    {
+      "id": "meme_022",
+      "phrase": "سلكها يا سليك",
+      "arabizi": "salekha ya slik",
+      "origin": "ثقافة الميمات اليومية",
+      "category": "social_trend",
+      "sentiment": "NEUTRAL",
+      "intent": "HELP_INQUIRY",
+      "meaning": "طلب إيجاد حل ذكي وسريع للخروج من ورطة أو موقف محرج.",
+      "tags": [
+        "rescue",
+        "humor"
+      ]
+    },
+    {
+      "id": "meme_023",
+      "phrase": "الله غالب يا حليش",
+      "arabizi": "allah ghaleb ya halliche",
+      "origin": "كرة القدم الوطنية (ملحمة كأس أمم إفريقيا 2010)",
+      "category": "national_sport",
+      "sentiment": "NEUTRAL",
+      "intent": "RESIGNATION",
+      "meaning": "التسليم بالقدر بعد بذل كل المجهود والشجاعة الممكنة.",
+      "tags": [
+        "halliche",
+        "football",
+        "sacrifice"
+      ]
+    },
+    {
+      "id": "meme_024",
+      "phrase": "جابوها الرجالة",
+      "arabizi": "djabouha rdjala",
+      "origin": "الاحتفالات الوطنية والرياضية",
+      "category": "national_sport",
+      "sentiment": "POSITIVE",
+      "intent": "CELEBRATION",
+      "meaning": "الافتخار بتحقيق الفوز والانتصار بفضل كفاح الرجال الأوفياء.",
+      "tags": [
+        "victory",
+        "men",
+        "glory"
+      ]
+    },
+    {
+      "id": "meme_025",
+      "phrase": "دير الخير وانساه",
+      "arabizi": "dir lkhir wensah",
+      "origin": "حكمة جزائرية أصيلة",
+      "category": "proverbs",
+      "sentiment": "POSITIVE",
+      "intent": "WISDOM",
+      "meaning": "دعوة لعمل الخير والإحسان دون انتظار المقابل أو التباهي.",
+      "tags": [
+        "morals",
+        "charity",
+        "proverb"
+      ]
+    },
+    {
+      "id": "meme_026",
+      "phrase": "حاجة فور",
+      "arabizi": "haja fort",
+      "origin": "الدارجة المعاصرة",
+      "category": "product_review",
+      "sentiment": "POSITIVE",
+      "intent": "PRAISE",
+      "meaning": "وصف منتج أو خدمة بجودة استثنائية تفوق التوقعات.",
+      "tags": [
+        "top_quality",
+        "slang"
+      ]
+    },
+    {
+      "id": "meme_027",
+      "phrase": "كاسكيطة وشانسون",
+      "arabizi": "casquette w chanson",
+      "origin": "اللوك الشعبي العاصمي",
+      "category": "street_culture",
+      "sentiment": "NEUTRAL",
+      "intent": "CASUAL_CHAT",
+      "meaning": "أسلوب الحياة الشعبي البسيط والأنيق للشباب الجزائري.",
+      "tags": [
+        "lifestyle",
+        "culture"
+      ]
+    },
+    {
+      "id": "meme_028",
+      "phrase": "حوتة ومقلية",
+      "arabizi": "houta w ma9liya",
+      "origin": "المثل الساخر في الدارجة",
+      "category": "proverbs",
+      "sentiment": "NEGATIVE",
+      "intent": "SARCASM",
+      "meaning": "سخرية من شخص يطلب الشيء جاهزاً ومطبوخاً دون أي جهد.",
+      "tags": [
+        "laziness",
+        "humor"
+      ]
+    },
+    {
+      "id": "meme_029",
+      "phrase": "طايح في بير",
+      "arabizi": "tayeh fi bir",
+      "origin": "الدارجة اليومية",
+      "category": "daily_slang",
+      "sentiment": "NEUTRAL",
+      "intent": "INQUIRY",
+      "meaning": "تُقال عند طول غياب الشخص أو انقطاع أخباره فجأة وكأنه سقط في بئر.",
+      "tags": [
+        "absence",
+        "slang"
+      ]
+    },
+    {
+      "id": "meme_030",
+      "phrase": "ما طلقو والو",
+      "arabizi": "ma tal9ou walou",
+      "origin": "الترندات الاجتماعية",
+      "category": "social_trend",
+      "sentiment": "NEUTRAL",
+      "intent": "SURPRISE",
+      "meaning": "التعجب من قدرة الجزائريين على تحويل أي موقف جاد إلى نكتة وميم متداول.",
+      "tags": [
+        "humor",
+        "memes"
+      ]
+    }
+  ]
+}

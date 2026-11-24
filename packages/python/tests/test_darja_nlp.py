@@ -20,6 +20,8 @@ from darja_nlp.agent import (
     get_openai_tool_definitions,
 )
 from darja_nlp.cultural import detect_cultural_references, get_cultural_data, get_slang_data
+from darja_nlp.dialogue import respond_to_darja
+from darja_nlp.profanity import detect_profanity, is_profane, censor_profanity
 
 
 class TestNormalize:
@@ -641,12 +643,108 @@ class TestCulturalKnowledge:
 
     def test_openai_tool_definitions(self) -> None:
         tools = get_openai_tool_definitions()
-        assert len(tools) == 4
+        assert len(tools) == 6
         names = [t["function"]["name"] for t in tools]
         assert "parse_algerian_message" in names
         assert "get_wilaya_details" in names
         assert "check_human_escalation" in names
         assert "detect_cultural_references" in names
+        assert "respond_to_darja" in names
+        assert "moderate_darja_text" in names
+
+
+class TestAlgeriaGeo69Wilayas:
+
+    def test_all_69_wilayas_loaded(self) -> None:
+        wilayas = get_wilayas()
+        assert len(wilayas) == 69
+        assert wilayas[0]["code"] == 1
+        assert wilayas[-1]["code"] == 69
+        assert wilayas[-1]["name_ar"] == "الأبيض سيدي الشيخ"
+        assert wilayas[-1]["name_fr"] == "El Abiodh Sidi Cheikh"
+
+    def test_wilaya_59_aflou(self) -> None:
+        w59 = get_wilaya_by_code(59)
+        assert w59 is not None
+        assert w59["name_ar"] == "أفلو"
+        assert w59["name_fr"] == "Aflou"
+        assert w59["era"] == 69
+        assert len(w59["communes_sample"]) > 0
+
+    def test_extract_entities_with_new_wilayas(self) -> None:
+        text = "حاب توصيل لبلدية بريكة في باتنة أو لأفلو ولاية 59"
+        res = extract_entities(text)
+        codes = [w.code for w in res.wilayas]
+        assert 59 in codes or 60 in codes or 5 in codes
+
+
+class TestDialogueResponseEngine:
+
+    def test_wach_ya_khoy_arabizi_reply(self) -> None:
+        res = respond_to_darja("wach ya khoy")
+        assert "cv" in res.reply.lower() or "hamdoulah" in res.reply.lower()
+        assert res.script == "arabizi"
+        assert res.intent == "WELLBEING_INQUIRY"
+
+    def test_wach_rak_arabic_reply(self) -> None:
+        res = respond_to_darja("واش يا خويا واش راك")
+        assert res.script == "arabic"
+        assert "الحمد لله" in res.reply or "لاباس" in res.reply
+
+    def test_salam_alaykom_greeting(self) -> None:
+        res = respond_to_darja("salam alaykom khoya")
+        assert "wa alaykom" in res.reply.lower()
+
+    def test_merchant_persona(self) -> None:
+        res = respond_to_darja("wach ya khoy", persona="merchant")
+        assert "boutique" in res.reply.lower() or "sel3a" in res.reply.lower() or "cv" in res.reply.lower()
+
+
+class TestProfanityAndModeration:
+
+    def test_detect_profanity_street_insult(self) -> None:
+        res = detect_profanity("يا حمار راك غالط")
+        assert res.is_profane is True
+        assert res.severity in ("low", "medium")
+        assert any(m.term == "hmar" for m in res.matches)
+
+    def test_detect_profanity_arabizi_slur(self) -> None:
+        res = detect_profanity("nik mok ya weld l9ahba")
+        assert res.is_profane is True
+        assert res.severity == "high"
+
+    def test_censor_profanity(self) -> None:
+        censored = censor_profanity("يا حمار ما تعيطش")
+        assert "حمار" not in censored
+        assert "***" in censored
+
+    def test_clean_text_is_not_profane(self) -> None:
+        res = detect_profanity("سلعة بزاف شابة يعطيكم الصحة نزيد نكوموندي")
+        assert res.is_profane is False
+        assert res.severity == "none"
+        assert is_profane("سلعة بزاف شابة") is False
+
+
+class TestMemesAndFrancoDarja:
+
+    def test_detect_viral_memes(self) -> None:
+        from darja_nlp.cultural import detect_memes
+        text = "قالو فاك يا حشيشة و زوخ وطير و وان تو ثري فيفا لالجيري"
+        memes = detect_memes(text)
+        assert len(memes) >= 2
+        phrases = [m.canonical_name for m in memes]
+        assert "فاك يا حشيشة" in phrases or "زوخ وطير" in phrases
+
+    def test_detect_franco_darja_loanwords(self) -> None:
+        from darja_nlp.cultural import detect_franco_darja
+        text = "حاب نكوموندي هاد السبردينة كابا ديسبو وبوانتير 42"
+        matches = detect_franco_darja(text)
+        assert len(matches) >= 3
+        origins = [m["fr_origin"] for m in matches]
+        assert "commander" in origins
+        assert "disponible" in origins
+        assert "cabas" in origins
+
 
 
 

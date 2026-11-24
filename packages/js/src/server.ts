@@ -14,7 +14,17 @@ import { extractQuantities, extractProductAttributes } from './quantities';
 import { detectEscalation } from './escalation';
 import { detectDialect } from './dialect';
 import { identifyIntent } from './intent';
-import { detectCulturalReferences, getCulturalData, getSlangData } from './cultural';
+import {
+  detectCulturalReferences,
+  getCulturalData,
+  getSlangData,
+  getMemesData,
+  getFrancoDarjaData,
+  detectMemes,
+  detectFrancoDarja,
+} from './cultural';
+import { respondToDarja, DialoguePersona, DialogueScript } from './dialogue';
+import { detectProfanity, censorProfanity } from './profanity';
 import { buildAgentContext, formatAgentSystemPrompt } from './agent';
 
 export interface ServerOptions {
@@ -122,6 +132,16 @@ export function startServer(options: ServerOptions = {}): http.Server {
         } else {
           sendError('Invalid wilaya code (expected integer 1-69)', 400);
         }
+        return;
+      }
+
+      if (pathname === '/api/memes') {
+        sendJson(getMemesData());
+        return;
+      }
+
+      if (pathname === '/api/franco') {
+        sendJson(getFrancoDarjaData());
         return;
       }
 
@@ -323,6 +343,62 @@ export function startServer(options: ServerOptions = {}): http.Server {
 
         if (pathname === '/api/arabizi') {
           sendJson({ input: text, arabic: arabiziToArabic(text) });
+          return;
+        }
+
+        if (pathname === '/api/chat') {
+          const persona = (body.persona || 'casual') as DialoguePersona;
+          const script = (body.script || 'auto') as DialogueScript;
+          const res = respondToDarja(text, { persona, script });
+          sendJson({
+            input: text,
+            reply: res.reply,
+            intent: res.intent,
+            script: res.script,
+            confidence: res.confidence,
+            matched_pattern: res.matchedPattern,
+          });
+          return;
+        }
+
+        if (pathname === '/api/moderate') {
+          const mask = typeof body.mask === 'string' ? body.mask : '***';
+          const res = detectProfanity(text);
+          const censored = censorProfanity(text, mask);
+          sendJson({
+            input: text,
+            is_profane: res.isProfane,
+            severity: res.severity,
+            matches: res.matches.map((m) => ({
+              term: m.term,
+              category: m.category,
+              severity: m.severity,
+              matched_text: m.matchedText,
+            })),
+            censored_text: censored,
+          });
+          return;
+        }
+
+        if (pathname === '/api/memes') {
+          const memes = detectMemes(text);
+          sendJson({
+            input: text,
+            memes: memes.map((m) => ({
+              phrase: m.canonicalName,
+              meaning: m.meaning,
+              metadata: m.metadata,
+            })),
+          });
+          return;
+        }
+
+        if (pathname === '/api/franco') {
+          const matches = detectFrancoDarja(text);
+          sendJson({
+            input: text,
+            matches,
+          });
           return;
         }
 

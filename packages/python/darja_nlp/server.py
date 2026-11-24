@@ -19,7 +19,9 @@ from .quantities import extract_quantities, extract_product_attributes
 from .escalation import detect_escalation
 from .dialect import detect_dialect
 from .intent import identify_intent
-from .cultural import detect_cultural_references, get_cultural_data, get_slang_data
+from .cultural import detect_cultural_references, get_cultural_data, get_slang_data, get_memes_data, get_franco_darja_data, detect_memes, detect_franco_darja
+from .dialogue import respond_to_darja
+from .profanity import detect_profanity, censor_profanity
 from .agent import build_agent_context, format_agent_system_prompt
 
 
@@ -122,6 +124,10 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                     self._send_error(f"Wilaya {param} not found (must be 1-69)", 404)
             else:
                 self._send_error("Invalid wilaya code (expected integer 1-69)", 400)
+        elif path == "/api/memes":
+            self._send_json(get_memes_data())
+        elif path == "/api/franco":
+            self._send_json(get_franco_darja_data())
         else:
             self._send_error("Endpoint not found", 404)
 
@@ -270,6 +276,47 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"input": text, "normalized": normalize(text)})
         elif path == "/api/arabizi":
             self._send_json({"input": text, "arabic": arabizi_to_arabic(text)})
+        elif path == "/api/chat":
+            persona = body.get("persona", "casual")
+            script = body.get("script", "auto")
+            res = respond_to_darja(text, persona=persona, script=script)
+            self._send_json({
+                "input": text,
+                "reply": res.reply,
+                "intent": res.intent,
+                "script": res.script,
+                "confidence": res.confidence,
+                "matched_pattern": res.matched_pattern,
+            })
+        elif path == "/api/moderate":
+            mask = body.get("mask", "***")
+            res = detect_profanity(text)
+            censored = censor_profanity(text, mask=mask)
+            self._send_json({
+                "input": text,
+                "is_profane": res.is_profane,
+                "severity": res.severity,
+                "matches": [
+                    {"term": m.term, "category": m.category, "severity": m.severity, "matched_text": m.matched_text}
+                    for m in res.matches
+                ],
+                "censored_text": censored,
+            })
+        elif path == "/api/memes":
+            memes = detect_memes(text)
+            self._send_json({
+                "input": text,
+                "memes": [
+                    {"phrase": m.canonical_name, "meaning": m.meaning, "metadata": m.metadata}
+                    for m in memes
+                ],
+            })
+        elif path == "/api/franco":
+            matches = detect_franco_darja(text)
+            self._send_json({
+                "input": text,
+                "matches": matches,
+            })
         else:
             self._send_error(f"Endpoint '{path}' not found", 404)
 

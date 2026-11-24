@@ -1,0 +1,423 @@
+{
+  "version": "1.0.0",
+  "description": "Massive lexicon of French loanwords, hybrid verbs, and expressions heavily used in Algerian Darja.",
+  "count": 52,
+  "words": [
+    {
+      "darja_ar": "نكوموندي",
+      "arabizi": "ncommandi",
+      "fr_origin": "commander",
+      "category": "verbs_commerce",
+      "meaning_ar": "أطلب أو أشتري عبر الطلبية",
+      "example": "حاب نكوموندي هاد السبردينة"
+    },
+    {
+      "darja_ar": "نليفري",
+      "arabizi": "nlivri",
+      "fr_origin": "livrer",
+      "category": "verbs_commerce",
+      "meaning_ar": "أوصل البضاعة",
+      "example": "نليفريولك غدوا للدار"
+    },
+    {
+      "darja_ar": "نكونفيرمي",
+      "arabizi": "nconfirmi",
+      "fr_origin": "confirmer",
+      "category": "verbs_commerce",
+      "meaning_ar": "أؤكد الطلب",
+      "example": "عيطلي باش نكونفيرمي الكوموند"
+    },
+    {
+      "darja_ar": "نانولي",
+      "arabizi": "nannuler",
+      "fr_origin": "annuler",
+      "category": "verbs_commerce",
+      "meaning_ar": "ألغي الطلب",
+      "example": "سمحلي راني حاب نانولي الكوموند"
+    },
+    {
+      "darja_ar": "نبلوكي",
+      "arabizi": "nbloqui",
+      "fr_origin": "bloquer",
+      "category": "verbs_tech",
+      "meaning_ar": "أحظر أو أعطل",
+      "example": "النميرو تبلوكا"
+    },
+    {
+      "darja_ar": "نريباري",
+      "arabizi": "nrepari",
+      "fr_origin": "réparer",
+      "category": "verbs_service",
+      "meaning_ar": "أصلح الشيء المعطل",
+      "example": "يقدر يريباري البيسي تاعي؟"
+    },
+    {
+      "darja_ar": "نشونجي",
+      "arabizi": "nchangi",
+      "fr_origin": "changer",
+      "category": "verbs_service",
+      "meaning_ar": "أغير أو أستبدل",
+      "example": "حاب نشونجي البوانتير"
+    },
+    {
+      "darja_ar": "نفاكتيري",
+      "arabizi": "nfacturi",
+      "fr_origin": "facturer",
+      "category": "verbs_commerce",
+      "meaning_ar": "أصدر فاتورة",
+      "example": "تقدرو تفاكتيريولي السلعة؟"
+    },
+    {
+      "darja_ar": "نخلص / نبايي",
+      "arabizi": "npayi",
+      "fr_origin": "payer",
+      "category": "verbs_commerce",
+      "meaning_ar": "أدفع الثمن",
+      "example": "نبايي كاش ولا بالبطاقة الذهبية؟"
+    },
+    {
+      "darja_ar": "نبارطاجي",
+      "arabizi": "npartagi",
+      "fr_origin": "partager",
+      "category": "verbs_tech",
+      "meaning_ar": "أشارك المنشور أو الرابط",
+      "example": "بارطاجي معايا لاباج"
+    },
+    {
+      "darja_ar": "نكونيكتي",
+      "arabizi": "nconnecti",
+      "fr_origin": "connecter",
+      "category": "verbs_tech",
+      "meaning_ar": "أتصل بالإنترنت",
+      "example": "ما قدرتش نكونيكتي اليوم"
+    },
+    {
+      "darja_ar": "نشيكولي",
+      "arabizi": "nchekoli",
+      "fr_origin": "checker",
+      "category": "verbs_tech",
+      "meaning_ar": "أتحقق من الأمر",
+      "example": "شيكيلي الكولي وين وصل"
+    },
+    {
+      "darja_ar": "ديسبو",
+      "arabizi": "dispo",
+      "fr_origin": "disponible",
+      "category": "commerce",
+      "meaning_ar": "متوفر في المخزون",
+      "example": "راهي ديسبو كابا ولا مقطوعة؟"
+    },
+    {
+      "darja_ar": "مريڤل",
+      "arabizi": "mrigel",
+      "fr_origin": "réglé",
+      "category": "daily_slang",
+      "meaning_ar": "مضبوط، جاهز، تمام",
+      "example": "كلش راه مريڤل صحيت"
+    },
+    {
+      "darja_ar": "كابا",
+      "arabizi": "caba",
+      "fr_origin": "cabas",
+      "category": "commerce",
+      "meaning_ar": "بضاعة مستوردة أصلية عبر الحقائب",
+      "example": "سلعة كابا دوريجين من فرنسا"
+    },
+    {
+      "darja_ar": "صولد",
+      "arabizi": "solde",
+      "fr_origin": "solde",
+      "category": "commerce",
+      "meaning_ar": "تخفيضات الأسعار",
+      "example": "دايرين صولد كبير هاد السيمانة"
+    },
+    {
+      "darja_ar": "رميز",
+      "arabizi": "remise",
+      "fr_origin": "remise",
+      "category": "commerce",
+      "meaning_ar": "خصم في الثمن",
+      "example": "كاش رميز لولاد البلاد؟"
+    },
+    {
+      "darja_ar": "بوانتير",
+      "arabizi": "pointure",
+      "fr_origin": "pointure",
+      "category": "clothing",
+      "meaning_ar": "مقاس الحذاء",
+      "example": "كاين بوانتير 42 في هاد الموديل؟"
+    },
+    {
+      "darja_ar": "طاي",
+      "arabizi": "taille",
+      "fr_origin": "taille",
+      "category": "clothing",
+      "meaning_ar": "مقاس الملابس",
+      "example": "طاي L جاتني سوا سوا"
+    },
+    {
+      "darja_ar": "دوريجين",
+      "arabizi": "dorigine",
+      "fr_origin": "d'origine",
+      "category": "commerce",
+      "meaning_ar": "أصلي غير مقلد",
+      "example": "حاجة دوريجين مع الضمان"
+    },
+    {
+      "darja_ar": "إيميتاسيون",
+      "arabizi": "imitation",
+      "fr_origin": "imitation",
+      "category": "commerce",
+      "meaning_ar": "نسخة مقلدة",
+      "example": "هادي دوريجين ولا إيميتاسيون برومي شوا؟"
+    },
+    {
+      "darja_ar": "كولي",
+      "arabizi": "colis",
+      "fr_origin": "colis",
+      "category": "logistics",
+      "meaning_ar": "طرد بريدي أو شحنة",
+      "example": "الكولي وصل للبياجي"
+    },
+    {
+      "darja_ar": "ليفريزون",
+      "arabizi": "livraison",
+      "fr_origin": "livraison",
+      "category": "logistics",
+      "meaning_ar": "خدمة التوصيل",
+      "example": "شحال ليفريزون لوهران؟"
+    },
+    {
+      "darja_ar": "ستوب ديسك",
+      "arabizi": "stop desk",
+      "fr_origin": "stop desk",
+      "category": "logistics",
+      "meaning_ar": "استلام الطرد من مقر وكالة الشحن",
+      "example": "نفضل ستوب ديسك في ياليدين"
+    },
+    {
+      "darja_ar": "دوميسيل",
+      "arabizi": "domicile",
+      "fr_origin": "à domicile",
+      "category": "logistics",
+      "meaning_ar": "توصيل إلى باب المنزل",
+      "example": "توصيل دوميسيل لعين الدفلى"
+    },
+    {
+      "darja_ar": "فاكتير",
+      "arabizi": "facture",
+      "fr_origin": "facture",
+      "category": "commerce",
+      "meaning_ar": "فاتورة شراء رسمية",
+      "example": "تبعثولي الفاكتير مع الكولي؟"
+    },
+    {
+      "darja_ar": "قارانتي",
+      "arabizi": "garantie",
+      "fr_origin": "garantie",
+      "category": "commerce",
+      "meaning_ar": "ضمان الجودة والصيانة",
+      "example": "كاين قارانتي عام كامل"
+    },
+    {
+      "darja_ar": "روطار",
+      "arabizi": "retard",
+      "fr_origin": "retard",
+      "category": "daily_slang",
+      "meaning_ar": "تأخير في الموعد",
+      "example": "الليفرور دار روطار اليوم"
+    },
+    {
+      "darja_ar": "أونبان",
+      "arabizi": "en panne",
+      "fr_origin": "en panne",
+      "category": "technical",
+      "meaning_ar": "معطل أو به خلل",
+      "example": "التلفون راه أونبان"
+    },
+    {
+      "darja_ar": "ديفو",
+      "arabizi": "defaut",
+      "fr_origin": "défaut",
+      "category": "commerce",
+      "meaning_ar": "عيب أو نقص صناعي",
+      "example": "إذا فيه ديفو تقدر ترجعو"
+    },
+    {
+      "darja_ar": "رومبورسمون",
+      "arabizi": "remboursement",
+      "fr_origin": "remboursement",
+      "category": "commerce",
+      "meaning_ar": "استرجاع الأموال المدفوعة",
+      "example": "حاب رومبورسمون دراهمي"
+    },
+    {
+      "darja_ar": "كليون",
+      "arabizi": "client",
+      "fr_origin": "client",
+      "category": "commerce",
+      "meaning_ar": "زبون",
+      "example": "سيرفيس كليون ممتاز"
+    },
+    {
+      "darja_ar": "ماغازان",
+      "arabizi": "magasin",
+      "fr_origin": "magasin",
+      "category": "commerce",
+      "meaning_ar": "محل تجاري أو متجر",
+      "example": "وين جاي الماغازان تاعكم؟"
+    },
+    {
+      "darja_ar": "بوتيك",
+      "arabizi": "boutique",
+      "fr_origin": "boutique",
+      "category": "commerce",
+      "meaning_ar": "دكان أو متجر ألبسة",
+      "example": "البوتيك في البويرة"
+    },
+    {
+      "darja_ar": "بري فيكس",
+      "arabizi": "prix fixe",
+      "fr_origin": "prix fixe",
+      "category": "commerce",
+      "meaning_ar": "سعر غير قابل للتفاوض",
+      "example": "السومة بري فيكس خويا"
+    },
+    {
+      "darja_ar": "أوكازيون",
+      "arabizi": "occasion",
+      "fr_origin": "occasion",
+      "category": "commerce",
+      "meaning_ar": "مستعمل أو فرصة جيدة",
+      "example": "بيسي أوكازيون نظيف"
+    },
+    {
+      "darja_ar": "نوف",
+      "arabizi": "neuf",
+      "fr_origin": "neuf",
+      "category": "commerce",
+      "meaning_ar": "جديد غير مستعمل بالكرتونة",
+      "example": "سلعة نوف زيرو كليمتر"
+    },
+    {
+      "darja_ar": "فالابل",
+      "arabizi": "valable",
+      "fr_origin": "valable",
+      "category": "commerce",
+      "meaning_ar": "صالح وساري المفعول",
+      "example": "البرومو مازالت فالابل"
+    },
+    {
+      "darja_ar": "ديجا",
+      "arabizi": "deja",
+      "fr_origin": "déjà",
+      "category": "discourse",
+      "meaning_ar": "سابقاً، بالفعل",
+      "example": "ديجا وصيتك عليها الخطرة لي فاتت"
+    },
+    {
+      "darja_ar": "نورمال",
+      "arabizi": "normal",
+      "fr_origin": "normal",
+      "category": "discourse",
+      "meaning_ar": "عادي، بدون مشكلة",
+      "example": "نورمال خويا ما كاين حتى حرج"
+    },
+    {
+      "darja_ar": "ديركت",
+      "arabizi": "direct",
+      "fr_origin": "direct",
+      "category": "discourse",
+      "meaning_ar": "مباشرة فوراً",
+      "example": "توصلك ديركت لباب دارك"
+    },
+    {
+      "darja_ar": "بارفي",
+      "arabizi": "parfait",
+      "fr_origin": "parfait",
+      "category": "discourse",
+      "meaning_ar": "ممتاز ومثالي",
+      "example": "هكدا بارفي خويا صحيت"
+    },
+    {
+      "darja_ar": "إكزاكتومون",
+      "arabizi": "exactement",
+      "fr_origin": "exactement",
+      "category": "discourse",
+      "meaning_ar": "بالضبط كما هو",
+      "example": "إكزاكتومون هاديك هي السلعة"
+    },
+    {
+      "darja_ar": "بيان سير",
+      "arabizi": "bien sur",
+      "fr_origin": "bien sûr",
+      "category": "discourse",
+      "meaning_ar": "بالتأكيد ودون شك",
+      "example": "بيان سير كاين التوصيل"
+    },
+    {
+      "darja_ar": "ميرسي",
+      "arabizi": "merci",
+      "fr_origin": "merci",
+      "category": "courtesy",
+      "meaning_ar": "شكراً جزيلاً",
+      "example": "ميرسي بزاف ربي يعاونكم"
+    },
+    {
+      "darja_ar": "باردون",
+      "arabizi": "pardon",
+      "fr_origin": "pardon",
+      "category": "courtesy",
+      "meaning_ar": "عذراً أو أعتذر",
+      "example": "باردون غلطت في النميرو"
+    },
+    {
+      "darja_ar": "سيلفوبلي",
+      "arabizi": "svp",
+      "fr_origin": "s'il vous plaît",
+      "category": "courtesy",
+      "meaning_ar": "من فضلك أو لو سمحت",
+      "example": "السومة سيلفوبلي"
+    },
+    {
+      "darja_ar": "بون كوراج",
+      "arabizi": "bon courage",
+      "fr_origin": "bon courage",
+      "category": "courtesy",
+      "meaning_ar": "بالتوفيق والصبر والهمة",
+      "example": "بون كوراج في الخدمة خويا"
+    },
+    {
+      "darja_ar": "صونطي",
+      "arabizi": "sante",
+      "fr_origin": "santé",
+      "category": "courtesy",
+      "meaning_ar": "بالصحة والعافية",
+      "example": "بون صونطي للجميع"
+    },
+    {
+      "darja_ar": "رونديفو",
+      "arabizi": "rendez-vous",
+      "fr_origin": "rendez-vous",
+      "category": "daily_slang",
+      "meaning_ar": "موعد متفق عليه",
+      "example": "درنا رونديفو مع الـ 14:00"
+    },
+    {
+      "darja_ar": "سيرفيس",
+      "arabizi": "service",
+      "fr_origin": "service",
+      "category": "service",
+      "meaning_ar": "خدمة أو مساعدة",
+      "example": "كاش سيرفيس نقدرو نعاونوك بيه؟"
+    },
+    {
+      "darja_ar": "كابابل",
+      "arabizi": "capable",
+      "fr_origin": "capable",
+      "category": "daily_slang",
+      "meaning_ar": "قادر أو محتمل",
+      "example": "كابابل توصلك اليوم العشية"
+    }
+  ]
+}

@@ -1,0 +1,343 @@
+{
+  "version": "1.0.0",
+  "description": "Algerian Darja conversational intents, matching patterns, and authentic colloquial responses in both Arabizi and Arabic script.",
+  "rules": [
+    {
+      "intent": "WELLBEING_INQUIRY",
+      "patterns_arabizi": [
+        "wach ya khoy",
+        "wach ya kho",
+        "wach rak",
+        "wachrak",
+        "wach rak kho",
+        "kifech rak",
+        "kirak",
+        "kirak ghaya",
+        "ca va kho",
+        "cv kho",
+        "labas kho",
+        "we cv",
+        "wach l'ahwal",
+        "kifech ahwalek",
+        "wach rakoum"
+      ],
+      "patterns_arabic": [
+        "واش يا خويا",
+        "واش راك",
+        "واش راك خويا",
+        "واشراك",
+        "كيفاش راك",
+        "كيراك",
+        "كيراك غايا",
+        "لاباس خويا",
+        "واش الأحوال",
+        "كيفاش الأحوال",
+        "واش راكم",
+        "لاباس عليك",
+        "كلش مليح",
+        "واش راك خو"
+      ],
+      "responses_arabizi": [
+        "We cv hamdoulah w nta kho? Koulchi mlih?",
+        "Labas hamdoullah rabi yahfdhek, w nta kifech rak?",
+        "Hamdoullah kolchi mrigel, kash ma khasek kho?",
+        "Ghaya rabi ykhellik w nta kirak labas?"
+      ],
+      "responses_arabic": [
+        "لاباس الحمد لله خويا العزيز، وأنت واش راك؟ كلش مريڤل؟",
+        "الحمد لله ربي يحفظك خونا، وأنت كاش جديد من جيهتك؟",
+        "كلش مريڤل وعلى خير ربي يبارك فيك، في الخدمة خويا واش يخصك؟",
+        "غايا ربي يسلمك ويحفظك، واش حوالكم نتومة؟"
+      ]
+    },
+    {
+      "intent": "ISLAMIC_GREETING",
+      "patterns_arabizi": [
+        "salam",
+        "salam alaykom",
+        "slm",
+        "salam khoya",
+        "assalam",
+        "salamo alaykom",
+        "salam 3likom",
+        "slm kho"
+      ],
+      "patterns_arabic": [
+        "سلام",
+        "سلام عليكم",
+        "السلام عليكم",
+        "سلام خويا",
+        "أهلا خويا",
+        "السلام عليكم ورحمة الله"
+      ],
+      "responses_arabizi": [
+        "Wa alaykom salam w rahma kho, marhba bik!",
+        "Wa alaykom salam kho l3ziz, marhba bik kash ma khasek?",
+        "3likom salam khouna, nharek mabrouk w koulchi mrigel!"
+      ],
+      "responses_arabic": [
+        "وعليكم السلام ورحمة الله وبركاته، مرحباً بيك خونا نورتنا!",
+        "وعليكم السلام خويا العزيز، مرحباً بيك في أي وقت كاش ما نسحقو نخدموك؟",
+        "وعليكم السلام ورحمة الله، نهارك مبروك ومرحباً بيك!"
+      ]
+    },
+    {
+      "intent": "CASUAL_GREETING",
+      "patterns_arabizi": [
+        "saha kho",
+        "saha khouya",
+        "saha",
+        "sahite",
+        "sahiti",
+        "sahitou"
+      ],
+      "patterns_arabic": [
+        "صحا خويا",
+        "صحا خونا",
+        "صحا",
+        "صحيت",
+        "صحيت خويا",
+        "صحيتو"
+      ],
+      "responses_arabizi": [
+        "Saha lik rabi yahfdhek kho!",
+        "Yselmek kho l3ziz, bla mziya!",
+        "Saha kho, marhba bik f kol wa9t!"
+      ],
+      "responses_arabic": [
+        "الله يسلمك ويحفظك خويا العزيز!",
+        "يسلمك خونا الغالي، مرحباً بيك في كل وقت!",
+        "صحا ليك وربي يعطيك الصحة والعافية!"
+      ]
+    },
+    {
+      "intent": "MORNING_GREETING",
+      "patterns_arabizi": [
+        "sbah lkhir",
+        "sbah ennour",
+        "bonjour",
+        "sbah el kheir"
+      ],
+      "patterns_arabic": [
+        "صباح الخير",
+        "صباح النور",
+        "صباح الفل",
+        "صباح الورد"
+      ],
+      "responses_arabizi": [
+        "Sbah el nour w lkhir kho! Nharek mabrouk!",
+        "Sbah el khir w l3afya, marhba bik!"
+      ],
+      "responses_arabic": [
+        "صباح الخير والسرور خويا الغالي، نهارك مبروك إن شاء الله!",
+        "صباح النور والبركة، مرحباً بيك وفي الخدمة دائماً!"
+      ]
+    },
+    {
+      "intent": "EVENING_GREETING",
+      "patterns_arabizi": [
+        "messa lkhir",
+        "msa lkhir",
+        "bonsoir",
+        "messa ennour"
+      ],
+      "patterns_arabic": [
+        "مساء الخير",
+        "مساء النور",
+        "مسا الخير",
+        "مساء الورد"
+      ],
+      "responses_arabizi": [
+        "Messa lkhir w l3afya kho! Marhba bik!",
+        "Bonsoir kho, koulchi mrigel nchallah?"
+      ],
+      "responses_arabic": [
+        "مساء الخير والعافية خويا، مرحباً بيك ونورتنا!",
+        "مساء النور والسرور، كاش ما نسحقو نخدموك ليوما؟"
+      ]
+    },
+    {
+      "intent": "RAMADAN_GREETING",
+      "patterns_arabizi": [
+        "saha ftourkoum",
+        "saha ftourkom",
+        "saha remdankoum",
+        "ramadan kareem",
+        "saha shourkoum"
+      ],
+      "patterns_arabic": [
+        "صحة فطوركم",
+        "صحة رمضانكم",
+        "رمضان كريم",
+        "صحة سحوركم",
+        "صيام مقبول"
+      ],
+      "responses_arabizi": [
+        "Saha ftourkoum w rabi yeta9abal menna w menkoum!",
+        "Saha remdankoum w koul 3am w ntouma b alf khir!",
+        "Saha shourkoum w rabi ybarek fikoum!"
+      ],
+      "responses_arabic": [
+        "صحة فطوركم وربي يتقبل منا ومنكم الصيام والقيام وصالح الأعمال!",
+        "صحة رمضانكم وكل عام وأنتم وأحبابكم بألف خير وسعادة!",
+        "صحة سحوركم وذنب مغفور إن شاء الله!"
+      ]
+    },
+    {
+      "intent": "EID_GREETING",
+      "patterns_arabizi": [
+        "saha 3idek",
+        "saha 3idkoum",
+        "aid mubarak",
+        "saha l3id"
+      ],
+      "patterns_arabic": [
+        "صحة عيدك",
+        "صحة عيدكم",
+        "عيد مبارك",
+        "عيدكم مبارك",
+        "كل عام وانتم بخير"
+      ],
+      "responses_arabizi": [
+        "Saha 3idek kho, koul 3am w ntouma bkhir w sa7a w lehna!",
+        "3idkoum mabrouk w ta9abala Allahou minna wa minkoum, koul 3am bkhir!"
+      ],
+      "responses_arabic": [
+        "صحة عيدكم وكل عام وأنتم بألف خير، ربي يتقبل منا ومنكم ولعقوبة للعام الجاي!",
+        "عيدكم مبارك وسعيد، تقبل الله منا ومنكم وغفر لنا ولكم، ربي يحفظكم!"
+      ]
+    },
+    {
+      "intent": "GRATITUDE",
+      "patterns_arabizi": [
+        "merci",
+        "merci bzaf",
+        "ya3tik saha",
+        "chokran",
+        "chokran bzaf",
+        "barak allah fik"
+      ],
+      "patterns_arabic": [
+        "شكرا",
+        "شكرا بزاف",
+        "يعطيك الصحة",
+        "الله يحفظك",
+        "بارك الله فيك",
+        "ربي يجازيك"
+      ],
+      "responses_arabizi": [
+        "Bla mziya kho rabi yahfdhek, f lkhedma f ay wa9t!",
+        "Yselmek kho w rabi yjazik, marhba bik dima!",
+        "Bla jmil khouna, rabi ybarek fik!"
+      ],
+      "responses_arabic": [
+        "بلا مزية خويا ربي يحفظك، في الخدمة دائماً ومرحباً بيك في أي وقت!",
+        "الله يسلمك ويعافيك خويا العزيز، وفيك بارك الله!",
+        "العفو وبلا جميل، ربي يرزقك من واسع فضله!"
+      ]
+    },
+    {
+      "intent": "FAREWELL",
+      "patterns_arabizi": [
+        "b9a 3la khir",
+        "bye",
+        "bslama",
+        "tchao",
+        "au revoir",
+        "thala",
+        "thala f rouhek"
+      ],
+      "patterns_arabic": [
+        "بقى على خير",
+        "بالسلامة",
+        "في أمان الله",
+        "تهلا في روحك",
+        "تبقاو على خير"
+      ],
+      "responses_arabizi": [
+        "B9a 3la khir kho, thala f rouhek w nharek mabrouk!",
+        "Bslama kho, marhba bik f ay wa9t w rabi yahfdhek!"
+      ],
+      "responses_arabic": [
+        "بالسلامة وفي أمان الله وحفظه، تهلا في روحك خويا ونهارك مبروك!",
+        "تبقاو على خير ونورتونا، مرحباً بيكم دائماً!"
+      ]
+    },
+    {
+      "intent": "NEWS_INQUIRY",
+      "patterns_arabizi": [
+        "kash jdid",
+        "kash akhbar",
+        "kayen jdid",
+        "kash ma kayen",
+        "kash sel3a"
+      ],
+      "patterns_arabic": [
+        "كاش جديد",
+        "كاش أخبار",
+        "كاين جديد",
+        "كاش ما كاين",
+        "كاش سلعة جديدة"
+      ],
+      "responses_arabizi": [
+        "Koulchi mrigel w labas hamdoulah! Kayen jdid w sel3a top, kash ma rak thawas?",
+        "Hamdoulah kolchi bkhir, dakhlet sel3a chaba bzaf marhba bik!"
+      ],
+      "responses_arabic": [
+        "كلش مريڤل والحمد لله على خير! دخلتنا سلعة جديدة ممتازة كاش ما راك تحوس؟",
+        "كاين الخير ربي يبارك! الجديد راهو واجد وسومات شابة بزاف، مرحباً بيك!"
+      ]
+    },
+    {
+      "intent": "COMMERCE_ORDER_HELP",
+      "patterns_arabizi": [
+        "kifech ncommandi",
+        "hab nchri",
+        "kifech nechri",
+        "hab ncommander",
+        "hab nedi haba"
+      ],
+      "patterns_arabic": [
+        "كيفاش نكوموندي",
+        "حاب نشري",
+        "كيفاش نشري",
+        "حاب ندي حبة",
+        "طريقة الطلب"
+      ],
+      "responses_arabizi": [
+        "Sahl bzaf kho: ab3atli l'adresse, lwilaya, numéro de téléphone w l'article li habou w nlivriwlek l bab dar!",
+        "Marhba bik! Khallili nom, prénom, numéro w lwilaya f ميساج w nconfirmiwlek la commande f lwa9t!"
+      ],
+      "responses_arabic": [
+        "ساهلة ماهلة خويا: ابعثلي العنوان، الولاية، رقم الهاتف والمنتج لي حابو ونوصلوهولك لباب الدار!",
+        "مرحباً بيك خونا! خليلي الاسم، رقم الهاتف، والولاية ونكونفيرميولك الطلبية فوراً!"
+      ]
+    },
+    {
+      "intent": "DELIVERY_LOCATION_HELP",
+      "patterns_arabizi": [
+        "win rakoum",
+        "kayen livraison",
+        "tlivriw",
+        "chhal livri",
+        "tlivriw l 69 wilaya"
+      ],
+      "patterns_arabic": [
+        "وين راكم",
+        "كاين توصيل",
+        "توصلو",
+        "شحال التوصيل",
+        "توصلو للدار",
+        "توصيل 69 ولاية"
+      ],
+      "responses_arabizi": [
+        "Kaynin f dzayer w ndirou livri rapide l ga3 69 wilaya l bab dar wla stop desk!",
+        "Livraison dispo f ga3 69 wilaya b prix mrigel w khalass 3and l'istilam COD!"
+      ],
+      "responses_arabic": [
+        "متواجدين في الجزائر ونوفرو التوصيل السريع لجميع 69 ولاية لباب الدار أو ستوب ديسك!",
+        "التوصيل متوفر لـ 69 ولاية والدفع عند الاستلام بعد ما تفيزي سلعتك وتتأكد منها!"
+      ]
+    }
+  ]
+}

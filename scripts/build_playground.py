@@ -33,6 +33,18 @@ def main() -> None:
     with open(data_dir / 'slang.json', 'r', encoding='utf-8') as f:
         slang_data = json.load(f)
 
+    with open(data_dir / 'profanity.json', 'r', encoding='utf-8') as f:
+        profanity_data = json.load(f)
+
+    with open(data_dir / 'dialogue_rules.json', 'r', encoding='utf-8') as f:
+        dialogue_rules_data = json.load(f)
+
+    with open(data_dir / 'memes.json', 'r', encoding='utf-8') as f:
+        memes_data = json.load(f)
+
+    with open(data_dir / 'franco_darja.json', 'r', encoding='utf-8') as f:
+        franco_data = json.load(f)
+
     template = r"""<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -599,6 +611,9 @@ def main() -> None:
         <button class="sample-chip" onclick="loadSample(5)">🚚 استفسار عن التوصيل لقسنطينة + مية الف</button>
         <button class="sample-chip" onclick="loadSample(6)">🍲 ثقافة وأطباق: رشتة عاصمية لباب الواد</button>
         <button class="sample-chip" onclick="loadSample(7)">🔥 ميمز وسلانغ: تيكي تاكا وسلعة كابا</button>
+        <button class="sample-chip" style="border-color:#10b981; color:#34d399;" onclick="loadSample(8)">💬 رد حواري: wach ya khoy</button>
+        <button class="sample-chip" style="border-color:#f43f5e; color:#fb7185;" onclick="loadSample(9)">🛡️ كشف الشتائم: يا حمار</button>
+        <button class="sample-chip" style="border-color:#ec4899; color:#f472b6;" onclick="loadSample(10)">🎭 ميمز: فاك يا حشيشة و زوخ وطير</button>
       </div>
     </div>
 
@@ -633,7 +648,7 @@ def main() -> None:
 
       <!-- 3. Wilayas (69) & Communes Card -->
       <div class="card">
-        <div class="section-title">الولايات والبلديات (69 Wilayas & 550+ Communes)</div>
+        <div class="section-title">الولايات والبلديات (69 ولاية و 1,541 بلدية - معتمدة على algeria-geo)</div>
         <div id="wilayasBox"></div>
       </div>
 
@@ -702,6 +717,26 @@ def main() -> None:
         <div id="normalizedBox" class="code-box"></div>
       </div>
 
+      <!-- 10. Natural Darja Dialogue Response Engine -->
+      <div class="card" style="border-color: rgba(16, 185, 129, 0.4); background: radial-gradient(circle at top right, #062b1f, #111827);">
+        <div class="section-title" style="color: #34d399;">💬 الردود الحوارية الطبيعية (Natural Darja Chatbot Engine)</div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">توليد رد عفوي وطبيعي بلهجة الدارجة مطابق تماماً للغة السائل (مثلاً: wach ya khoy &rarr; we cv hamdoulah):</div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span id="dialogueScriptBadge" class="token-pill" style="background:#065f46; color:#6ee7b7; border:1px solid #10b981;">Script</span>
+          <span id="dialogueIntentBadge" class="token-pill" style="background:#1e293b; color:#93c5fd; border:1px solid #3b82f6;">Intent</span>
+        </div>
+        <div id="dialogueReplyBox" style="background:#080c14; border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:12px 16px; font-size:15px; color:#ecfdf5; line-height:1.6; font-weight:600;"></div>
+      </div>
+
+      <!-- 11. Content Moderation & Profanity Shield -->
+      <div class="card" style="border-color: rgba(244, 63, 94, 0.4); background: radial-gradient(circle at top right, #2b0610, #111827);">
+        <div class="section-title" style="color: #fb7185;">🛡️ درع سلامة المحتوى والكلمات البذيئة (Content Moderation Shield)</div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">كشف الشتائم، الألفاظ البذيئة والسمية في الدارجة (عربي وعربيزي) مع الحجب التلقائي:</div>
+        <div id="profanityStatusBox" style="margin-bottom:8px;"></div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">النص المحجوب (Censored Text):</div>
+        <div id="censoredTextBox" class="code-box" style="color:#fda4af;"></div>
+      </div>
+
       <!-- 10. AI Agent Customer Assistant Simulator -->
       <div class="card" style="grid-column: 1 / -1; border-color: rgba(59, 130, 246, 0.4); background: radial-gradient(circle at top left, #0f1c3f, #111827);">
         <div class="section-title" style="color: #60a5fa;">🤖 محاكي وكيل الذكاء الاصطناعي الجزائري (AI Agent Assistant Simulator)</div>
@@ -741,6 +776,10 @@ def main() -> None:
     const DIALOGUES_DATA = __DIALOGUES_DATA__;
     const CULTURE_DATA = __CULTURE_DATA__;
     const SLANG_DATA = __SLANG_DATA__;
+    const PROFANITY_DATA = __PROFANITY_DATA__;
+    const DIALOGUE_RULES_DATA = __DIALOGUE_RULES_DATA__;
+    const MEMES_DATA = __MEMES_DATA__;
+    const FRANCO_DATA = __FRANCO_DATA__;
 
     // Core Algorithms
     const ALEF_VARIANTS = /[\u0622\u0623\u0625]/g;
@@ -1437,6 +1476,87 @@ def main() -> None:
       };
     }
 
+    function detectScript(text) {
+      const latinCount = (text.match(/[a-zA-Z]/g) || []).length;
+      const arabicCount = (text.match(/[\u0600-\u06FF]/g) || []).length;
+      return arabicCount > latinCount ? 'arabic' : 'arabizi';
+    }
+
+    function respondToDarja(text, persona = 'casual') {
+      if (!text || !text.trim()) {
+        return { reply: 'مرحباً بيك خويا، كاش ما نسحقو نخدموك؟', intent: 'EMPTY', script: 'arabic' };
+      }
+      const resolvedScript = detectScript(text);
+      const normInput = text.toLowerCase().replace(/[!?.,;:\-_/\\]+/g, ' ').replace(/\s+/g, ' ').trim();
+      const rules = (DIALOGUE_RULES_DATA && DIALOGUE_RULES_DATA.rules) || [];
+
+      for (const rule of rules) {
+        const patterns = resolvedScript === 'arabizi' ? rule.patterns_arabizi : rule.patterns_arabic;
+        const altPatterns = resolvedScript === 'arabizi' ? rule.patterns_arabic : rule.patterns_arabizi;
+
+        for (const p of patterns) {
+          const normP = p.toLowerCase().trim();
+          if (normInput.includes(normP) || normP.includes(normInput)) {
+            const responses = resolvedScript === 'arabizi' ? rule.responses_arabizi : rule.responses_arabic;
+            let chosen = responses[0] || '';
+            if (persona === 'merchant' && rule.intent === 'WELLBEING_INQUIRY') {
+              chosen = resolvedScript === 'arabizi' ? 'We cv hamdoulah kho! Marhba bik f la boutique ta3na, kash ma khasek sel3a?' : 'لاباس الحمد لله ربي يحفظك خويا! مرحباً بيك في متجرنا، كاش ما راك تحوس سلعة؟';
+            }
+            return { reply: chosen, intent: rule.intent, script: resolvedScript };
+          }
+        }
+        for (const p of altPatterns) {
+          const normP = p.toLowerCase().trim();
+          if (normInput.includes(normP)) {
+            const responses = resolvedScript === 'arabizi' ? rule.responses_arabizi : rule.responses_arabic;
+            return { reply: responses[0] || '', intent: rule.intent, script: resolvedScript };
+          }
+        }
+      }
+
+      if (resolvedScript === 'arabizi') {
+        return { reply: 'We cv hamdoulah w nta kho? Marhba bik!', intent: 'CASUAL_CHAT', script: 'arabizi' };
+      }
+      return { reply: 'مرحباً بيك خويا العزيز! واش راك وكاش ما نسحقو نخدموك؟', intent: 'CASUAL_CHAT', script: 'arabic' };
+    }
+
+    function detectProfanity(text) {
+      if (!text || !text.trim()) return { isProfane: false, severity: 'none', matches: [], censoredText: text };
+      const termsList = (PROFANITY_DATA && PROFANITY_DATA.terms) || [];
+      const normText = text.toLowerCase().replace(/[\u064B-\u065F\u0670\u0640]/g, '').replace(/(.)\1{2,}/g, '$1$1');
+      const matches = [];
+      const censoredChars = text.split('');
+      let highestSeverity = 'none';
+      const severityOrder = { none: 0, low: 1, medium: 2, high: 3 };
+
+      for (const item of termsList) {
+        const variants = [];
+        if (item.ar) variants.push(item.ar);
+        if (item.arabizi) variants.push(...item.arabizi);
+
+        for (const v of variants) {
+          if (!v) continue;
+          const escaped = v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const pattern = new RegExp(`(?<![\\w\u0600-\u06FF])${escaped}(?![\\w\u0600-\u06FF])`, 'gi');
+          let m;
+          while ((m = pattern.exec(normText)) !== null) {
+            const start = m.index;
+            const end = start + m[0].length;
+            matches.push({ term: item.term || v, category: item.category, severity: item.severity, matchedText: text.slice(start, end) });
+            if (severityOrder[item.severity] > severityOrder[highestSeverity]) highestSeverity = item.severity;
+            for (let i = start; i < Math.min(end, censoredChars.length); i++) censoredChars[i] = '*';
+          }
+        }
+      }
+      const isProfane = matches.length > 0;
+      return {
+        isProfane,
+        severity: isProfane ? highestSeverity : 'none',
+        matches,
+        censoredText: censoredChars.join('').replace(/\*+/g, '***')
+      };
+    }
+
     // UI Controller
     const inputArea = document.getElementById('textInput');
     const charCount = document.getElementById('charCount');
@@ -1449,7 +1569,10 @@ def main() -> None:
       "شوالا راك باغي خوية غايا درك؟ حاب دوزينة مقاس 42 لعين الترك ولاية 31 بـ zr express للدار و نخلصك كاش",
       "واشنهي هادا قداش التوصيل لقسنطينة سيرتا و وقتاش تلحق؟ نخلصك كاش بـ مية الف",
       "طاح الحك وصاب غطاه، ابعثلي رشتة عاصمية و طبق شخشوخة لباب الواد و نخلصك كاش",
-      "تيكي تاكا يا خويا الكولي وصلني وسلعتكم كابا أصلية ولوز وهبال يعطيكم الصحة"
+      "تيكي تاكا يا خويا الكولي وصلني وسلعتكم كابا أصلية ولوز وهبال يعطيكم الصحة",
+      "wach ya khoy",
+      "يا حمار ما تبعثليش سلعة خردة وناقصة",
+      "قالو فاك يا حشيشة و زوخ وطير و وان تو ثري فيفا لالجيري"
     ];
 
     function loadSample(idx) {
@@ -1715,6 +1838,33 @@ def main() -> None:
       document.getElementById('arabiziBox').textContent = arabiziClean || '-';
       document.getElementById('normalizedBox').textContent = normalize(text) || '-';
 
+      // 8. Natural Darja Dialogue Response Engine
+      const chatRes = respondToDarja(text);
+      document.getElementById('dialogueReplyBox').textContent = chatRes.reply;
+      const scriptBadge = document.getElementById('dialogueScriptBadge');
+      scriptBadge.textContent = chatRes.script === 'arabizi' ? '🔤 Arabizi' : '🔤 عربية';
+      const intentBadge = document.getElementById('dialogueIntentBadge');
+      intentBadge.textContent = chatRes.intent;
+
+      // 9. Content Moderation & Profanity Shield
+      const profRes = detectProfanity(text);
+      const profStatusBox = document.getElementById('profanityStatusBox');
+      const censoredBox = document.getElementById('censoredTextBox');
+      censoredBox.textContent = profRes.censoredText;
+      if (profRes.isProfane) {
+        profStatusBox.innerHTML = `
+          <div style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#f87171; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:700;">
+            ⚠️ تم رصد محتوى بذيء أو شتائم (درجة الخطورة: ${profRes.severity.toUpperCase()}) — ${profRes.matches.length} كلمة مرصودة
+          </div>
+        `;
+      } else {
+        profStatusBox.innerHTML = `
+          <div style="background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#34d399; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:700;">
+            ✅ المحتوى آمن ونظيف (Clean & Safe)
+          </div>
+        `;
+      }
+
       // 8. AI Agent Simulator
       let wilayaName = null;
       if (entities.wilayas.length > 0) {
@@ -1819,6 +1969,14 @@ def main() -> None:
         '__CULTURE_DATA__', json.dumps(culture_data, ensure_ascii=False)
     ).replace(
         '__SLANG_DATA__', json.dumps(slang_data, ensure_ascii=False)
+    ).replace(
+        '__PROFANITY_DATA__', json.dumps(profanity_data, ensure_ascii=False)
+    ).replace(
+        '__DIALOGUE_RULES_DATA__', json.dumps(dialogue_rules_data, ensure_ascii=False)
+    ).replace(
+        '__MEMES_DATA__', json.dumps(memes_data, ensure_ascii=False)
+    ).replace(
+        '__FRANCO_DATA__', json.dumps(franco_data, ensure_ascii=False)
     )
 
     out_file = docs_dir / 'index.html'

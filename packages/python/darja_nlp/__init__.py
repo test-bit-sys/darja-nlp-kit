@@ -47,8 +47,23 @@ from .cultural import (
     detect_cultural_references,
     get_cultural_data,
     get_slang_data,
+    get_memes_data,
+    get_franco_darja_data,
+    detect_memes,
+    detect_franco_darja,
     CulturalMatch,
     CulturalAnalysisResult,
+)
+from .profanity import (
+    detect_profanity,
+    is_profane,
+    censor_profanity,
+    ProfanityResult,
+    ProfanityMatch,
+)
+from .dialogue import (
+    respond_to_darja,
+    DialogueResponse,
 )
 from .server import start_server
 
@@ -99,7 +114,18 @@ __all__ = [
     'detect_cultural_references',
     'get_cultural_data',
     'get_slang_data',
+    'get_memes_data',
+    'get_franco_darja_data',
+    'detect_memes',
+    'detect_franco_darja',
     'CulturalMatch',
     'CulturalAnalysisResult',
+    'detect_profanity',
+    'is_profane',
+    'censor_profanity',
+    'ProfanityResult',
+    'ProfanityMatch',
+    'respond_to_darja',
+    'DialogueResponse',
     'start_server',
 ]

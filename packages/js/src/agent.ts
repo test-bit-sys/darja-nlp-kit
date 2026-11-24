@@ -354,5 +354,44 @@ export function getOpenAiToolDefinitions(): Array<Record<string, unknown>> {
         },
       },
     },
+    {
+      type: 'function',
+      function: {
+        name: 'respond_to_darja',
+        description: "Generate an authentic Algerian colloquial response (supporting 'wach ya khoy' -> 'we cv', greetings, and order inquiries).",
+        parameters: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: 'The customer message to reply to.',
+            },
+            persona: {
+              type: 'string',
+              enum: ['casual', 'merchant', 'assistant'],
+              description: 'Persona tone of the reply.',
+            },
+          },
+          required: ['text'],
+        },
+      },
+    },
+    {
+      type: 'function',
+      function: {
+        name: 'moderate_darja_text',
+        description: 'Check text for Algerian profanity, vulgar expressions, slurs, and toxic language in Arabic script and Arabizi.',
+        parameters: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: 'The message to check and sanitize.',
+            },
+          },
+          required: ['text'],
+        },
+      },
+    },
   ];
 }

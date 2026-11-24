@@ -13,6 +13,8 @@ from typing import Any, Dict, List, Optional
 _DATA_DIR = Path(__file__).parent / 'data'
 _culture_cache: Optional[Dict[str, Any]] = None
 _slang_cache: Optional[Dict[str, Any]] = None
+_memes_cache: Optional[Dict[str, Any]] = None
+_franco_cache: Optional[Dict[str, Any]] = None
 
 _GENERIC_STOP = {'سلعة', 'سوق', 'حي', 'شارع', 'باب', 'واد', 'ساحة', 'جبل', 'جبال', 'طاجين', 'طبق', 'أكلة'}
 
@@ -73,6 +75,40 @@ def get_slang_data() -> Dict[str, Any]:
             pass
     _slang_cache = {'expressions': []}
     return _slang_cache
+
+
+def get_memes_data() -> Dict[str, Any]:
+    """Load memes.json containing iconic Algerian memes, viral TV quotes, and pop-culture phrases."""
+    global _memes_cache
+    if _memes_cache is not None:
+        return _memes_cache
+    path = _DATA_DIR / 'memes.json'
+    if path.exists():
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                _memes_cache = json.load(f)
+                return _memes_cache
+        except Exception:
+            pass
+    _memes_cache = {'memes': []}
+    return _memes_cache
+
+
+def get_franco_darja_data() -> Dict[str, Any]:
+    """Load franco_darja.json containing French-Darja loanwords and hybrid verbs."""
+    global _franco_cache
+    if _franco_cache is not None:
+        return _franco_cache
+    path = _DATA_DIR / 'franco_darja.json'
+    if path.exists():
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                _franco_cache = json.load(f)
+                return _franco_cache
+        except Exception:
+            pass
+    _franco_cache = {'words': []}
+    return _franco_cache
 
 
 @dataclass
@@ -136,7 +172,7 @@ def detect_cultural_references(text: str) -> CulturalAnalysisResult:
                 metadata={"category": p.get("category"), "region": p.get("region")}
             ))
 
-    # 2. Match Memes & Trends
+    # 2. Match Memes & Trends (from culture.json and memes.json)
     for m in culture_db.get("memes_and_trends", []):
         m_phrase = m.get("phrase", "")
         m_arabizi = m.get("arabizi", "")
@@ -148,6 +184,20 @@ def detect_cultural_references(text: str) -> CulturalAnalysisResult:
                 meaning=m.get("meaning", ""),
                 metadata={"tone": m.get("tone"), "context": m.get("context")}
             ))
+
+    memes_db = get_memes_data()
+    for m in memes_db.get("memes", []):
+        m_phrase = m.get("phrase", "")
+        m_arabizi = m.get("arabizi", "")
+        if (m_phrase and m_phrase in text) or (m_arabizi and m_arabizi.lower() in lower_text):
+            if not any(x.canonical_name == m_phrase for x in matched_memes):
+                matched_memes.append(CulturalMatch(
+                    matched_text=m_phrase if m_phrase in text else m_arabizi,
+                    category="meme_trend",
+                    canonical_name=m_phrase,
+                    meaning=m.get("meaning", ""),
+                    metadata={"origin": m.get("origin"), "category": m.get("category"), "tags": m.get("tags")}
+                ))
 
     # 3. Match Landmarks
     for lmk in culture_db.get("landmarks", []):
@@ -259,3 +309,46 @@ def detect_cultural_references(text: str) -> CulturalAnalysisResult:
         all_matches=all_matches,
         cultural_summary=cultural_summary,
     )
+
+
+def detect_memes(text: str) -> List[CulturalMatch]:
+    """Extract specifically Algerian memes and viral pop-culture quotes from text."""
+    res = detect_cultural_references(text)
+    return res.memes_and_trends
+
+
+def detect_franco_darja(text: str) -> List[Dict[str, Any]]:
+    """Detect French-Darja loanwords and hybrid verbs in text."""
+    if not text or not text.strip():
+        return []
+
+    lower_text = text.lower()
+    franco_db = get_franco_darja_data()
+    matches = []
+
+    for item in franco_db.get("words", []):
+        ar_term = item.get("darja_ar", "")
+        arabizi_term = item.get("arabizi", "")
+        fr_origin = item.get("fr_origin", "")
+
+        matched_key = None
+        if ar_term and ar_term in text:
+            matched_key = ar_term
+        elif arabizi_term and arabizi_term.lower() in lower_text:
+            matched_key = arabizi_term
+        elif fr_origin and fr_origin.lower() in lower_text:
+            matched_key = fr_origin
+
+        if matched_key:
+            matches.append({
+                "matched_text": matched_key,
+                "darja_ar": ar_term,
+                "arabizi": arabizi_term,
+                "fr_origin": fr_origin,
+                "category": item.get("category"),
+                "meaning_ar": item.get("meaning_ar"),
+                "example": item.get("example")
+            })
+
+    return matches
+

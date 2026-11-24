@@ -15,7 +15,15 @@ import {
   getFewShotDialogues,
   getOpenAiToolDefinitions,
 } from '../src/agent';
-import { detectCulturalReferences, getCulturalData, getSlangData } from '../src/cultural';
+import {
+  detectCulturalReferences,
+  getCulturalData,
+  getSlangData,
+  detectMemes,
+  detectFrancoDarja,
+} from '../src/cultural';
+import { respondToDarja } from '../src/dialogue';
+import { detectProfanity, isProfane, censorProfanity } from '../src/profanity';
 
 describe('normalize', () => {
   it('should unify alef variants', () => {
@@ -711,11 +719,113 @@ describe('Cultural Knowledge and Slang Detection', () => {
 
   it('should return OpenAI tool definitions including cultural detection', () => {
     const tools = getOpenAiToolDefinitions();
-    assert.equal(tools.length, 4);
+    assert.equal(tools.length, 6);
     const names = tools.map((t: any) => t.function.name);
     assert.ok(names.includes('parse_algerian_message'));
     assert.ok(names.includes('get_wilaya_details'));
     assert.ok(names.includes('check_human_escalation'));
     assert.ok(names.includes('detect_cultural_references'));
+    assert.ok(names.includes('respond_to_darja'));
+    assert.ok(names.includes('moderate_darja_text'));
+  });
+});
+
+describe('AlgeriaGeo 69 Wilayas', () => {
+  it('should load all 69 official wilayas', () => {
+    const wilayas = getWilayas();
+    assert.equal(wilayas.length, 69);
+    assert.equal(wilayas[0].code, 1);
+    assert.equal(wilayas[68].code, 69);
+    assert.equal(wilayas[68].name_ar, 'الأبيض سيدي الشيخ');
+    assert.equal(wilayas[68].name_fr, 'El Abiodh Sidi Cheikh');
+  });
+
+  it('should fetch wilaya 59 Aflou with era 69', () => {
+    const w59 = getWilayaByCode(59);
+    assert.ok(w59);
+    assert.equal(w59.name_ar, 'أفلو');
+    assert.equal(w59.name_fr, 'Aflou');
+    assert.equal(w59.era, 69);
+    assert.ok(w59.communes_sample && w59.communes_sample.length > 0);
+  });
+
+  it('should extract entities including new wilayas', () => {
+    const text = 'حاب توصيل لبلدية بريكة في باتنة أو لأفلو ولاية 59';
+    const res = extractEntities(text);
+    const codes = res.wilayas.map((w) => w.code);
+    assert.ok(codes.includes(59) || codes.includes(60) || codes.includes(5));
+  });
+});
+
+describe('Dialogue Response Engine', () => {
+  it("should respond to 'wach ya khoy' with 'we cv hamdoulah'", () => {
+    const res = respondToDarja('wach ya khoy');
+    assert.ok(res.reply.toLowerCase().includes('cv') || res.reply.toLowerCase().includes('hamdoulah'));
+    assert.equal(res.script, 'arabizi');
+    assert.equal(res.intent, 'WELLBEING_INQUIRY');
+  });
+
+  it('should respond in Arabic script when asked in Arabic', () => {
+    const res = respondToDarja('واش يا خويا واش راك');
+    assert.equal(res.script, 'arabic');
+    assert.ok(res.reply.includes('الحمد لله') || res.reply.includes('لاباس'));
+  });
+
+  it('should handle Islamic greetings', () => {
+    const res = respondToDarja('salam alaykom khoya');
+    assert.ok(res.reply.toLowerCase().includes('wa alaykom'));
+  });
+
+  it('should handle merchant persona', () => {
+    const res = respondToDarja('wach ya khoy', { persona: 'merchant' });
+    assert.ok(res.reply.toLowerCase().includes('boutique') || res.reply.toLowerCase().includes('sel3a') || res.reply.toLowerCase().includes('cv'));
+  });
+});
+
+describe('Profanity and Content Moderation', () => {
+  it('should detect street insult in Arabic', () => {
+    const res = detectProfanity('يا حمار راك غالط');
+    assert.equal(res.isProfane, true);
+    assert.ok(res.severity === 'low' || res.severity === 'medium');
+    assert.ok(res.matches.some((m) => m.term === 'hmar'));
+  });
+
+  it('should detect Arabizi slur with HIGH severity', () => {
+    const res = detectProfanity('nik mok ya weld l9ahba');
+    assert.equal(res.isProfane, true);
+    assert.equal(res.severity, 'high');
+  });
+
+  it('should censor profanity with mask', () => {
+    const censored = censorProfanity('يا حمار ما تعيطش', '***');
+    assert.ok(!censored.includes('حمار'));
+    assert.ok(censored.includes('***'));
+  });
+
+  it('should report clean text as not profane', () => {
+    const res = detectProfanity('سلعة بزاف شابة يعطيكم الصحة نزيد نكوموندي');
+    assert.equal(res.isProfane, false);
+    assert.equal(res.severity, 'none');
+    assert.equal(isProfane('سلعة بزاف شابة'), false);
+  });
+});
+
+describe('Memes and Franco-Darja Loanwords', () => {
+  it('should detect viral Algerian memes', () => {
+    const text = 'قالو فاك يا حشيشة و زوخ وطير و وان تو ثري فيفا لالجيري';
+    const memes = detectMemes(text);
+    assert.ok(memes.length >= 2);
+    const phrases = memes.map((m) => m.canonicalName);
+    assert.ok(phrases.includes('فاك يا حشيشة') || phrases.includes('زوخ وطير'));
+  });
+
+  it('should detect French-Darja loanwords and hybrid verbs', () => {
+    const text = 'حاب نكوموندي هاد السبردينة كابا ديسبو وبوانتير 42';
+    const matches = detectFrancoDarja(text);
+    assert.ok(matches.length >= 3);
+    const origins = matches.map((m) => m.frOrigin);
+    assert.ok(origins.includes('commander'));
+    assert.ok(origins.includes('disponible'));
+    assert.ok(origins.includes('cabas'));
   });
 });

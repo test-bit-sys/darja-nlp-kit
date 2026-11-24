@@ -15,7 +15,9 @@ import { detectEscalation } from './escalation';
 import { analyzeSentiment } from './sentiment';
 import { detectDialect } from './dialect';
 import { extractQuantities, extractProductAttributes } from './quantities';
-import { detectCulturalReferences } from './cultural';
+import { detectCulturalReferences, detectMemes } from './cultural';
+import { respondToDarja, DialoguePersona, DialogueScript } from './dialogue';
+import { detectProfanity, censorProfanity } from './profanity';
 import { buildAgentContext, formatAgentSystemPrompt } from './agent';
 import { startServer } from './server';
 
@@ -34,6 +36,9 @@ Commands:
   dialect <text>       Detect Algerian regional dialect (Center, East, West, South)
   quantities <text>    Extract colloquial quantities and product attributes
   culture <text>       Detect Algerian proverbs, viral memes, landmarks, dishes, and slang
+  chat <text>          Generate natural Algerian Darja response (e.g. 'wach ya khoy' -> 'we cv')
+  moderate <text>      Detect profanities, toxic slurs, and censor Algerian text
+  memes <text>         Detect Algerian viral memes and TV comedy quotes
   agent-prompt <text>  Build grounded prompt for AI LLM agents (GPT-4o, Claude, etc.)
   server               Start zero-dependency HTTP microservice (for n8n, Make, Docker)
 
@@ -323,6 +328,87 @@ function main() {
         }
         if (res.slang_expressions.length > 0) {
           console.log(`💬 Slang Terms: ${res.slang_expressions.map((s) => s.canonical_name).join(', ')}`);
+        }
+      }
+      break;
+    }
+
+    case 'chat': {
+      if (!text) {
+        console.error('Error: Please provide a message for chat response.');
+        process.exit(1);
+      }
+      const persona = (typeof flags.persona === 'string' ? flags.persona : 'casual') as DialoguePersona;
+      const script = (typeof flags.script === 'string' ? flags.script : 'auto') as DialogueScript;
+      const res = respondToDarja(text, { persona, script });
+      if (flags.json) {
+        console.log(JSON.stringify(res, null, 2));
+      } else {
+        console.log('=== Algerian Conversational Response ===');
+        console.log(`Reply          : ${res.reply}`);
+        console.log(`Intent         : ${res.intent}`);
+        console.log(`Script         : ${res.script}`);
+        console.log(`Confidence     : ${res.confidence.toFixed(2)}`);
+      }
+      break;
+    }
+
+    case 'moderate': {
+      if (!text) {
+        console.error('Error: Please provide text to moderate.');
+        process.exit(1);
+      }
+      const mask = typeof flags.mask === 'string' ? flags.mask : '***';
+      const res = detectProfanity(text);
+      const censored = censorProfanity(text, mask);
+      const output = {
+        is_profane: res.isProfane,
+        severity: res.severity,
+        matches_count: res.matches.length,
+        matches: res.matches.map((m) => ({
+          term: m.term,
+          category: m.category,
+          severity: m.severity,
+          matched_text: m.matchedText,
+        })),
+        censored_text: censored,
+      };
+      if (flags.json) {
+        console.log(JSON.stringify(output, null, 2));
+      } else {
+        console.log('=== Content Moderation & Profanity Check ===');
+        console.log(`Is Profane     : ${res.isProfane ? 'Yes' : 'No'}`);
+        console.log(`Severity       : ${res.severity.toUpperCase()}`);
+        console.log(`Matches        : ${res.matches.length}`);
+        console.log(`Censored Text  : ${censored}`);
+      }
+      break;
+    }
+
+    case 'memes': {
+      if (!text) {
+        console.error('Error: Please provide text to detect memes.');
+        process.exit(1);
+      }
+      const memes = detectMemes(text);
+      const output = memes.map((m) => ({
+        phrase: m.canonicalName,
+        meaning: m.meaning,
+        metadata: m.metadata,
+      }));
+      if (flags.json) {
+        console.log(JSON.stringify(output, null, 2));
+      } else {
+        console.log('=== Algerian Memes & Pop-Culture ===');
+        if (memes.length === 0) {
+          console.log('No viral memes detected in text.');
+        }
+        for (const m of memes) {
+          console.log(`🎭 Meme: ${m.canonicalName}`);
+          console.log(`   Meaning: ${m.meaning}`);
+          if (m.metadata?.origin) {
+            console.log(`   Origin : ${m.metadata.origin}`);
+          }
         }
       }
       break;
