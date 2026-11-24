@@ -1,5 +1,7 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/test-bit-sys/darja-nlp-kit/main/assets/logo.jpg" alt="darja-nlp-kit logo" width="200" style="border-radius: 28px;" />
+  <a href="https://test-bit-sys.github.io/darja-nlp-kit/">
+    <img src="https://raw.githubusercontent.com/test-bit-sys/darja-nlp-kit/main/assets/logo.jpg?v=2" alt="darja-nlp-kit logo" width="190" />
+  </a>
   <h1>darja-nlp-kit</h1>
   <p><strong>Zero-dependency, dual-language (TypeScript & Python) NLP toolkit for Algerian Darja</strong></p>
 
