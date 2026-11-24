@@ -20,3 +20,8 @@ dist/
 Thumbs.db
 .vscode/
 .idea/
+
+# Raw scratch & corpus cache
+scratch*
+*.parquet
+scratch_corpus/

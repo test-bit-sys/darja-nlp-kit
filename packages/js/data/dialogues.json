@@ -2116,5 +2116,118 @@
       "discount": true
     },
     "notes": "Additional GENERAL_DARJA dialogue covering bargaining_fair domain."
+  },
+  {
+    "id": "real_001",
+    "region": "CENTER",
+    "domain": "e_commerce_clothing",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "سلام عليكم خويا، شفت التريكو هذاك لي في لاباج وعجبني بزاااف حطة يهبل، حاب 2 حبات مقاس L للرويبة بالجزائر 0661223344",
+    "merchant_response": "وعليكم السلام ورحمة الله خويا العزيز! بصحتك مسبقاً، سلعة أصلية ومتقونة 100%. مسجلينلك زوج حبات طاي L، والتوصيل لرويبة غدوا يكون عندك وربي يباركلك.",
+    "entities": {
+      "wilaya": "الجزائر (16)",
+      "commune": "الرويبة",
+      "quantity": 2,
+      "phone": "0661223344"
+    },
+    "notes": "Authentic conversational feedback with mined terms 'حطة يهبل'."
+  },
+  {
+    "id": "real_002",
+    "region": "WEST",
+    "domain": "electronics_support",
+    "intent": "PRICE_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "kirak kho ghaya, chhal souma ta3 had pc portable caba dorigine w kifech livri l wahran drk?",
+    "merchant_response": "الله يسلمك خويا العزيز غايا الحمد لله ربي يحفظك! البيسي راهو مسيوم 62,000 دج (ستة ملاين وميتين) كابا نظيف دوريجين مع قارنتي عام، وتوصيل وهران كاين اليوم مع ياليدين.",
+    "entities": {
+      "wilaya": "وهران (31)",
+      "carrier": "YALIDINE",
+      "price_dzd": 62000
+    },
+    "notes": "Authentic Oranais inquiry with Arabizi and Franco-Darja terms."
+  },
+  {
+    "id": "real_003",
+    "region": "EAST",
+    "domain": "cosmetics_inquiry",
+    "intent": "AVAILABILITY_INQUIRY",
+    "sentiment": "POSITIVE",
+    "customer_message": "عيشك خويا، السلعة لي حطيتوها اليوم ما شاء الله تهبل! كاش ما بقات حبة من السيروم للبياض بقسنطينة؟",
+    "merchant_response": "يعيشك أختي ربي يحفظك، كلك ذوق! مازال باقيين آخر 3 حبات في الستوك فقط، نقدرو نحجزولك حبة وتوصلك لقسنطينة غدوا إن شاء الله.",
+    "entities": {
+      "wilaya": "قسنطينة (25)"
+    },
+    "notes": "Authentic Constantine phrasing with mined terms 'عيشك', 'تهبل'."
+  },
+  {
+    "id": "real_004",
+    "region": "SOUTH",
+    "domain": "desert_logistics",
+    "intent": "DELIVERY_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "مرحب بيك خويا، واش راك وكيفاش الأحوال؟ حبيت نسقسيكم إذا عندكم توصيل لأفلو ولاية 59 أو للأغواط؟",
+    "merchant_response": "مرحباً بيك وبأهلنا الكرام في أفلو وعاصمة السهوب الأغواط! أكيد التوصيل متوفر للولاية 59 أفلو لباب دارك أو ستوب ديسك، والسلعة توصلك في ظرف 48 ساعة والدفع عند الاستلام.",
+    "entities": {
+      "wilaya": "أفلو (59)",
+      "wilaya_parent": "الأغواط (03)"
+    },
+    "notes": "Targeted test for new wilaya 59 (Aflou) with authentic polite greeting."
+  },
+  {
+    "id": "real_005",
+    "region": "EAST",
+    "domain": "general_market",
+    "intent": "PRICE_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "قداش السومة تاع هاد الصاك بريكة ولاية باتنة كاش برومو لولاد لبلاد؟",
+    "merchant_response": "على الراس والعين يا ناس بريكة والشاوي الأحرار! السومة 2,800 دج ودايرين تخفيض 10% لولاد البلاد، ابعثلي العنوان ونكونفيرميولك الكوموند.",
+    "entities": {
+      "wilaya": "بريكة (60)",
+      "wilaya_alt": "باتنة (05)"
+    },
+    "notes": "Targeted test for new wilaya 60 (Barika) with Eastern Darja 'قداش'."
+  },
+  {
+    "id": "real_006",
+    "region": "CENTER",
+    "domain": "escalation_support",
+    "intent": "COMPLAINT",
+    "sentiment": "NEGATIVE",
+    "customer_message": "خويا سلعتكم جاتني مكسرة وفيها ديفو كبير، ما تبهدلوناش هكذا راني نستنى في رومبورسمون دراهمي ولا نشكي!",
+    "merchant_response": "نعتذرو منك أشد الاعتذار خويا وحقك علينا مية بالمية! ما تقلق روحك خلاص، دراهمك يرجعولك اليوم ولا نبعثولك حبة جديدة نوف زيرو كليمتر، عيطلي في هاد النميرو ونريڤلوها في ثانية.",
+    "entities": {
+      "needs_escalation": true,
+      "reason": "ANGRY_CUSTOMER"
+    },
+    "notes": "Real customer service handling of damaged parcel and refund."
+  },
+  {
+    "id": "real_007",
+    "region": "WEST",
+    "domain": "handicrafts",
+    "intent": "GREETING",
+    "sentiment": "POSITIVE",
+    "customer_message": "صحيت خويا العزيز الله يعطيك الصحة، الكولي وصل لتلمسان والسلعة متقونة وهمة وشان تبارك الله فيكم",
+    "merchant_response": "الله يسلمك ويجازيك بالخير خونا الغالي! فرحتنا كبيرة كي نالت رضاكم سلعتنا، مرحباً بيك وبكامل ناس تلمسان لبهية في أي وقت.",
+    "entities": {
+      "wilaya": "تلمسان (13)"
+    },
+    "notes": "Praise message with mined terms 'همة وشان', 'متقونة'."
+  },
+  {
+    "id": "real_008",
+    "region": "SOUTH",
+    "domain": "food_commerce",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "سلام عليكم، السلعة وصلت لبوسعادة ولاية 68 ربي يبارك فيكم سريعين، سجللي كوموند ثانية لعين وسارة 65",
+    "merchant_response": "وعليكم السلام ورحمة الله يا أهل بوسعادة الكرام ومدينة السعادة! على عيني وراسي، الطلبية الثانية لعين وسارة مسجلة وغدوا تخرج في ليفريزون وبلا مزية.",
+    "entities": {
+      "wilaya": "بوسعادة (68)",
+      "wilaya_dest": "عين وسارة (65)"
+    },
+    "notes": "Cross-wilaya order covering new wilayas 68 (Bou Saada) and 65 (Ain Ouessara)."
   }
 ]
