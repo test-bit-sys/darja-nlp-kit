@@ -22,7 +22,11 @@ def main() -> None:
         'dialects.json',
         'dialogues.json',
         'culture.json',
-        'slang.json'
+        'slang.json',
+        'dialogue_rules.json',
+        'profanity.json',
+        'franco_darja.json',
+        'memes.json'
     ]
 
     for src_name in data_files:

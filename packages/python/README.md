@@ -627,6 +627,13 @@ To train and fine-tune open-source models (Llama 3.1, Mistral, Qwen 2.5, Gemma 2
 - **`data/fine_tuning/algerian_corpus_openai.jsonl`** — 5,288 samples in OpenAI Chat Completions JSONL format.
 - **`data/fine_tuning/algerian_translation_pairs.json`** — 3,000 parallel bilingual pairs (Algerian Darja ↔ English).
 
+### Real Data Sources Integrated:
+1. **`asce3/algerian-chat-messages`**: Authentic Algerian chat messages and human-to-human question-reply conversational exchanges.
+2. **`touati-kamel/algerian-arabic-english-translation-50k`**: High-quality parallel translation sentences across Algerian culture, podcasts, and daily life.
+3. **`sepidmnorozy/Algerian_sentiment`**: Labeled real-world social media comments capturing genuine Algerian sentiment nuances.
+4. **`ayoubkirouane/Algerian-Darija`** (168k rows) & **`algerian-nlp/algerian-darja-corpus`** (34M words): Spoken conversational Algerian audio transcripts.
+5. **`test-bit-sys/algeria-geo`**: Official logistics ground truth covering all 69 Wilayas, 538 Dairas, and 1,541 Communes.
+
 ### Ready-to-Use LoRA / Unsloth Training Script:
 ```bash
 python scripts/train_fine_tuning.py --model_name unsloth/llama-3-8b-Instruct-bnb-4bit
