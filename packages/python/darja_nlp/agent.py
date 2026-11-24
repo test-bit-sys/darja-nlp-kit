@@ -341,5 +341,22 @@ def get_openai_tool_definitions() -> List[Dict[str, Any]]:
                     "required": ["text"]
                 }
             }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "detect_cultural_references",
+                "description": "Detect Algerian cultural references, proverbs, viral memes, landmarks, gastronomy, and slang in customer text.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "The customer's message text in Arabic or Arabizi."
+                        }
+                    },
+                    "required": ["text"]
+                }
+            }
         }
     ]

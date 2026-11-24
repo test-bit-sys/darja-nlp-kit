@@ -283,3 +283,76 @@ ${fewShotsSection}
 4. اجعل الرد مختصراً وبشرياً (1 إلى 3 أسطر).
 `;
 }
+
+export function getOpenAiToolDefinitions(): Array<Record<string, unknown>> {
+  return [
+    {
+      type: 'function',
+      function: {
+        name: 'parse_algerian_message',
+        description: 'Parse and extract Algerian entities (Wilayas, colloquial prices in DZD, payments, carriers, phones with telecom operator, quantities, product attributes) and dialect from customer text.',
+        parameters: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: "The customer's message in Arabic, Arabizi, or French code-switching.",
+            },
+          },
+          required: ['text'],
+        },
+      },
+    },
+    {
+      type: 'function',
+      function: {
+        name: 'get_wilaya_details',
+        description: 'Get official Algerian Wilaya information (Arabic/French name, postal code 01-69, region).',
+        parameters: {
+          type: 'object',
+          properties: {
+            code: {
+              type: 'integer',
+              description: 'The wilaya numeric code (1 to 69).',
+            },
+          },
+          required: ['code'],
+        },
+      },
+    },
+    {
+      type: 'function',
+      function: {
+        name: 'check_human_escalation',
+        description: 'Detect if customer is furious, making legal threats, or explicitly asking for a human agent.',
+        parameters: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: "The customer's message text.",
+            },
+          },
+          required: ['text'],
+        },
+      },
+    },
+    {
+      type: 'function',
+      function: {
+        name: 'detect_cultural_references',
+        description: 'Detect Algerian cultural references, proverbs, viral memes, landmarks, gastronomy, and slang in customer text.',
+        parameters: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: "The customer's message text in Arabic or Arabizi.",
+            },
+          },
+          required: ['text'],
+        },
+      },
+    },
+  ];
+}

@@ -9,7 +9,12 @@ import { extractQuantities, extractProductAttributes } from '../src/quantities';
 import { detectEscalation } from '../src/escalation';
 import { detectDialect, getDialectMetadata } from '../src/dialect';
 import { identifyIntent } from '../src/intent';
-import { buildAgentContext, formatAgentSystemPrompt, getFewShotDialogues } from '../src/agent';
+import {
+  buildAgentContext,
+  formatAgentSystemPrompt,
+  getFewShotDialogues,
+  getOpenAiToolDefinitions,
+} from '../src/agent';
 import { detectCulturalReferences, getCulturalData, getSlangData } from '../src/cultural';
 
 describe('normalize', () => {
@@ -702,5 +707,15 @@ describe('Cultural Knowledge and Slang Detection', () => {
     assert.equal(ctx.cultural.hasCulturalReference, true);
     const prompt = formatAgentSystemPrompt(ctx);
     assert.ok(prompt.includes('إشارات ثقافية وشعبية'));
+  });
+
+  it('should return OpenAI tool definitions including cultural detection', () => {
+    const tools = getOpenAiToolDefinitions();
+    assert.equal(tools.length, 4);
+    const names = tools.map((t: any) => t.function.name);
+    assert.ok(names.includes('parse_algerian_message'));
+    assert.ok(names.includes('get_wilaya_details'));
+    assert.ok(names.includes('check_human_escalation'));
+    assert.ok(names.includes('detect_cultural_references'));
   });
 });

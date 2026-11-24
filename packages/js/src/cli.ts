@@ -15,6 +15,7 @@ import { detectEscalation } from './escalation';
 import { analyzeSentiment } from './sentiment';
 import { detectDialect } from './dialect';
 import { extractQuantities, extractProductAttributes } from './quantities';
+import { detectCulturalReferences } from './cultural';
 import { buildAgentContext, formatAgentSystemPrompt } from './agent';
 import { startServer } from './server';
 
@@ -32,6 +33,7 @@ Commands:
   sentiment <text>     Analyze Algerian sentiment (POSITIVE, NEGATIVE, NEUTRAL)
   dialect <text>       Detect Algerian regional dialect (Center, East, West, South)
   quantities <text>    Extract colloquial quantities and product attributes
+  culture <text>       Detect Algerian proverbs, viral memes, landmarks, dishes, and slang
   agent-prompt <text>  Build grounded prompt for AI LLM agents (GPT-4o, Claude, etc.)
   server               Start zero-dependency HTTP microservice (for n8n, Make, Docker)
 
@@ -83,6 +85,7 @@ function main() {
         process.exit(1);
       }
       const entities = extractEntities(text);
+      const cult = detectCulturalReferences(text);
       const res = {
         wilayas: entities.wilayas.map((w) => ({
           code: w.code,
@@ -108,6 +111,10 @@ function main() {
           sizes: entities.attributes?.sizes || [],
         },
         delivery: (entities.deliveries || []).map((d) => d.label),
+        cultural: {
+          has_cultural_reference: cult.hasCulturalReference,
+          summary: cult.hasCulturalReference ? cult.culturalSummary : null,
+        },
       };
 
       if (flags.json) {
@@ -139,6 +146,9 @@ function main() {
           console.log(
             `🎨 Attributes: Colors=[${res.attributes.colors.join(', ')}], Sizes=[${res.attributes.sizes.join(', ')}]`
           );
+        }
+        if (cult.hasCulturalReference) {
+          console.log(`🏛️ Culture/Slang: ${cult.culturalSummary}`);
         }
       }
       break;
@@ -252,6 +262,68 @@ function main() {
         );
         console.log(`🎨 Colors: ${attrs.colors.join(', ') || 'None'}`);
         console.log(`📏 Sizes: ${attrs.sizes.join(', ') || 'None'}`);
+      }
+      break;
+    }
+
+    case 'culture': {
+      if (!text) {
+        console.error('Error: Please provide text for cultural analysis.');
+        process.exit(1);
+      }
+      const cult = detectCulturalReferences(text);
+      const res = {
+        has_cultural_reference: cult.hasCulturalReference,
+        proverbs: cult.proverbs.map((p) => ({
+          canonical_name: p.canonicalName,
+          meaning: p.meaning,
+          region: p.metadata?.region,
+        })),
+        memes_and_trends: cult.memesAndTrends.map((m) => ({
+          canonical_name: m.canonicalName,
+          meaning: m.meaning,
+          tone: m.metadata?.tone,
+        })),
+        landmarks: cult.landmarks.map((l) => ({
+          canonical_name: l.canonicalName,
+          city: l.metadata?.city,
+          wilaya_code: l.metadata?.wilaya_code,
+          description: l.meaning,
+        })),
+        gastronomy: cult.gastronomy.map((g) => ({
+          canonical_name: g.canonicalName,
+          origin: g.metadata?.origin,
+          category: g.metadata?.category,
+        })),
+        slang_expressions: cult.slangExpressions.map((s) => ({
+          canonical_name: s.canonicalName,
+          meaning: s.meaning,
+          polarity: s.metadata?.polarity,
+        })),
+        cultural_summary: cult.culturalSummary,
+      };
+
+      if (flags.json) {
+        console.log(JSON.stringify(res, null, 2));
+      } else {
+        console.log('=== Algerian Cultural References & Slang ===');
+        console.log(`Has Reference : ${res.has_cultural_reference ? 'Yes' : 'No'}`);
+        console.log(`Summary       : ${res.cultural_summary}`);
+        if (res.proverbs.length > 0) {
+          console.log(`📜 Proverbs   : ${res.proverbs.map((p) => p.canonical_name).join(', ')}`);
+        }
+        if (res.memes_and_trends.length > 0) {
+          console.log(`🎭 Memes/Trends: ${res.memes_and_trends.map((m) => m.canonical_name).join(', ')}`);
+        }
+        if (res.landmarks.length > 0) {
+          console.log(`🏛️ Landmarks  : ${res.landmarks.map((l) => l.canonical_name).join(', ')}`);
+        }
+        if (res.gastronomy.length > 0) {
+          console.log(`🍲 Gastronomy : ${res.gastronomy.map((g) => g.canonical_name).join(', ')}`);
+        }
+        if (res.slang_expressions.length > 0) {
+          console.log(`💬 Slang Terms: ${res.slang_expressions.map((s) => s.canonical_name).join(', ')}`);
+        }
       }
       break;
     }

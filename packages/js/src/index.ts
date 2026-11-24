@@ -7,7 +7,7 @@ export { extractQuantities, extractProductAttributes } from './quantities';
 export { detectEscalation } from './escalation';
 export { detectDialect, getDialectMetadata } from './dialect';
 export { identifyIntent } from './intent';
-export { buildAgentContext, formatAgentSystemPrompt, getFewShotDialogues } from './agent';
+export { buildAgentContext, formatAgentSystemPrompt, getFewShotDialogues, getOpenAiToolDefinitions } from './agent';
 export { detectCulturalReferences, getCulturalData, getSlangData } from './cultural';
 export { startServer } from './server';
 export type { ServerOptions } from './server';

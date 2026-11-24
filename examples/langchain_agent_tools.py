@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from darja_nlp import (
     build_agent_context,
+    detect_cultural_references,
     detect_escalation,
     extract_entities,
     get_openai_tool_definitions,
@@ -73,6 +74,19 @@ def run_darja_tool(name: str, arguments: dict) -> str:
             "reason": esc.reason,
             "urgency": esc.urgency,
             "guideline": esc.guideline,
+        }, ensure_ascii=False)
+
+    elif name == "detect_cultural_references":
+        text = arguments.get("text", "")
+        cult = detect_cultural_references(text)
+        return json.dumps({
+            "has_cultural_reference": cult.has_cultural_reference,
+            "cultural_summary": cult.cultural_summary,
+            "proverbs": [p.canonical_name for p in cult.proverbs],
+            "memes": [m.canonical_name for m in cult.memes_and_trends],
+            "landmarks": [l.canonical_name for l in cult.landmarks],
+            "gastronomy": [g.canonical_name for g in cult.gastronomy],
+            "slang": [s.canonical_name for s in cult.slang_expressions],
         }, ensure_ascii=False)
 
     return json.dumps({"error": f"Unknown tool: {name}"})

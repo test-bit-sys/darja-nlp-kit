@@ -19,6 +19,7 @@ from .quantities import extract_quantities, extract_product_attributes
 from .escalation import detect_escalation
 from .dialect import detect_dialect
 from .intent import identify_intent
+from .cultural import detect_cultural_references, get_cultural_data, get_slang_data
 from .agent import build_agent_context, format_agent_system_prompt
 
 
@@ -69,10 +70,23 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                     "POST /api/dialect",
                     "POST /api/escalation",
                     "POST /api/quantities",
+                    "POST /api/culture",
                     "POST /api/agent-context",
                     "GET  /api/wilayas",
                     "GET  /api/wilayas/<code_1_to_69>",
+                    "GET  /api/culture",
                 ]
+            })
+        elif path == "/api/culture":
+            c_data = get_cultural_data()
+            s_data = get_slang_data()
+            self._send_json({
+                "service": "darja-nlp-kit cultural knowledge engine",
+                "proverbs_count": len(c_data.get("proverbs", [])),
+                "memes_count": len(c_data.get("memes_and_trends", [])),
+                "landmarks_count": len(c_data.get("landmarks", [])),
+                "gastronomy_count": len(c_data.get("gastronomy", [])),
+                "slang_count": len(s_data.get("expressions", [])),
             })
         elif path == "/api/wilayas":
             wilayas = get_wilayas()
@@ -123,6 +137,7 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
 
         if path == "/api/parse":
             entities = extract_entities(text)
+            cult = detect_cultural_references(text)
             self._send_json({
                 "input": text,
                 "wilayas": [
@@ -165,6 +180,10 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                 "attributes": {
                     "colors": entities.attributes.colors if entities.attributes else [],
                     "sizes": entities.attributes.sizes if entities.attributes else [],
+                },
+                "cultural": {
+                    "has_cultural_reference": cult.has_cultural_reference,
+                    "summary": cult.cultural_summary if cult.has_cultural_reference else None,
                 },
             })
         elif path == "/api/intent":
@@ -211,6 +230,33 @@ class DarjaRequestHandler(BaseHTTPRequestHandler):
                 "input": text,
                 "quantities": [{"raw": q.raw, "value": q.value, "unit": q.unit} for q in quants],
                 "attributes": {"colors": attrs.colors, "sizes": attrs.sizes},
+            })
+        elif path in ("/api/culture", "/api/cultural"):
+            cult = detect_cultural_references(text)
+            self._send_json({
+                "input": text,
+                "has_cultural_reference": cult.has_cultural_reference,
+                "proverbs": [
+                    {"canonical_name": p.canonical_name, "meaning": p.meaning, "region": p.metadata.get("region")}
+                    for p in cult.proverbs
+                ],
+                "memes_and_trends": [
+                    {"canonical_name": m.canonical_name, "meaning": m.meaning, "tone": m.metadata.get("tone")}
+                    for m in cult.memes_and_trends
+                ],
+                "landmarks": [
+                    {"canonical_name": l.canonical_name, "city": l.metadata.get("city"), "wilaya_code": l.metadata.get("wilaya_code"), "description": l.meaning}
+                    for l in cult.landmarks
+                ],
+                "gastronomy": [
+                    {"canonical_name": g.canonical_name, "origin": g.metadata.get("origin"), "category": g.metadata.get("category")}
+                    for g in cult.gastronomy
+                ],
+                "slang_expressions": [
+                    {"canonical_name": s.canonical_name, "meaning": s.meaning, "polarity": s.metadata.get("polarity")}
+                    for s in cult.slang_expressions
+                ],
+                "cultural_summary": cult.cultural_summary,
             })
         elif path == "/api/agent-context":
             store_name = body.get("store_name", "Bazar El Djazair")

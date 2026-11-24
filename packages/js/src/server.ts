@@ -14,6 +14,7 @@ import { extractQuantities, extractProductAttributes } from './quantities';
 import { detectEscalation } from './escalation';
 import { detectDialect } from './dialect';
 import { identifyIntent } from './intent';
+import { detectCulturalReferences, getCulturalData, getSlangData } from './cultural';
 import { buildAgentContext, formatAgentSystemPrompt } from './agent';
 
 export interface ServerOptions {
@@ -62,10 +63,26 @@ export function startServer(options: ServerOptions = {}): http.Server {
             'POST /api/dialect',
             'POST /api/escalation',
             'POST /api/quantities',
+            'POST /api/culture',
             'POST /api/agent-context',
             'GET  /api/wilayas',
             'GET  /api/wilayas/:code',
+            'GET  /api/culture',
           ],
+        });
+        return;
+      }
+
+      if (pathname === '/api/culture') {
+        const cData = getCulturalData();
+        const sData = getSlangData();
+        sendJson({
+          service: 'darja-nlp-kit cultural knowledge engine',
+          proverbs_count: (cData.proverbs || []).length,
+          memes_count: (cData.memes_and_trends || []).length,
+          landmarks_count: (cData.landmarks || []).length,
+          gastronomy_count: (cData.gastronomy || []).length,
+          slang_count: (sData.expressions || []).length,
         });
         return;
       }
@@ -137,6 +154,7 @@ export function startServer(options: ServerOptions = {}): http.Server {
 
         if (pathname === '/api/parse') {
           const entities = extractEntities(text);
+          const cult = detectCulturalReferences(text);
           sendJson({
             input: text,
             wilayas: entities.wilayas.map((w) => ({
@@ -184,6 +202,10 @@ export function startServer(options: ServerOptions = {}): http.Server {
             attributes: {
               colors: entities.attributes?.colors || [],
               sizes: entities.attributes?.sizes || [],
+            },
+            cultural: {
+              has_cultural_reference: cult.hasCulturalReference,
+              summary: cult.hasCulturalReference ? cult.culturalSummary : null,
             },
           });
           return;
@@ -243,6 +265,42 @@ export function startServer(options: ServerOptions = {}): http.Server {
             input: text,
             quantities: quants.map((q) => ({ raw: q.raw, value: q.value, unit: q.unit })),
             attributes: { colors: attrs.colors, sizes: attrs.sizes },
+          });
+          return;
+        }
+
+        if (pathname === '/api/culture' || pathname === '/api/cultural') {
+          const cult = detectCulturalReferences(text);
+          sendJson({
+            input: text,
+            has_cultural_reference: cult.hasCulturalReference,
+            proverbs: cult.proverbs.map((p) => ({
+              canonical_name: p.canonicalName,
+              meaning: p.meaning,
+              region: p.metadata?.region,
+            })),
+            memes_and_trends: cult.memesAndTrends.map((m) => ({
+              canonical_name: m.canonicalName,
+              meaning: m.meaning,
+              tone: m.metadata?.tone,
+            })),
+            landmarks: cult.landmarks.map((l) => ({
+              canonical_name: l.canonicalName,
+              city: l.metadata?.city,
+              wilaya_code: l.metadata?.wilaya_code,
+              description: l.meaning,
+            })),
+            gastronomy: cult.gastronomy.map((g) => ({
+              canonical_name: g.canonicalName,
+              origin: g.metadata?.origin,
+              category: g.metadata?.category,
+            })),
+            slang_expressions: cult.slangExpressions.map((s) => ({
+              canonical_name: s.canonicalName,
+              meaning: s.meaning,
+              polarity: s.metadata?.polarity,
+            })),
+            cultural_summary: cult.culturalSummary,
           });
           return;
         }

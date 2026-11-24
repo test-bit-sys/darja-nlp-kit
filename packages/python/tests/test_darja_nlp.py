@@ -13,7 +13,12 @@ from darja_nlp.dialect import detect_dialect, get_dialect_metadata
 from darja_nlp.intent import identify_intent
 from darja_nlp.quantities import extract_quantities, extract_product_attributes
 from darja_nlp.escalation import detect_escalation
-from darja_nlp.agent import build_agent_context, format_agent_system_prompt, get_few_shot_dialogues
+from darja_nlp.agent import (
+    build_agent_context,
+    format_agent_system_prompt,
+    get_few_shot_dialogues,
+    get_openai_tool_definitions,
+)
 from darja_nlp.cultural import detect_cultural_references, get_cultural_data, get_slang_data
 
 
@@ -633,5 +638,15 @@ class TestCulturalKnowledge:
         assert ctx['cultural']['has_cultural_reference'] is True
         prompt = format_agent_system_prompt(ctx)
         assert 'إشارات ثقافية وشعبية' in prompt
+
+    def test_openai_tool_definitions(self) -> None:
+        tools = get_openai_tool_definitions()
+        assert len(tools) == 4
+        names = [t["function"]["name"] for t in tools]
+        assert "parse_algerian_message" in names
+        assert "get_wilaya_details" in names
+        assert "check_human_escalation" in names
+        assert "detect_cultural_references" in names
+
 
 

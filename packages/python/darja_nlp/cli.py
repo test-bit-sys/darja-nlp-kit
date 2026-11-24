@@ -23,6 +23,7 @@ from .quantities import extract_quantities, extract_product_attributes
 from .escalation import detect_escalation
 from .dialect import detect_dialect
 from .intent import identify_intent
+from .cultural import detect_cultural_references
 from .agent import build_agent_context, format_agent_system_prompt
 from .server import start_server
 
@@ -64,6 +65,11 @@ def main():
     p_qty.add_argument("text", help="Message text")
     p_qty.add_argument("--json", action="store_true", help="Output raw JSON")
 
+    # Command: culture
+    p_cult = subparsers.add_parser("culture", help="Detect Algerian proverbs, viral memes, landmarks, dishes, and slang")
+    p_cult.add_argument("text", help="Message or expression text")
+    p_cult.add_argument("--json", action="store_true", help="Output raw JSON")
+
     # Command: agent-prompt
     p_prompt = subparsers.add_parser("agent-prompt", help="Build grounded context and system prompt for LLMs (GPT, Claude, Gemini)")
     p_prompt.add_argument("text", help="Customer message")
@@ -82,6 +88,7 @@ def main():
 
     if args.command == "parse":
         entities = extract_entities(args.text)
+        cult = detect_cultural_references(args.text)
         res = {
             "wilayas": [{"code": w.code, "name_ar": w.name_ar, "commune": w.commune} for w in entities.wilayas],
             "prices_dzd": [{"amount": p.amount, "raw": p.raw} for p in entities.prices],
@@ -92,6 +99,10 @@ def main():
                 "sizes": entities.attributes.sizes if entities.attributes else [],
             },
             "delivery": [d.label for d in entities.deliveries],
+            "cultural": {
+                "has_cultural_reference": cult.has_cultural_reference,
+                "summary": cult.cultural_summary if cult.has_cultural_reference else None,
+            },
         }
         if args.json:
             print(json.dumps(res, ensure_ascii=False, indent=2))
@@ -111,6 +122,8 @@ def main():
                 print(f"📦 Quantities: {q_str}")
             if res["attributes"]["colors"] or res["attributes"]["sizes"]:
                 print(f"🎨 Attributes: Colors={res['attributes']['colors']}, Sizes={res['attributes']['sizes']}")
+            if cult.has_cultural_reference:
+                print(f"🏛️ Culture/Slang: {cult.cultural_summary}")
 
     elif args.command == "intent":
         res = identify_intent(args.text)
@@ -188,6 +201,49 @@ def main():
             print("📦 Quantities:", ", ".join(f"{q.value} {q.unit} ({q.raw})" for q in quants) or "None")
             print(f"🎨 Colors: {', '.join(attrs.colors) or 'None'}")
             print(f"📏 Sizes: {', '.join(attrs.sizes) or 'None'}")
+
+    elif args.command == "culture":
+        cult = detect_cultural_references(args.text)
+        data = {
+            "has_cultural_reference": cult.has_cultural_reference,
+            "proverbs": [
+                {"canonical_name": p.canonical_name, "meaning": p.meaning, "region": p.metadata.get("region")}
+                for p in cult.proverbs
+            ],
+            "memes_and_trends": [
+                {"canonical_name": m.canonical_name, "meaning": m.meaning, "tone": m.metadata.get("tone")}
+                for m in cult.memes_and_trends
+            ],
+            "landmarks": [
+                {"canonical_name": l.canonical_name, "city": l.metadata.get("city"), "wilaya_code": l.metadata.get("wilaya_code"), "description": l.meaning}
+                for l in cult.landmarks
+            ],
+            "gastronomy": [
+                {"canonical_name": g.canonical_name, "origin": g.metadata.get("origin"), "category": g.metadata.get("category")}
+                for g in cult.gastronomy
+            ],
+            "slang_expressions": [
+                {"canonical_name": s.canonical_name, "meaning": s.meaning, "polarity": s.metadata.get("polarity")}
+                for s in cult.slang_expressions
+            ],
+            "cultural_summary": cult.cultural_summary,
+        }
+        if args.json:
+            print(json.dumps(data, ensure_ascii=False, indent=2))
+        else:
+            print("=== Algerian Cultural References & Slang ===")
+            print(f"Has Reference : {'Yes' if data['has_cultural_reference'] else 'No'}")
+            print(f"Summary       : {data['cultural_summary']}")
+            if data["proverbs"]:
+                print(f"📜 Proverbs   : {', '.join(p['canonical_name'] for p in data['proverbs'])}")
+            if data["memes_and_trends"]:
+                print(f"🎭 Memes/Trends: {', '.join(m['canonical_name'] for m in data['memes_and_trends'])}")
+            if data["landmarks"]:
+                print(f"🏛️ Landmarks  : {', '.join(l['canonical_name'] for l in data['landmarks'])}")
+            if data["gastronomy"]:
+                print(f"🍲 Gastronomy : {', '.join(g['canonical_name'] for g in data['gastronomy'])}")
+            if data["slang_expressions"]:
+                print(f"💬 Slang Terms: {', '.join(s['canonical_name'] for s in data['slang_expressions'])}")
 
     elif args.command == "agent-prompt":
         ctx = build_agent_context(args.text, store_name=args.store)

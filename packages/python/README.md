@@ -568,6 +568,9 @@ darja-nlp escalation "سراقين حشيتوهالي رجعولي دراهمي"
 # Intent classification
 darja-nlp intent "شحال التوصيل لسطيف؟"
 
+# Detect Algerian proverbs, viral memes, landmarks, dishes, and street slang
+darja-nlp culture "طاح الحك وصاب غطاه ابعثلي رشتة عاصمية لباب الواد"
+
 # Start local HTTP microservice server (for n8n, Make, Docker)
 darja-nlp server --port 8080
 ```
@@ -590,8 +593,10 @@ node dist/cli.js server --port 8080
 - `POST /api/intent` — Customer intent classification
 - `POST /api/escalation` — Human takeover detection
 - `POST /api/quantities` — Algerian quantities & product attributes
+- `POST /api/culture` — Detect Algerian proverbs, viral memes, landmarks, gastronomy, and slang
 - `POST /api/sentiment` — Score and positive/negative token breakdown
 - `POST /api/dialect` — Regional dialect detection (WEST, EAST, CENTER, SOUTH)
+- `GET  /api/culture` — Cultural dataset statistics and coverage
 - `GET  /api/wilayas` — List all 69 official Algerian Wilayas
 - `GET  /api/wilayas/:code` — Wilaya details by code (1 to 69)
 
