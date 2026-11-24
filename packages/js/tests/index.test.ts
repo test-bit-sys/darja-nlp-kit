@@ -10,6 +10,7 @@ import { detectEscalation } from '../src/escalation';
 import { detectDialect, getDialectMetadata } from '../src/dialect';
 import { identifyIntent } from '../src/intent';
 import { buildAgentContext, formatAgentSystemPrompt, getFewShotDialogues } from '../src/agent';
+import { detectCulturalReferences, getCulturalData, getSlangData } from '../src/cultural';
 
 describe('normalize', () => {
   it('should unify alef variants', () => {
@@ -652,5 +653,54 @@ describe('Dialect Data and Few-Shot Dialogues', () => {
     assert.ok(ctx.fewShotExamples && ctx.fewShotExamples.length > 0);
     const prompt = formatAgentSystemPrompt(ctx);
     assert.ok(prompt.includes('أمثلة واقعية لنبرة الرد'));
+  });
+});
+
+describe('Cultural Knowledge and Slang Detection', () => {
+  it('should load cultural data successfully', () => {
+    const cdata = getCulturalData();
+    assert.ok(cdata.proverbs.length >= 20);
+    assert.ok(cdata.memes_and_trends.length >= 10);
+    assert.ok(cdata.landmarks.length >= 10);
+    assert.ok(cdata.gastronomy.length >= 10);
+  });
+
+  it('should load slang data successfully', () => {
+    const sdata = getSlangData();
+    assert.ok(sdata.expressions.length >= 20);
+  });
+
+  it('should detect proverbs and memes', () => {
+    const text = 'الحجرة في بلاصتها ثقيلة وراك فاهم يا خويا';
+    const res = detectCulturalReferences(text);
+    assert.equal(res.hasCulturalReference, true);
+    assert.ok(res.proverbs.some((p) => p.canonicalName === 'الحجرة في بلاصتها ثقيلة'));
+    assert.ok(res.memesAndTrends.some((m) => m.canonicalName === 'راك فاهم'));
+  });
+
+  it('should detect landmarks and gastronomy', () => {
+    const text = 'حاب ناكل رشتة عاصمية وكرانتيكا حامية في باب الواد';
+    const res = detectCulturalReferences(text);
+    assert.equal(res.hasCulturalReference, true);
+    assert.ok(res.gastronomy.some((f) => f.canonicalName.includes('رشتة')));
+    assert.ok(res.gastronomy.some((f) => f.canonicalName.includes('الكرانتيكا')));
+    assert.ok(res.landmarks.some((l) => l.canonicalName.includes('باب الواد')));
+  });
+
+  it('should detect slang expressions', () => {
+    const text = 'سلعتكم كابا أصلية وسلعة لوز ماشي خردة';
+    const res = detectCulturalReferences(text);
+    assert.equal(res.hasCulturalReference, true);
+    assert.ok(res.slangExpressions.some((s) => s.canonicalName === 'سلعة كابا' || s.matchedText === 'كابا'));
+    assert.ok(res.slangExpressions.some((s) => s.canonicalName === 'خردة'));
+  });
+
+  it('should include cultural section in agent context and system prompt', () => {
+    const text = 'طاح الحك وصاب غطاه، ابعثلي رشتة عاصمية لباب الواد';
+    const ctx = buildAgentContext(text);
+    assert.ok(ctx.cultural);
+    assert.equal(ctx.cultural.hasCulturalReference, true);
+    const prompt = formatAgentSystemPrompt(ctx);
+    assert.ok(prompt.includes('إشارات ثقافية وشعبية'));
   });
 });

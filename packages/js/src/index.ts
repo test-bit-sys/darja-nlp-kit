@@ -8,10 +8,14 @@ export { detectEscalation } from './escalation';
 export { detectDialect, getDialectMetadata } from './dialect';
 export { identifyIntent } from './intent';
 export { buildAgentContext, formatAgentSystemPrompt, getFewShotDialogues } from './agent';
+export { detectCulturalReferences, getCulturalData, getSlangData } from './cultural';
 export { startServer } from './server';
 export type { ServerOptions } from './server';
 export type { AgentContext, DialogueExample } from './agent';
 export type {
+  CulturalCategory,
+  CulturalMatch,
+  CulturalAnalysisResult,
   NormalizeOptions,
   ArabiziOptions,
   TokenizeResult,

@@ -27,6 +27,12 @@ def main() -> None:
     with open(data_dir / 'dialogues.json', 'r', encoding='utf-8') as f:
         dialogues_data = json.load(f)
 
+    with open(data_dir / 'culture.json', 'r', encoding='utf-8') as f:
+        culture_data = json.load(f)
+
+    with open(data_dir / 'slang.json', 'r', encoding='utf-8') as f:
+        slang_data = json.load(f)
+
     template = r"""<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -591,6 +597,8 @@ def main() -> None:
         <button class="sample-chip" onclick="loadSample(3)">🚨 تصعيد عاجل: سراقين حشيتوهالي ونشكي</button>
         <button class="sample-chip" onclick="loadSample(4)">📍 لهجة وهران + دوزينة بونتير 42</button>
         <button class="sample-chip" onclick="loadSample(5)">🚚 استفسار عن التوصيل لقسنطينة + مية الف</button>
+        <button class="sample-chip" onclick="loadSample(6)">🍲 ثقافة وأطباق: رشتة عاصمية لباب الواد</button>
+        <button class="sample-chip" onclick="loadSample(7)">🔥 ميمز وسلانغ: تيكي تاكا وسلعة كابا</button>
       </div>
     </div>
 
@@ -678,7 +686,14 @@ def main() -> None:
         <div id="dialectMarkers" class="tokens-pill-box"></div>
       </div>
 
-      <!-- 8. Arabizi & Normalization -->
+      <!-- 8. Cultural Knowledge, Slang & Food Card -->
+      <div class="card">
+        <div class="section-title">المعالم، الأمثال والمصطلحات الشعبية (Culture, Slang & Food)</div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">رصد التراث والأمثال الشعبية ومصطلحات التجارة:</div>
+        <div id="culturalBox" style="display:flex; flex-direction:column; gap:6px;"></div>
+      </div>
+
+      <!-- 9. Arabizi & Normalization -->
       <div class="card">
         <div class="section-title">معالجة الأرابيزي والتطبيع (Arabizi & Normalizer)</div>
         <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">الترجمة التفسيرية (Arabizi &rarr; Arabic):</div>
@@ -687,7 +702,7 @@ def main() -> None:
         <div id="normalizedBox" class="code-box"></div>
       </div>
 
-      <!-- 9. AI Agent Customer Assistant Simulator -->
+      <!-- 10. AI Agent Customer Assistant Simulator -->
       <div class="card" style="grid-column: 1 / -1; border-color: rgba(59, 130, 246, 0.4); background: radial-gradient(circle at top left, #0f1c3f, #111827);">
         <div class="section-title" style="color: #60a5fa;">🤖 محاكي وكيل الذكاء الاصطناعي الجزائري (AI Agent Assistant Simulator)</div>
         <p style="font-size: 13px; color: #94a3b8; margin-bottom: 14px;">
@@ -703,7 +718,7 @@ def main() -> None:
             <div id="agentReplyBox" style="background:#080c14; border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:16px; font-size:15px; color:#f0fdf4; line-height:1.7; min-height:80px; display:flex; align-items:center;"></div>
           </div>
           <div style="grid-column: 1 / -1; margin-top: 4px;">
-            <div style="font-size: 12px; color: #fbbf24; font-weight: 700; margin-bottom: 6px;">📚 عينة تدريب حقيقية مطابقة للهجة المستهدفة من قاعدة البيانات (100+ Dialogues Few-Shot):</div>
+            <div style="font-size: 12px; color: #fbbf24; font-weight: 700; margin-bottom: 6px;">📚 عينة تدريب حقيقية مطابقة للهجة المستهدفة من قاعدة البيانات (150+ Dialogues Few-Shot):</div>
             <div id="matchingDialogueBox" style="background:#080c14; border:1px solid rgba(251,191,36,0.25); border-radius:10px; padding:12px 16px; font-size:13px; color:#fef3c7; line-height:1.7;"></div>
           </div>
         </div>
@@ -724,6 +739,8 @@ def main() -> None:
     const WILAYAS_DATA = __WILAYAS_DATA__;
     const DIALECTS_DATA = __DIALECTS_DATA__;
     const DIALOGUES_DATA = __DIALOGUES_DATA__;
+    const CULTURE_DATA = __CULTURE_DATA__;
+    const SLANG_DATA = __SLANG_DATA__;
 
     // Core Algorithms
     const ALEF_VARIANTS = /[\u0622\u0623\u0625]/g;
@@ -1222,6 +1239,204 @@ def main() -> None:
       };
     }
 
+    const GENERIC_CULTURE_STOP = new Set(['سلعة', 'سوق', 'حي', 'شارع', 'باب', 'واد', 'ساحة', 'جبل', 'جبال', 'طاجين', 'طبق', 'أكلة']);
+
+    function extractKeywords(text) {
+      if (!text) return [];
+      const clean = text.split(' (')[0].trim();
+      const parts = text.split(/[/(),]|\s+و/);
+      const res = new Set([text, clean]);
+      for (const part of parts) {
+        const p = part.trim();
+        if (p.length > 2 && !GENERIC_CULTURE_STOP.has(p)) {
+          res.add(p);
+          if (p.startsWith('ال') && p.length > 3) {
+            res.add(p.slice(2));
+          } else if (!p.startsWith('ال')) {
+            res.add('ال' + p);
+          }
+          const words = p.split(/\s+/);
+          if (words.length === 2) {
+            for (const w of words) {
+              if (w.length > 3 && !GENERIC_CULTURE_STOP.has(w)) {
+                res.add(w);
+                if (w.startsWith('ال') && w.length > 4) {
+                  res.add(w.slice(2));
+                } else if (!w.startsWith('ال')) {
+                  res.add('ال' + w);
+                }
+              }
+            }
+          }
+        }
+      }
+      return Array.from(res).filter(x => x.length > 2 && !GENERIC_CULTURE_STOP.has(x));
+    }
+
+    function detectCulturalReferences(text) {
+      if (!text || !text.trim()) {
+        return {
+          hasCulturalReference: false,
+          proverbs: [],
+          memesAndTrends: [],
+          landmarks: [],
+          gastronomy: [],
+          slangExpressions: [],
+          allMatches: [],
+          culturalSummary: 'لا توجد إشارات ثقافية خاصة.'
+        };
+      }
+      const lowerText = text.toLowerCase();
+      const cultureDb = (typeof CULTURE_DATA !== 'undefined' && CULTURE_DATA) ? CULTURE_DATA : { proverbs: [], memes_and_trends: [], landmarks: [], gastronomy: [] };
+      const slangDb = (typeof SLANG_DATA !== 'undefined' && SLANG_DATA) ? SLANG_DATA : { expressions: [] };
+
+      const matchedProverbs = [];
+      const matchedMemes = [];
+      const matchedLandmarks = [];
+      const matchedGastronomy = [];
+      const matchedSlang = [];
+
+      // 1. Proverbs
+      for (const p of cultureDb.proverbs || []) {
+        const pText = p.text || '';
+        const pArabizi = p.arabizi || '';
+        if ((pText && text.includes(pText)) || (pArabizi && lowerText.includes(pArabizi.toLowerCase()))) {
+          matchedProverbs.push({
+            matchedText: text.includes(pText) ? pText : pArabizi,
+            category: 'proverb',
+            canonicalName: pText,
+            meaning: p.meaning || '',
+            metadata: { category: p.category, region: p.region }
+          });
+        }
+      }
+
+      // 2. Memes & Trends
+      for (const m of cultureDb.memes_and_trends || []) {
+        const mPhrase = m.phrase || '';
+        const mArabizi = m.arabizi || '';
+        if ((mPhrase && text.includes(mPhrase)) || (mArabizi && lowerText.includes(mArabizi.toLowerCase()))) {
+          matchedMemes.push({
+            matchedText: text.includes(mPhrase) ? mPhrase : mArabizi,
+            category: 'meme_trend',
+            canonicalName: mPhrase,
+            meaning: m.meaning || '',
+            metadata: { tone: m.tone, context: m.context }
+          });
+        }
+      }
+
+      // 3. Landmarks
+      for (const lmk of cultureDb.landmarks || []) {
+        const lName = lmk.name || '';
+        const keywords = extractKeywords(lName);
+        for (const kw of keywords) {
+          if (kw && text.includes(kw)) {
+            matchedLandmarks.push({
+              matchedText: kw,
+              category: 'landmark',
+              canonicalName: lName,
+              meaning: lmk.description || '',
+              metadata: { city: lmk.city, wilaya_code: lmk.wilaya_code }
+            });
+            break;
+          }
+        }
+      }
+
+      // 4. Gastronomy
+      for (const f of cultureDb.gastronomy || []) {
+        const fName = f.name || '';
+        const fArabizi = f.arabizi || '';
+        const keywords = extractKeywords(fName);
+        let matched = false;
+        for (const kw of keywords) {
+          if (kw && text.includes(kw)) {
+            matchedGastronomy.push({
+              matchedText: kw,
+              category: 'gastronomy',
+              canonicalName: fName,
+              meaning: f.description || '',
+              metadata: { origin: f.origin, category: f.category }
+            });
+            matched = true;
+            break;
+          }
+        }
+        if (!matched && fArabizi) {
+          const parts = fArabizi.split('/');
+          for (const part of parts) {
+            if (part.trim() && lowerText.includes(part.trim().toLowerCase())) {
+              matchedGastronomy.push({
+                matchedText: part.trim(),
+                category: 'gastronomy',
+                canonicalName: fName,
+                meaning: f.description || '',
+                metadata: { origin: f.origin, category: f.category }
+              });
+              break;
+            }
+          }
+        }
+      }
+
+      // 5. Slang Expressions
+      for (const s of slangDb.expressions || []) {
+        const sTerm = s.term || '';
+        const sArabizi = s.arabizi || '';
+        const keywords = extractKeywords(sTerm);
+        let matched = false;
+        for (const kw of keywords) {
+          if (kw && text.includes(kw)) {
+            matchedSlang.push({
+              matchedText: kw,
+              category: 'slang',
+              canonicalName: sTerm,
+              meaning: s.meaning || '',
+              metadata: { type: s.type, polarity: s.polarity }
+            });
+            matched = true;
+            break;
+          }
+        }
+        if (!matched && sArabizi && lowerText.includes(sArabizi.toLowerCase())) {
+          matchedSlang.push({
+            matchedText: sArabizi,
+            category: 'slang',
+            canonicalName: sTerm,
+            meaning: s.meaning || '',
+            metadata: { type: s.type, polarity: s.polarity }
+          });
+        }
+      }
+
+      const allMatches = [
+        ...matchedProverbs,
+        ...matchedMemes,
+        ...matchedLandmarks,
+        ...matchedGastronomy,
+        ...matchedSlang
+      ];
+
+      const summaryParts = [];
+      if (matchedProverbs.length > 0) summaryParts.push(`أمثال شعبية: ${matchedProverbs.map(p => `"${p.canonicalName}"`).join('، ')}`);
+      if (matchedMemes.length > 0) summaryParts.push(`ترندات وميمز: ${matchedMemes.map(m => `"${m.canonicalName}"`).join('، ')}`);
+      if (matchedLandmarks.length > 0) summaryParts.push(`معالم وأسواق: ${matchedLandmarks.map(l => `"${l.canonicalName}"`).join('، ')}`);
+      if (matchedGastronomy.length > 0) summaryParts.push(`مأكولات جزائرية: ${matchedGastronomy.map(f => `"${f.canonicalName}"`).join('، ')}`);
+      if (matchedSlang.length > 0) summaryParts.push(`مصطلحات شارع: ${matchedSlang.map(s => `"${s.canonicalName}"`).join('، ')}`);
+
+      return {
+        hasCulturalReference: allMatches.length > 0,
+        proverbs: matchedProverbs,
+        memesAndTrends: matchedMemes,
+        landmarks: matchedLandmarks,
+        gastronomy: matchedGastronomy,
+        slangExpressions: matchedSlang,
+        allMatches,
+        culturalSummary: summaryParts.length > 0 ? summaryParts.join(' | ') : 'لا توجد إشارات ثقافية خاصة.'
+      };
+    }
+
     // UI Controller
     const inputArea = document.getElementById('textInput');
     const charCount = document.getElementById('charCount');
@@ -1232,7 +1447,9 @@ def main() -> None:
       "السلعة هاااااايلة بزاااااف و الخدمة فور، يعطيك الصحة! توصيل للعلمة سطيف رقمي 0770112233 و نخلصك بـ baridimob",
       "سراقين حشيتوهالي رجعولي دراهمي سلعة خردة وما رديتوش عليا ونشكي بيكم للعدالة ولابوليس!",
       "شوالا راك باغي خوية غايا درك؟ حاب دوزينة مقاس 42 لعين الترك ولاية 31 بـ zr express للدار و نخلصك كاش",
-      "واشنهي هادا قداش التوصيل لقسنطينة سيرتا و وقتاش تلحق؟ نخلصك كاش بـ مية الف"
+      "واشنهي هادا قداش التوصيل لقسنطينة سيرتا و وقتاش تلحق؟ نخلصك كاش بـ مية الف",
+      "طاح الحك وصاب غطاه، ابعثلي رشتة عاصمية و طبق شخشوخة لباب الواد و نخلصك كاش",
+      "تيكي تاكا يا خويا الكولي وصلني وسلعتكم كابا أصلية ولوز وهبال يعطيكم الصحة"
     ];
 
     function loadSample(idx) {
@@ -1453,12 +1670,52 @@ def main() -> None:
         dMarkers.innerHTML = '<span class="empty-state">لا توجد مؤشرات جهوية حصرية</span>';
       }
 
-      // 6. Arabizi & Normalization
+      // 6. Cultural & Slang Detection
+      const cultural = detectCulturalReferences(text);
+      const cultBox = document.getElementById('culturalBox');
+      cultBox.innerHTML = '';
+      if (cultural.allMatches.length > 0) {
+        cultural.allMatches.forEach(m => {
+          let badgeStyle = 'background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#60a5fa;';
+          let icon = '🏛️';
+          let catTitle = 'معلم / سوق';
+          if (m.category === 'proverb') {
+            badgeStyle = 'background:rgba(245,158,11,0.15); border:1px solid #f59e0b; color:#fbbf24;';
+            icon = '📜';
+            catTitle = 'مثل شعبي';
+          } else if (m.category === 'meme_trend') {
+            badgeStyle = 'background:rgba(236,72,153,0.15); border:1px solid #ec4899; color:#f472b6;';
+            icon = '🎭';
+            catTitle = 'ترند / ميم';
+          } else if (m.category === 'gastronomy') {
+            badgeStyle = 'background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#34d399;';
+            icon = '🍲';
+            catTitle = 'أكلة / طبق';
+          } else if (m.category === 'slang') {
+            badgeStyle = 'background:rgba(139,92,246,0.15); border:1px solid #8b5cf6; color:#a78bfa;';
+            icon = '💬';
+            catTitle = 'مصطلح شارع';
+          }
+          cultBox.innerHTML += `
+            <div style="${badgeStyle} border-radius:8px; padding:6px 10px; font-size:12px; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">${icon}</span>
+              <div>
+                <strong>${catTitle}: ${m.canonicalName}</strong>
+                <span style="opacity:0.85; margin-right:6px;">(${m.meaning})</span>
+              </div>
+            </div>
+          `;
+        });
+      } else {
+        cultBox.innerHTML = '<span class="empty-state">لا توجد إشارات شعبية أو أمثال في النص</span>';
+      }
+
+      // 7. Arabizi & Normalization
       const arabiziClean = arabiziToArabic(text);
       document.getElementById('arabiziBox').textContent = arabiziClean || '-';
       document.getElementById('normalizedBox').textContent = normalize(text) || '-';
 
-      // 7. AI Agent Simulator
+      // 8. AI Agent Simulator
       let wilayaName = null;
       if (entities.wilayas.length > 0) {
         const firstW = entities.wilayas[0];
@@ -1471,6 +1728,7 @@ def main() -> None:
       const attrText = (attrs.colors.concat(attrs.sizes)).join(' | ') || 'غير محدد';
 
       const escNotice = esc.needsEscalation ? `\n🚨 [تنبيه تصعيد عاجل]: ${esc.reason} (${esc.urgency}) - ${esc.guideline}\n` : '';
+      const culturalLine = cultural.hasCulturalReference ? `\n- المراجع الثقافية والتراثية المرصودة: ${cultural.culturalSummary}` : '';
 
       const agentPrompt = `أنت مساعد خدمة عملاء ذكي وبشري لمتجر إلكتروني جزائري 'Bazar El Djazair'.${escNotice}
 [سياق الزبون المستخرج بدقة عبر darja-nlp-kit]:
@@ -1485,7 +1743,7 @@ def main() -> None:
 - شركة التوصيل: ${carrierName || 'غير محددة'}
 - المبالغ بالدينار: ${priceText || 'غير محددة'}
 - وسائل الدفع: ${entities.payments.length > 0 ? entities.payments.map(p => p.label).join(', ') : 'غير محددة'}
-- أرقام الهاتف: ${entities.phones.length > 0 ? entities.phones.map(ph => ph.normalized + (ph.operatorLabel ? ' ('+ph.operatorLabel+')' : '')).join(', ') : 'غير متوفرة'}
+- أرقام الهاتف: ${entities.phones.length > 0 ? entities.phones.map(ph => ph.normalized + (ph.operatorLabel ? ' ('+ph.operatorLabel+')' : '')).join(', ') : 'غير متوفرة'}${culturalLine}
 
 [التعليمات]: طابق نية الزبون ولهجته بدقة، وأجب بدارجة جزائرية عفوية ومحترمة (لا فصحى معربة)، والتزم بالأسعار والولايات بدون أي هلوسة.`;
 
@@ -1494,6 +1752,12 @@ def main() -> None:
       let agentReply = '';
       if (esc.needsEscalation) {
         agentReply = '🚨 تنبيه النظام: تم إيقاف الرد الآلي وتحويل المحادثة لمشرف خدمة العملاء البشري بسبب التصعيد (' + esc.reason + ').';
+      } else if (cultural.proverbs.length > 0) {
+        const prov = cultural.proverbs[0];
+        agentReply = `وعليكم السلام خويا لعزيز! كيما يقول المثل الشعبي "${prov.canonicalName}". رانا في الخدمة وسلعتنا مضمونة ونوصلوها حتى لباب دارك، مرحب بيك في كل وقت!`;
+      } else if (cultural.gastronomy.length > 0) {
+        const food = cultural.gastronomy[0];
+        agentReply = `أهلاً وسهلاً خويا! بصحتكم مسبقاً ${food.canonicalName}، بنة وهمة وشان. سلعتنا راهي واجدة والتوصيل متوفر لجميع الولايات مع خيار الدفع عند الاستلام!`;
       } else if (intentRes.intent === 'COMPLAINT' || sent.label === 'NEGATIVE') {
         agentReply = 'سلام عليكم خويا، حقك علينا ونعتذروا منك بزاف بزاف! ما تقلقش روحك كامل، المشكل نحلوهولك درك. قولي برك واش صرا بالضبط ونبدلولك السلعة ولا نرجعولك دراهمك في الحين.';
       } else if (intentRes.intent === 'PRICE_INQUIRY') {
@@ -1551,6 +1815,10 @@ def main() -> None:
         '__DIALECTS_DATA__', json.dumps(dialects_data, ensure_ascii=False)
     ).replace(
         '__DIALOGUES_DATA__', json.dumps(dialogues_data, ensure_ascii=False)
+    ).replace(
+        '__CULTURE_DATA__', json.dumps(culture_data, ensure_ascii=False)
+    ).replace(
+        '__SLANG_DATA__', json.dumps(slang_data, ensure_ascii=False)
     )
 
     out_file = docs_dir / 'index.html'

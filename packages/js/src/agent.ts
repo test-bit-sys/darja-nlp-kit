@@ -5,7 +5,8 @@ import { extractEntities } from './entities';
 import { detectDialect } from './dialect';
 import { identifyIntent } from './intent';
 import { detectEscalation } from './escalation';
-import { DialectRegion, EscalationResult, IntentType, SentimentLabel } from './types';
+import { detectCulturalReferences } from './cultural';
+import { CulturalAnalysisResult, DialectRegion, EscalationResult, IntentType, SentimentLabel } from './types';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -52,6 +53,7 @@ export interface AgentContext {
     productAttributes: { colors: string[]; sizes: string[] };
   };
   fewShotExamples?: DialogueExample[];
+  cultural?: CulturalAnalysisResult;
 }
 
 let _dialoguesCache: any[] | null = null;
@@ -150,6 +152,7 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
   const dialect = detectDialect(rawMessage);
   const sentiment = analyzeSentiment(rawMessage);
   const entities = extractEntities(rawMessage);
+  const cultural = detectCulturalReferences(rawMessage);
 
   let tone = 'PROFESSIONAL_HELPFUL';
   let toneInstruction = '🤝 الزبون يستفسر. أجب بوضوح وسرعة ومهنية جزائرية عفوية.';
@@ -220,6 +223,7 @@ export function buildAgentContext(message: string, storeName = 'Bazar El Djazair
       productAttributes: productAttributesSummary,
     },
     fewShotExamples: getFewShotDialogues(dialect.region, intent.intent, 2),
+    cultural,
   };
 }
 
@@ -248,6 +252,11 @@ export function formatAgentSystemPrompt(context: AgentContext): string {
     });
   }
 
+  let culturalSection = '';
+  if (context.cultural?.hasCulturalReference) {
+    culturalSection = `\n[إشارات ثقافية وشعبية مرصودة في رسالة الزبون]:\n- الدلالات الشعبية: ${context.cultural.culturalSummary}\n👉 إرشاد الرد: أظهر فهماً ذكياً وتفاعلاً طيباً مع المثل الشعبي أو الأكلة أو المعلم المذكور بروح جزائرية أصيلة.\n`;
+  }
+
   return `أنت مساعد خدمة عملاء ذكي وبشري جداً لمتجر إلكتروني جزائري '${store}'.
 مهمتك الرد على الزبون الجزائري بدارجة واقعية ومتقنة 100%، كأنك تاجر جزائري محترف ولطيف.${escalationNotice}
 [السياق المستخرج من رسالة الزبون]:
@@ -265,6 +274,7 @@ export function formatAgentSystemPrompt(context: AgentContext): string {
 - شركات التوصيل: ${facts.deliveryCompanies.length > 0 ? facts.deliveryCompanies.join(', ') : 'غير محددة'}
 - نمط التوصيل: ${facts.deliveryMode || 'غير محدد'}
 - أرقام الهاتف: ${facts.phones.length > 0 ? facts.phones.join(', ') : 'غير متوفرة'}
+${culturalSection}
 ${fewShotsSection}
 [قواعد صارمة للرد]:
 1. تحدث بدارجة جزائرية عفوية ومحترمة (لا تستخدم فصحى معربة أو لهجات مشرقية إطلاقاً).

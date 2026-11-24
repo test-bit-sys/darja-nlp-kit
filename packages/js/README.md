@@ -32,6 +32,9 @@ Handles Arabic script, Arabizi (Latin transliteration with numbers), and French/
 - **Colloquial Quantities & Product Attributes** — Extract colloquial quantities (`حبة`, `زوج حبات`, `شكارة`, `باكية`, `كرطونة`, `دوزينة` = 12), clothing sizes (XS–3XL), shoe sizes (35–48), and Algerian color names (`كحل / noir`, `بيض / blanc`, etc.)
 - **Telecom Operator Routing & Direct WhatsApp URLs** — Classify Algerian phone numbers by operator (`MOBILIS`, `DJEZZY`, `OOREDOO`, `ALGERIE_TELECOM`) and generate instant 1-click WhatsApp deep links (`https://wa.me/213...`)
 - **Smart Human Escalation Engine** — Detect angry customers (`حشيتوهالي`, `سراقين`), explicit requests for human agents (`احكي مع بنادم`, `appel moi`), and legal threats (`نشكي بيكم`, `لابوليس`) with urgency levels (CRITICAL, HIGH, MEDIUM)
+- **Cultural Knowledge, Heritage & Proverbs Engine** — Detect 25+ classic Algerian proverbs (`طاح الحك وصاب غطاه`), viral memes/trends (`تيكي تاكا`, `ألو بلحمر`), 17+ iconic landmarks/markets (`ساحة الشهداء وباب الواد`, `سانتا كروز`), and 15+ traditional gastronomy dishes (`رشتة`, `شخشوخة`, `كسكسي`, `كاران`) with origin context
+- **Street & Commercial Slang Analysis** — Detect Algerian youth slang, e-commerce verification terms (`سلعة كابا`, `سلعة لوز`, `سلعة صحيحة`), Arabizi slang expressions, and emotional states
+- **Algerian LLM Fine-Tuning Datasets** — 222+ curated instruction and multi-turn dialogue pairs in Alpaca, ShareGPT, and OpenAI JSONL formats for fine-tuning Llama 3, Mistral, Qwen, and GPT-4o-mini
 - **Zero-Dependency CLI & Local HTTP Microservice** — Instantly run a production-ready, CORS-enabled REST API and CLI commands with zero external packages for n8n, Make.com, webhooks, and local containers
 - **AI Agent & LLM Middleware** — Pre-packaged grounding engine & dialect-mirroring system prompt generator for AI Agents (GPT-4o, Claude, Gemini, Llama) to deliver ultra-realistic human responses to Algerian customers without hallucination
 
@@ -525,6 +528,32 @@ const res = extractEntities('اتصل بي على 0661234567');
 // }
 ```
 
+### `detectCulturalReferences(text)` — Proverbs, Memes, Landmarks, Gastronomy & Slang
+
+Zero-dependency cultural and linguistic knowledge extraction. Detects classic proverbs, viral memes, historical landmarks/markets, traditional gastronomy dishes, and street/commercial slang expressions.
+
+**Python:**
+```python
+from darja_nlp import detect_cultural_references
+
+res = detect_cultural_references("طاح الحك وصاب غطاه ابعثلي رشتة عاصمية لباب الواد")
+# res.has_cultural_reference -> True
+# res.proverbs[0].canonical_name -> "طاح الحك وصاب غطاه"
+# res.landmarks[0].canonical_name -> "ساحة الشهداء وباب الواد"
+# res.gastronomy[0].canonical_name -> "الرشتة العاصمية"
+# res.cultural_summary -> "أمثال شعبية: 'طاح الحك وصاب غطاه' | معالم وأسواق: 'ساحة الشهداء وباب الواد' | مأكولات جزائرية: 'الرشتة العاصمية'"
+```
+
+**TypeScript:**
+```typescript
+import { detectCulturalReferences } from '@dz-open-suite/darja-nlp-kit';
+
+const res = detectCulturalReferences('تيكي تاكا يا خويا الكولي وصلني وسلعتكم كابا أصلية');
+// res.hasCulturalReference -> true
+// res.memesAndTrends[0].canonicalName -> 'تيكي تاكا'
+// res.slangExpressions[0].canonicalName -> 'سلعة كابا'
+```
+
 ## Zero-Dependency CLI
 
 `darja-nlp-kit` comes with an instant command-line tool requiring zero extra dependencies:
@@ -578,6 +607,19 @@ Ready-to-use blueprints for Algerian developers and automation engineers:
 | `examples/fastapi_ecommerce_service.py` | FastAPI microservice template |
 | `examples/express_ecommerce_service.ts` | Express.js microservice template |
 
+## Algerian LLM Fine-Tuning Datasets (`data/fine_tuning`)
+
+To train and fine-tune open-source models (Llama 3, Mistral, Qwen, Gemma) and OpenAI models on Algerian Darja, `darja-nlp-kit` generates 222+ curated instruction and multi-turn dialogue pairs:
+
+- `data/fine_tuning/alpaca_darja.json` — Stanford Alpaca instruction format (`instruction`, `input`, `output`)
+- `data/fine_tuning/sharegpt_darja.json` — ShareGPT multi-turn conversation format (compatible with Axolotl, LLaMA-Factory, Unsloth)
+- `data/fine_tuning/openai_finetune_darja.jsonl` — OpenAI Chat Completions fine-tuning format (JSON Lines with `system`, `user`, `assistant`)
+
+To re-export the latest dataset at any time:
+```bash
+python scripts/export_datasets.py
+```
+
 ## Running Tests
 
 ### Python
@@ -589,7 +631,8 @@ python -m pytest tests/ -v
 ### TypeScript
 ```bash
 cd packages/js
-npx tsx --test tests/index.test.ts
+npm run build
+npm test
 ```
 
 ## Project Structure
@@ -600,22 +643,33 @@ darja-nlp-kit/
 │   └── workflows/
 │       ├── ci.yml             # GitHub Actions CI workflow
 │       └── publish.yml        # Release publishing to npm & PyPI
-├── data/                      # Shared linguistic datasets
-│   ├── stopwords.json
-│   ├── lexicon.json
-│   └── arabizi_rules.json
+├── data/                      # Shared linguistic & cultural datasets
+│   ├── stopwords.json         # 592 categorized Darja stopwords
+│   ├── lexicon.json           # 412 sentiment words + negators + intensifiers
+│   ├── arabizi_rules.json     # 133 overrides + 243 French loanwords whitelist
+│   ├── wilayas.json           # All 69 Algerian Wilayas (Law 26-06) + Communes
+│   ├── dialects.json          # Regional dialect vocabulary (WEST, EAST, CENTER, SOUTH)
+│   ├── dialogues.json         # 150 realistic customer-merchant few-shot dialogues
+│   ├── culture.json           # 72 proverbs, viral memes, landmarks, and traditional dishes
+│   ├── slang.json             # 33 street, youth, and e-commerce verification expressions
+│   └── fine_tuning/           # Alpaca, ShareGPT, OpenAI JSONL datasets
+├── docs/                      # Standalone GitHub Pages interactive web playground
 ├── packages/
-│   ├── js/                    # TypeScript/JavaScript package
+│   ├── js/                    # TypeScript/JavaScript package (@dz-open-suite/darja-nlp-kit)
 │   │   ├── src/
 │   │   ├── tests/
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   └── python/                # Python package
+│   │   └── package.json
+│   └── python/                # Python package (darja-nlp-kit)
 │       ├── darja_nlp/
 │       ├── tests/
 │       └── pyproject.toml
 ├── scripts/
-│   └── sync_data.py           # Data sync utility
+│   ├── build_culture_dataset.py
+│   ├── build_slang_dataset.py
+│   ├── build_dialect_dataset.py
+│   ├── build_playground.py
+│   ├── export_datasets.py
+│   └── sync_data.py           # Sync data across Python & JS packages
 └── README.md
 ```
 

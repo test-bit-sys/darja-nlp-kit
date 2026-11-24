@@ -16,6 +16,7 @@ from .entities import extract_entities, get_wilaya_by_code
 from .dialect import detect_dialect
 from .intent import identify_intent, IntentType
 from .escalation import detect_escalation
+from .cultural import detect_cultural_references
 
 _DATA_DIR = Path(__file__).parent / 'data'
 _dialogues_cache: Optional[List[Dict[str, Any]]] = None
@@ -124,6 +125,7 @@ def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> D
     dialect = detect_dialect(raw_message)
     sentiment = analyze_sentiment(raw_message)
     entities = extract_entities(raw_message)
+    cultural = detect_cultural_references(raw_message)
 
     # Tone recommendation based on escalation & sentiment
     if escalation.needs_escalation:
@@ -203,6 +205,19 @@ def build_agent_context(message: str, store_name: str = "Bazar El Djazair") -> D
             intent=intent.intent,
             limit=2
         ),
+        "cultural": {
+            "has_cultural_reference": cultural.has_cultural_reference,
+            "summary": cultural.cultural_summary,
+            "matches": [
+                {
+                    "matched_text": m.matched_text,
+                    "category": m.category,
+                    "canonical_name": m.canonical_name,
+                    "meaning": m.meaning,
+                }
+                for m in cultural.all_matches
+            ],
+        },
     }
 
 
@@ -239,6 +254,12 @@ def format_agent_system_prompt(context: Dict[str, Any]) -> str:
         for i, ex in enumerate(few_shots, 1):
             few_shots_section += f"{i}. رسالة الزبون: \"{ex['customer_message']}\"\n   رد التاجر الطبيعي: \"{ex['merchant_response']}\"\n"
 
+    cult_data = context.get("cultural") or {}
+    cultural_section = ""
+    if cult_data.get("has_cultural_reference") or cult_data.get("hasCulturalReference"):
+        cult_summary = cult_data.get("summary") or cult_data.get("culturalSummary") or ""
+        cultural_section = f"\n[إشارات ثقافية وشعبية مرصودة في رسالة الزبون]:\n- الدلالات الشعبية: {cult_summary}\n👉 إرشاد الرد: أظهر فهماً ذكياً وتفاعلاً طيباً مع المثل الشعبي أو الأكلة أو المعلم المذكور بروح جزائرية أصيلة.\n"
+
     prompt = f"""أنت مساعد خدمة عملاء ذكي وبشري جداً لمتجر إلكتروني جزائري '{store}'.
 مهمتك الرد على الزبون الجزائري بدارجة واقعية ومتقنة 100%، كأنك تاجر جزائري محترف ولطيف.{escalation_notice}
 [السياق المستخرج من رسالة الزبون]:
@@ -256,6 +277,7 @@ def format_agent_system_prompt(context: Dict[str, Any]) -> str:
 - شركات التوصيل: {', '.join(facts['delivery_companies']) if facts['delivery_companies'] else 'غير محددة'}
 - نمط التوصيل: {facts['delivery_mode'] if facts['delivery_mode'] else 'غير محدد'}
 - أرقام الهاتف: {', '.join(facts['phones']) if facts['phones'] else 'غير متوفرة'}
+{cultural_section}
 {few_shots_section}
 [قواعد صارمة للرد]:
 1. تحدث بدارجة جزائرية عفوية ومحترمة (لا تستخدم فصحى معربة أو لهجات مشرقية إطلاقاً).

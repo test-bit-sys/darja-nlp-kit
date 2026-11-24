@@ -162,3 +162,24 @@ export interface EscalationResult {
   matchedTriggers: string[];
   guideline: string;
 }
+
+export type CulturalCategory = 'proverb' | 'meme_trend' | 'landmark' | 'gastronomy' | 'slang';
+
+export interface CulturalMatch {
+  matchedText: string;
+  category: CulturalCategory;
+  canonicalName: string;
+  meaning: string;
+  metadata?: Record<string, any>;
+}
+
+export interface CulturalAnalysisResult {
+  hasCulturalReference: boolean;
+  proverbs: CulturalMatch[];
+  memesAndTrends: CulturalMatch[];
+  landmarks: CulturalMatch[];
+  gastronomy: CulturalMatch[];
+  slangExpressions: CulturalMatch[];
+  allMatches: CulturalMatch[];
+  culturalSummary: string;
+}

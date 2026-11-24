@@ -14,6 +14,7 @@ from darja_nlp.intent import identify_intent
 from darja_nlp.quantities import extract_quantities, extract_product_attributes
 from darja_nlp.escalation import detect_escalation
 from darja_nlp.agent import build_agent_context, format_agent_system_prompt, get_few_shot_dialogues
+from darja_nlp.cultural import detect_cultural_references, get_cultural_data, get_slang_data
 
 
 class TestNormalize:
@@ -588,4 +589,49 @@ class TestDialectDataAndFewShot:
         assert len(ctx['few_shot_examples']) > 0
         prompt = format_agent_system_prompt(ctx)
         assert 'أمثلة واقعية لنبرة الرد' in prompt
+
+
+class TestCulturalKnowledge:
+
+    def test_cultural_data_loaded(self) -> None:
+        cdata = get_cultural_data()
+        assert len(cdata['proverbs']) >= 20
+        assert len(cdata['memes_and_trends']) >= 10
+        assert len(cdata['landmarks']) >= 10
+        assert len(cdata['gastronomy']) >= 10
+
+    def test_slang_data_loaded(self) -> None:
+        sdata = get_slang_data()
+        assert len(sdata['expressions']) >= 20
+
+    def test_detect_proverbs_and_memes(self) -> None:
+        text = 'الحجرة في بلاصتها ثقيلة وراك فاهم يا خويا'
+        res = detect_cultural_references(text)
+        assert res.has_cultural_reference is True
+        assert any(p.canonical_name == 'الحجرة في بلاصتها ثقيلة' for p in res.proverbs)
+        assert any(m.canonical_name == 'راك فاهم' for m in res.memes_and_trends)
+
+    def test_detect_landmarks_and_gastronomy(self) -> None:
+        text = 'حاب ناكل رشتة عاصمية وكرانتيكا حامية في باب الواد'
+        res = detect_cultural_references(text)
+        assert res.has_cultural_reference is True
+        assert any('رشتة' in f.canonical_name for f in res.gastronomy)
+        assert any('كرانتيكا' in f.canonical_name for f in res.gastronomy)
+        assert any('باب الواد' in l.canonical_name for l in res.landmarks)
+
+    def test_detect_slang(self) -> None:
+        text = 'سلعتكم كابا أصلية وسلعة لوز ماشي خردة'
+        res = detect_cultural_references(text)
+        assert res.has_cultural_reference is True
+        assert any('سلعة كابا' in s.canonical_name for s in res.slang_expressions)
+        assert any('خردة' in s.canonical_name for s in res.slang_expressions)
+
+    def test_agent_context_includes_cultural_section(self) -> None:
+        text = 'طاح الحك وصاب غطاه، ابعثلي رشتة عاصمية لباب الواد'
+        ctx = build_agent_context(text)
+        assert 'cultural' in ctx
+        assert ctx['cultural']['has_cultural_reference'] is True
+        prompt = format_agent_system_prompt(ctx)
+        assert 'إشارات ثقافية وشعبية' in prompt
+
 

@@ -1430,5 +1430,691 @@
       "commune": "بئر العاتر"
     },
     "notes": "Additional GENERAL_DARJA dialogue covering logistics domain."
+  },
+  {
+    "id": "cult_001",
+    "region": "CENTER",
+    "domain": "culture_food",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "واش خويا لعزيز ابعثلي 3 بلاطوات رشتة عاصمية بالدجاج ولفت للقبة 0661224466",
+    "merchant_response": "مريڤل خويا وليد القبة! الرشتة حرة سخونة واللفت والدجاج متبل بالقرفة كما يحب الخاطر، توصلك قبل الظهر صحيت.",
+    "entities": {
+      "wilaya": "الجزائر (16)",
+      "commune": "القبة",
+      "dish": "رشتة عاصمية",
+      "phone": "0661224466"
+    },
+    "notes": "Additional CENTER dialogue covering culture_food domain."
+  },
+  {
+    "id": "cult_002",
+    "region": "WEST",
+    "domain": "culture_food",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "سيدي خويا باغي 4 كاسكروطات كاران حامي مع الهريسة والكمون وبارد لوهران بلا مزية",
+    "merchant_response": "على الراس خويا! كاران حامي يغلي من الكوشة مع رشة كمون وكازوز حمود بوعلام، وهران الباهية في الخدمة درك وبلا مزية.",
+    "entities": {
+      "wilaya": "وهران (31)",
+      "dish": "كرانتيكا / كاران"
+    },
+    "notes": "Additional WEST dialogue covering culture_food domain."
+  },
+  {
+    "id": "cult_003",
+    "region": "SOUTH",
+    "domain": "culture_food",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "مرحب بيك خويا، كاش 2 قصاع شخشوخة بسكرية حارة باللحم لبسكرة هاهو 0670119988",
+    "merchant_response": "على الراس والعين يا أهل الجود! شخشوخة بسكرية حرة بالراس والفلفل الحار توصلك دافية تفتح النفس وربي يباركلك.",
+    "entities": {
+      "wilaya": "بسكرة (7)",
+      "dish": "شخشوخة بسكرية",
+      "phone": "0670119988"
+    },
+    "notes": "Additional SOUTH dialogue covering culture_food domain."
+  },
+  {
+    "id": "cult_004",
+    "region": "EAST",
+    "domain": "culture_food",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "عيشك خويا كاين دوبارة بسكرية حارة مخلطة فول وحمص بسيرتا قسنطينة؟",
+    "merchant_response": "يعيشك خويا العزيز! كاين دوبارة حارة تفور بزيت الزيتون والحرور ورأس الحانوت القسنطيني على عيني وراسي.",
+    "entities": {
+      "wilaya": "قسنطينة (25)",
+      "dish": "دوبارة"
+    },
+    "notes": "Additional EAST dialogue covering culture_food domain."
+  },
+  {
+    "id": "cult_005",
+    "region": "CENTER",
+    "domain": "culture_sweets",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "واش خويا كاش سنيوة قلب اللوز شامية معسلة باللوز لرمضان للبليدة؟",
+    "merchant_response": "مريڤل يا الغالي! سنيوة قلب اللوز عاصمي حقيقي محشي باللوز ومشرب بالشاربات وماء الزهر المقطر واجدة للبليدة.",
+    "entities": {
+      "wilaya": "البليدة (9)",
+      "sweet": "قلب اللوز"
+    },
+    "notes": "Additional CENTER dialogue covering culture_sweets domain."
+  },
+  {
+    "id": "cult_006",
+    "region": "EAST",
+    "domain": "culture_sweets",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "قداش السومة تاع كيلو مقروط العسل بالغرس واصل لسطيف العالي؟",
+    "merchant_response": "السومة 1,800 دج للكيلو، مقروط مرمل حر يذوب في الفم معسل بالعسل الصافي وتوصيل سطيف في 24 ساعة على عيني.",
+    "entities": {
+      "wilaya": "سطيف (19)",
+      "sweet": "مقروط العسل",
+      "price_dzd": 1800
+    },
+    "notes": "Additional EAST dialogue covering culture_sweets domain."
+  },
+  {
+    "id": "cult_007",
+    "region": "WEST",
+    "domain": "proverb_wisdom",
+    "intent": "GREETING",
+    "sentiment": "POSITIVE",
+    "customer_message": "كيراك خويا غايا، الحجرة في بلاصتها ثقيلة وسلعتكم ديما في بلاصتها ربي يحفظكم",
+    "merchant_response": "الله يسلمك ويحفظك خويا العزيز، كلام من ذهب وربي يثقل ميزان حسناتك! رانا ديما هنا لخدمتكم وبلا مزية.",
+    "entities": {},
+    "notes": "Additional WEST dialogue covering proverb_wisdom domain."
+  },
+  {
+    "id": "cult_008",
+    "region": "CENTER",
+    "domain": "proverb_dispute",
+    "intent": "COMPLAINT",
+    "sentiment": "NEGATIVE",
+    "customer_message": "يا خويا جاء يكحلها عماها ليفرور تاعكم حط الكولي عند الجيران بلا ما يعيطلي!",
+    "merchant_response": "حقك علينا خويا العزيز ونعتذروا أشد الاعتذار! هاد الخطأ غير مقبول تماماً، درك نتاصلوا بالسائق ونرجعولك الكولي ليدك مع تعويض يرضيك.",
+    "entities": {
+      "urgency": "HIGH"
+    },
+    "notes": "Additional CENTER dialogue covering proverb_dispute domain."
+  },
+  {
+    "id": "cult_009",
+    "region": "EAST",
+    "domain": "proverb_complaint",
+    "intent": "COMPLAINT",
+    "sentiment": "NEGATIVE",
+    "customer_message": "ما يحس بالجمرة غير لي كواتو، راني نستنى فلكولي في عنابة أسبوع وسلعتي فاسدة!",
+    "merchant_response": "يعيشك خويا وحاسين بيك وبحرقة حقك! السلعة نرجعوها ضروك على حسابنا ودراهمك يرجعولك كاملين أو بديل مجاني فورا.",
+    "entities": {
+      "wilaya": "عنابة (23)",
+      "urgency": "CRITICAL"
+    },
+    "notes": "Additional EAST dialogue covering proverb_complaint domain."
+  },
+  {
+    "id": "cult_010",
+    "region": "WEST",
+    "domain": "meme_slang",
+    "intent": "BARGAINING",
+    "sentiment": "NEUTRAL",
+    "customer_message": "راك فاهم خويا، ديرلي سومة حنينة راني باغي ندي 3 حبات لمستغانم",
+    "merchant_response": "على الراس وبلا مزية خويا العزيز! راك فاهم وحنا نفهموك، السومة نديروهالك لوز 6,500 دج في بلاصة 8,000 دج وتوصيل مستغانم باطل.",
+    "entities": {
+      "wilaya": "مستغانم (27)",
+      "quantity": 3,
+      "price_dzd": 6500
+    },
+    "notes": "Additional WEST dialogue covering meme_slang domain."
+  },
+  {
+    "id": "cult_011",
+    "region": "CENTER",
+    "domain": "meme_slang",
+    "intent": "BARGAINING",
+    "sentiment": "NEUTRAL",
+    "customer_message": "نلعبوا ولا نحرموا خويا لعزيز! نحيلي 500 دج تاع التوصيل ولا نأنيلي لكوموند دروك",
+    "merchant_response": "هههه على الراس خويا وما تحرم والو! ما يكون غير خاطرك طيب، التوصيل باطل من عندنا وربي يدوم المحبة والسلعة توصلك مريڤلة.",
+    "entities": {
+      "discount": true
+    },
+    "notes": "Additional CENTER dialogue covering meme_slang domain."
+  },
+  {
+    "id": "cult_012",
+    "region": "EAST",
+    "domain": "meme_slang",
+    "intent": "COMPLAINT",
+    "sentiment": "NEGATIVE",
+    "customer_message": "واشنهي هادي قاع مكانش منها! كيفاش نحسبولي 800 دج لافريزون لقالمة؟",
+    "merchant_response": "حقك خويا العزيز ويعيشك، صرا خطأ في السيستام برك! التوصيل لقالمة 350 دج للمكتب وما نزيدو عليك حتى دورو زايد على عيني.",
+    "entities": {
+      "wilaya": "قالمة (24)"
+    },
+    "notes": "Additional EAST dialogue covering meme_slang domain."
+  },
+  {
+    "id": "cult_013",
+    "region": "CENTER",
+    "domain": "meme_slang",
+    "intent": "GREETING",
+    "sentiment": "POSITIVE",
+    "customer_message": "تيكي تاكا يا ليكيب! الكولي لحقني لباب الدار في باب الواد في 24 ساعة يعطيكم الصحة",
+    "merchant_response": "الله يسترك خويا العزيز ويحفظك! خدمة سريعة ونقية كيما يحبو ولاد البهجة، بصحتك وتلبسها بالصحة والعافية.",
+    "entities": {
+      "wilaya": "الجزائر (16)",
+      "commune": "باب الواد"
+    },
+    "notes": "Additional CENTER dialogue covering meme_slang domain."
+  },
+  {
+    "id": "cult_014",
+    "region": "SOUTH",
+    "domain": "proverb_faith",
+    "intent": "GREETING",
+    "sentiment": "POSITIVE",
+    "customer_message": "السلام عليكم، مول النية يربح ونيتكم باينة صافية في هاد المتجر ربي يبارك في تجارتكم",
+    "merchant_response": "وعليكم السلام ورحمة الله وبركاته خويا الغالي! وفيك يبارك الله يا أهل الصدق والأصالة، شهادة نعتزو بيها فوق راسنا.",
+    "entities": {},
+    "notes": "Additional SOUTH dialogue covering proverb_faith domain."
+  },
+  {
+    "id": "cult_015",
+    "region": "WEST",
+    "domain": "market_places",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "salam khoya baghi nji nchri 3andkom f souk castor wla 3andkom livraison l santa cruz f oran?",
+    "merchant_response": "مرحبا بيك في وهران الباهية! المحل تاعنا قريب من كاستور وعندنا توصيل حتى لسانتا كروز والمرجاجو درك وبلا مزية.",
+    "entities": {
+      "wilaya": "وهران (31)",
+      "landmark": "كاستور / سانتا كروز"
+    },
+    "notes": "Additional WEST dialogue covering market_places domain."
+  },
+  {
+    "id": "cult_016",
+    "region": "EAST",
+    "domain": "market_places",
+    "intent": "PRICE_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "قداش السومة بالجملة كيما سوق دبي بالعلمة ادا ديت كرطونة كيت بلوتوث؟",
+    "merchant_response": "أهلا خويا! نحسبولك بسعر الجملة تماماً كيما سوق دبي بالعلمة 950 دج للحبة مع فاتورة وضمان وتوصيل للشرق كامل.",
+    "entities": {
+      "wilaya": "سطيف (19)",
+      "market": "سوق دبي بالعلمة",
+      "price_dzd": 950
+    },
+    "notes": "Additional EAST dialogue covering market_places domain."
+  },
+  {
+    "id": "cult_017",
+    "region": "CENTER",
+    "domain": "market_places",
+    "intent": "AVAILABILITY_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "واش خويا كاين هاد البياس تاشي تاع ايفون كيما يبيعوها في سوق بلفور بالحراش؟",
+    "merchant_response": "أكيد خويا العزيز! السلعة دوريجين برومي شوا كيما بلفور الحراش مع ضمان التجربة والاستبدال كولشي مريڤل.",
+    "entities": {
+      "wilaya": "الجزائر (16)",
+      "market": "سوق بلفور الحراش"
+    },
+    "notes": "Additional CENTER dialogue covering market_places domain."
+  },
+  {
+    "id": "cult_018",
+    "region": "SOUTH",
+    "domain": "market_places",
+    "intent": "DELIVERY_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "مرحب بيك خويا، كاين شحن لقصر تاغيت ببني عباس؟ وبشحال السومة؟",
+    "merchant_response": "على الراس والعين خويا العزيز! كاين توصيل لتاغيت وبني عباس مع كوليتريكس وتوصل في 3 أيام سالمة غانمة بإذن الله.",
+    "entities": {
+      "wilaya": "بني عباس (52)",
+      "landmark": "قصر تاغيت"
+    },
+    "notes": "Additional SOUTH dialogue covering market_places domain."
+  },
+  {
+    "id": "cult_019",
+    "region": "EAST",
+    "domain": "market_places",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "عيشك خويا ابعثلي رأس الحانوت حقيقي كيما سوق الرحبة بقسنطينة رقمي 0550443322",
+    "merchant_response": "يعيشك خويا ومرحبا بناس سيرتا! رأس حانوت قسنطيني أصلي مخلط على أصوله يوصلك في أبهى تغليف على عيني وراسي.",
+    "entities": {
+      "wilaya": "قسنطينة (25)",
+      "market": "سوق الرحبة",
+      "phone": "0550443322"
+    },
+    "notes": "Additional EAST dialogue covering market_places domain."
+  },
+  {
+    "id": "cult_020",
+    "region": "CENTER",
+    "domain": "market_places",
+    "intent": "PRICE_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "واش خويا شحال تحسبلي كيلو سردين نقي توصيل من سوق عين البنيان لبوزريعة؟",
+    "merchant_response": "مرحبا خويا! السردين طازج وصيد اليوم يدير 800 دج للكيلو وتوصيل لبوزريعة واجد دروك مع ليفرور مريڤل.",
+    "entities": {
+      "wilaya": "الجزائر (16)",
+      "market": "سوق عين البنيان",
+      "price_dzd": 800
+    },
+    "notes": "Additional CENTER dialogue covering market_places domain."
+  },
+  {
+    "id": "cult_021",
+    "region": "WEST",
+    "domain": "slang_reaction",
+    "intent": "AVAILABILITY_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "خويا سلعتكم كابا أصلية ولا شناوة ومفرعسة؟ راني باغي نشري لسيدي بلعباس درك",
+    "merchant_response": "حرز تقلق روحك خويا العزيز! سلعتنا كابا أصلية 100% دوريجين، وادا لقيت فيها أدنى خربوشة نرجعولك دراهمك وبلا مزية.",
+    "entities": {
+      "wilaya": "سيدي بلعباس (22)"
+    },
+    "notes": "Additional WEST dialogue covering slang_reaction domain."
+  },
+  {
+    "id": "cult_022",
+    "region": "EAST",
+    "domain": "slang_reaction",
+    "intent": "BARGAINING",
+    "sentiment": "NEUTRAL",
+    "customer_message": "عيشك خويا ديرلي لافان في هاد الزوج صبابط راني نشري عليك ديما بلا تمسخير",
+    "merchant_response": "على عيني وراسي خويا الغالي وربي يبعد التمسخير! السومة نقصوهالك للخر ونديرولك 7,200 دج في بلاصة 8,500 دج وتوصيل باتنة باطل.",
+    "entities": {
+      "wilaya": "باتنة (5)",
+      "discount": true
+    },
+    "notes": "Additional EAST dialogue covering slang_reaction domain."
+  },
+  {
+    "id": "cult_023",
+    "region": "CENTER",
+    "domain": "slang_reaction",
+    "intent": "GREETING",
+    "sentiment": "POSITIVE",
+    "customer_message": "واش خويا لعزيز قوسطو راه هايل والسلعة وصلتني حطة وهبال يعطيكم الصحة",
+    "merchant_response": "الله يسترك خويا العزيز ويدوم القوسطو العالي والضحكة! شهادتك هبال ونفرحو كي تعجبك السلعة، رانا هنا ديما.",
+    "entities": {},
+    "notes": "Additional CENTER dialogue covering slang_reaction domain."
+  },
+  {
+    "id": "cult_024",
+    "region": "SOUTH",
+    "domain": "slang_reaction",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "واه خويا السلعة زينة والتاجر سيريو، اديني حبتين لغرداية وهاهو نومرو 0670332211",
+    "merchant_response": "على الراس والعين يا أهل ميزاب الكرام! طلبيتك مسجلة وحبتين في طريقهم لغرداية وربي يباركلك في رزقك.",
+    "entities": {
+      "wilaya": "غرداية (47)",
+      "phone": "0670332211"
+    },
+    "notes": "Additional SOUTH dialogue covering slang_reaction domain."
+  },
+  {
+    "id": "cult_025",
+    "region": "GENERAL_DARJA",
+    "domain": "proverb_wisdom",
+    "intent": "GREETING",
+    "sentiment": "POSITIVE",
+    "customer_message": "الصنعة في اليد أمان من الفقر وسلعتكم متقونة ما شاء الله تبارك الرحمن",
+    "merchant_response": "بارك الله فيك وجازاك الله كل خير خويا الغالي! إتقان العمل عبادة وشرف لينا رضاك وثقتك الدائمة.",
+    "entities": {},
+    "notes": "Additional GENERAL_DARJA dialogue covering proverb_wisdom domain."
+  },
+  {
+    "id": "cult_026",
+    "region": "EAST",
+    "domain": "landmarks",
+    "intent": "DELIVERY_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "خويا كاين توصيل لقصر أحمد باي بقسنطينة سطوب ديسك؟",
+    "merchant_response": "أكيد خويا العزيز، مكتب ياليدين في وسط سيرتا قريب جداً من قصر أحمد باي والتوصيل يدير 300 دج على عيني.",
+    "entities": {
+      "wilaya": "قسنطينة (25)",
+      "landmark": "قصر أحمد باي"
+    },
+    "notes": "Additional EAST dialogue covering landmarks domain."
+  },
+  {
+    "id": "cult_027",
+    "region": "CENTER",
+    "domain": "food_delivery",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "واش خويا كاش شخشوخة ظفر بسكرية سخونة واصلة للعاصمة باب الواد 0661887766؟",
+    "merchant_response": "مريڤل خويا الغالي! الشخشوخة تخرجلك سخونة تفور بالحمص ولحم الخروف وتوصلك لباب الواد قبل الغداء صحيت.",
+    "entities": {
+      "wilaya": "الجزائر (16)",
+      "commune": "باب الواد",
+      "phone": "0661887766"
+    },
+    "notes": "Additional CENTER dialogue covering food_delivery domain."
+  },
+  {
+    "id": "cult_028",
+    "region": "WEST",
+    "domain": "complaint_slang",
+    "intent": "COMPLAINT",
+    "sentiment": "NEGATIVE",
+    "customer_message": "سلعتكم خردة ومفرعسة، وين راهي لاغارونتي لي زوختو بيها في الفيسبوك؟",
+    "merchant_response": "حقك علينا خويا وحرز تتقلق! حنا ما نزخوش وكلامنا كلمة وحدة، السلعة نبدلوهالك بوحدة جديدة دوريجين درك وبلا مزية.",
+    "entities": {
+      "urgency": "HIGH"
+    },
+    "notes": "Additional WEST dialogue covering complaint_slang domain."
+  },
+  {
+    "id": "cult_029",
+    "region": "EAST",
+    "domain": "complaint_driver",
+    "intent": "COMPLAINT",
+    "sentiment": "NEGATIVE",
+    "customer_message": "خويا راني مزعفان بزاف من ليفرور تاعكم في عنابة، عيطلي في وقت الماتش وما حبش يستنى 5 دقائق!",
+    "merchant_response": "متأسفين ياسر خويا العزيز ونعتذروا منك على تصرف السائق! درك نكلمو رئيس مركز عنابة ونوصلوهالك للدار باطل على عيني.",
+    "entities": {
+      "wilaya": "عنابة (23)",
+      "urgency": "HIGH"
+    },
+    "notes": "Additional EAST dialogue covering complaint_driver domain."
+  },
+  {
+    "id": "cult_030",
+    "region": "WEST",
+    "domain": "street_food",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "كيراك خويا غايا، باغي كاسكروط كاران حامي مع بارد تشينة لوهران درك",
+    "merchant_response": "الله يسلمك خويا! كاران وهراني حر مع الكمون والهريسة وكازوز بارد راه واجد ومرحب بيك وبلا مزية.",
+    "entities": {
+      "wilaya": "وهران (31)"
+    },
+    "notes": "Additional WEST dialogue covering street_food domain."
+  },
+  {
+    "id": "cult_031",
+    "region": "EAST",
+    "domain": "shopping",
+    "intent": "PRICE_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "قداش السومة تاع هاد لفيستا الكحلة لسوق الرحبة بسيرتا؟",
+    "merchant_response": "السومة تدير 5,400 دج والسلعة باهية خلاص كابا تركية، ونوصلوهالك لسوق الرحبة في قسنطينة على عيني.",
+    "entities": {
+      "wilaya": "قسنطينة (25)",
+      "price_dzd": 5400
+    },
+    "notes": "Additional EAST dialogue covering shopping domain."
+  },
+  {
+    "id": "cult_032",
+    "region": "SOUTH",
+    "domain": "dates_tradition",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "مرحب بيك خويا، كاين تمور دقلة نور حرة من بسكرة لبشار؟ ورقمي 0670445566",
+    "merchant_response": "على الراس والعين يا أهل بشار الكرام! دقلة نور عسل طبيعي من نخيل بسكرة توصلك معبأة بإتقان وربي يباركلك.",
+    "entities": {
+      "wilaya": "بشار (8)",
+      "phone": "0670445566"
+    },
+    "notes": "Additional SOUTH dialogue covering dates_tradition domain."
+  },
+  {
+    "id": "cult_033",
+    "region": "CENTER",
+    "domain": "tech_market",
+    "intent": "AVAILABILITY_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "واش خويا كاش ما تسحق في بلفور الحراش رانا هنا نحوسو على باطري اصلية",
+    "merchant_response": "مرحبا بخويا وليد الحراش! الباطري أصلية 100% مع ضمان 6 أشهر وموجودة كولشي مريڤل كاش ما تسحق.",
+    "entities": {
+      "wilaya": "الجزائر (16)",
+      "commune": "الحراش"
+    },
+    "notes": "Additional CENTER dialogue covering tech_market domain."
+  },
+  {
+    "id": "cult_034",
+    "region": "EAST",
+    "domain": "proverb_commerce",
+    "intent": "BARGAINING",
+    "sentiment": "NEUTRAL",
+    "customer_message": "الجديد حبو والقديم لا تفرط فيه، راني زبون قديم من سطيف وديرلي سومة باهية",
+    "merchant_response": "على عيني وراسي زبوننا الوفي! ما نفرطوش فيك خلاص، نحسبولك الحبة بـ 3,200 دج في بلاصة 3,800 دج وتوصيل سطيف باطل.",
+    "entities": {
+      "wilaya": "سطيف (19)",
+      "discount": true
+    },
+    "notes": "Additional EAST dialogue covering proverb_commerce domain."
+  },
+  {
+    "id": "cult_035",
+    "region": "EAST",
+    "domain": "proverb_ethics",
+    "intent": "COMPLAINT",
+    "sentiment": "NEGATIVE",
+    "customer_message": "اللسان ما فيه عظم بصح ليفرور تاعكم هدر معايا بطريقة عيانة بزاف في باتنة!",
+    "merchant_response": "حقك على راسنا وعينينا خويا ونعتذروا أشد الاعتذار! هاد السلوك لا يمثل متجرنا، وتم تنبيه السائق وتوصيلك القادم مجاني تماماً.",
+    "entities": {
+      "wilaya": "باتنة (5)",
+      "urgency": "HIGH"
+    },
+    "notes": "Additional EAST dialogue covering proverb_ethics domain."
+  },
+  {
+    "id": "cult_036",
+    "region": "WEST",
+    "domain": "proverb_satisfaction",
+    "intent": "GREETING",
+    "sentiment": "POSITIVE",
+    "customer_message": "طاح الحك وصاب غطاه، هاد السبردينة لي كنت نحوس عليها في تلمسان سنين يعطيكم الصحة",
+    "merchant_response": "الله يحفظك ويسلمك خويا العزيز! بصحتك وراحتك وتلبسها بالصحة والهنا وبلا مزية، نتشرفو بخدمة ناس تلمسان ديما.",
+    "entities": {
+      "wilaya": "تلمسان (13)"
+    },
+    "notes": "Additional WEST dialogue covering proverb_satisfaction domain."
+  },
+  {
+    "id": "cult_037",
+    "region": "CENTER",
+    "domain": "proverb_deal",
+    "intent": "BARGAINING",
+    "sentiment": "NEUTRAL",
+    "customer_message": "يا شاري دالة ويا بايع دالة، ساعدنا شوية في هاد لفيستا خويا لعزيز ربي يسهلك",
+    "merchant_response": "على الراس خويا! الدنيا بيع وشرا وأهم حاجة رضاكم، نقصولك 600 دج وتوصيل العاصمة باطل كاش ما تسحق.",
+    "entities": {
+      "discount": true
+    },
+    "notes": "Additional CENTER dialogue covering proverb_deal domain."
+  },
+  {
+    "id": "cult_038",
+    "region": "GENERAL_DARJA",
+    "domain": "proverb_kindness",
+    "intent": "GREETING",
+    "sentiment": "POSITIVE",
+    "customer_message": "سعدك يا فاعل الخير، شكرا على الهدية والكابل لي بعثتوهم مع الكوموند ربي يكثر خيركم",
+    "merchant_response": "وفيك يبارك الله خويا العزيز! تستاهل كل خير وهاد الهدية عربون وفاء لثقتكم الغالية في متجرنا.",
+    "entities": {},
+    "notes": "Additional GENERAL_DARJA dialogue covering proverb_kindness domain."
+  },
+  {
+    "id": "cult_039",
+    "region": "WEST",
+    "domain": "proverb_thrift",
+    "intent": "BARGAINING",
+    "sentiment": "NEUTRAL",
+    "customer_message": "خبي قرشك الأبيض ليومك الأسود، راني نقتصد وديرلي ريميز مليحة في زوج حبات لوهران",
+    "merchant_response": "الله يسلمك خويا وحكمة في محلها! نديرلك تخفيض 1,200 دج في الزوج حبات وتوصيل ياليدين وهران باطل وبلا مزية.",
+    "entities": {
+      "wilaya": "وهران (31)",
+      "quantity": 2
+    },
+    "notes": "Additional WEST dialogue covering proverb_thrift domain."
+  },
+  {
+    "id": "cult_040",
+    "region": "CENTER",
+    "domain": "proverb_destiny",
+    "intent": "COMPLAINT",
+    "sentiment": "NEGATIVE",
+    "customer_message": "المكتوب ما منو هروب، تكسرت السلعة في الطريق لتيبازة ونستنى تعويض منكم دروك",
+    "merchant_response": "حقك مضمون 100% خويا وما تقلقش خلاص! نبعثولك وحدة جديدة مغلفة ومحمية غدوا الصباح وتعويض على التأخير صحيت.",
+    "entities": {
+      "wilaya": "تيبازة (42)"
+    },
+    "notes": "Additional CENTER dialogue covering proverb_destiny domain."
+  },
+  {
+    "id": "cult_041",
+    "region": "CENTER",
+    "domain": "slang_praise",
+    "intent": "GREETING",
+    "sentiment": "POSITIVE",
+    "customer_message": "خويا سلعتكم لوز ما شاء الله هبال في تيبازة شنوة، عجبت كامل لافامي",
+    "merchant_response": "الله يسترك خويا العزيز وربي يحفظك ويحفظ لافامي كاملة! شهادتكم فخر لينا وكاش ما تسحقو رانا هنا ديما.",
+    "entities": {
+      "wilaya": "تيبازة (42)",
+      "commune": "شنوة"
+    },
+    "notes": "Additional CENTER dialogue covering slang_praise domain."
+  },
+  {
+    "id": "cult_042",
+    "region": "SOUTH",
+    "domain": "desert_delivery",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "خويا راني شاري كليماتيزور لتاغيت بشار وبشحال الديلي؟ نومرو 0670998811",
+    "merchant_response": "على الراس والعين خوتنا في تاغيت الساحرة! التوصيل مؤمن عبر كوليتريكس ويوصل في 3 أيام سالما غانما بإذن الله.",
+    "entities": {
+      "wilaya": "بني عباس (52)",
+      "landmark": "تاغيت",
+      "phone": "0670998811"
+    },
+    "notes": "Additional SOUTH dialogue covering desert_delivery domain."
+  },
+  {
+    "id": "cult_043",
+    "region": "EAST",
+    "domain": "landmark_inquiry",
+    "intent": "AVAILABILITY_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "عيشك خويا كاش كاسكيطة دوريجين كيما لي يبيعو في عين الفوارة بسطيف؟",
+    "merchant_response": "نعم خويا الغالي، سلعة كابا أصلية 100% ونوعية ممتازة وتوصيل سطيف العالي متوفر غدوا على عيني.",
+    "entities": {
+      "wilaya": "سطيف (19)",
+      "landmark": "عين الفوارة"
+    },
+    "notes": "Additional EAST dialogue covering landmark_inquiry domain."
+  },
+  {
+    "id": "cult_044",
+    "region": "CENTER",
+    "domain": "quick_order",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "واش خويا كولشي مريڤل؟ بعثلي 2 حبات تريكو كحل لأولاد فايت العاصمة 0661334455",
+    "merchant_response": "مريڤل خويا وليد أولاد فايت! زوج تريكوات في النوار مسجلين وغدوا يكونو عندك مع ليفرور صحيت.",
+    "entities": {
+      "wilaya": "الجزائر (16)",
+      "commune": "أولاد فايت",
+      "phone": "0661334455"
+    },
+    "notes": "Additional CENTER dialogue covering quick_order domain."
+  },
+  {
+    "id": "cult_045",
+    "region": "WEST",
+    "domain": "quick_order",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "صايي خويا شريت هاك نميرو 0770554433 واديني حبة لمغنية بتلمسان",
+    "merchant_response": "الله يسلمك خويا ومرحبا بناس مغنية الأحرار! سلعتك مسجلة وتوصلك بعد غدوا ان شاء الله وبلا مزية.",
+    "entities": {
+      "wilaya": "تلمسان (13)",
+      "commune": "مغنية",
+      "phone": "0770554433"
+    },
+    "notes": "Additional WEST dialogue covering quick_order domain."
+  },
+  {
+    "id": "cult_046",
+    "region": "SOUTH",
+    "domain": "desert_feedback",
+    "intent": "GREETING",
+    "sentiment": "POSITIVE",
+    "customer_message": "مرحب بيك خويا، السلعة وصلت لتمنراست تبارك الله وزينة بزاف وربي يرزقكم من وسع",
+    "merchant_response": "وفيك يبارك الله خويا العزيز! فخورين بخدمة أهلنا في أقصى الجنوب وتمنراست الأبية، جازاكم الله خيرا.",
+    "entities": {
+      "wilaya": "تمنراست (11)"
+    },
+    "notes": "Additional SOUTH dialogue covering desert_feedback domain."
+  },
+  {
+    "id": "cult_047",
+    "region": "SOUTH",
+    "domain": "quick_order",
+    "intent": "ORDER",
+    "sentiment": "POSITIVE",
+    "customer_message": "واه خويا السومة باهية وسجللي طلبية للوادي سوف هاهو نميرو 0670889922",
+    "merchant_response": "على الراس والعين يا أهل قمار والوادي الكرام! الطلبية مسجلة وتوصلكم للمكتب في ياليدين وربي يباركلك.",
+    "entities": {
+      "wilaya": "الوادي (39)",
+      "phone": "0670889922"
+    },
+    "notes": "Additional SOUTH dialogue covering quick_order domain."
+  },
+  {
+    "id": "cult_048",
+    "region": "EAST",
+    "domain": "tech_inquiry",
+    "intent": "PRICE_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "عيشك خويا قداش السومة تاع كابل تيب سي أنكر لجيجل الكورنيش؟",
+    "merchant_response": "السومة 1,600 دج أصلي مع ضمان عام كامل وتوصيل جيجل يدير 350 دج برك على عيني وراسي.",
+    "entities": {
+      "wilaya": "جيجل (18)",
+      "price_dzd": 1600
+    },
+    "notes": "Additional EAST dialogue covering tech_inquiry domain."
+  },
+  {
+    "id": "cult_049",
+    "region": "CENTER",
+    "domain": "fast_delivery",
+    "intent": "DELIVERY_INQUIRY",
+    "sentiment": "NEUTRAL",
+    "customer_message": "واش خويا كاين توصيل للدرارية بالجزائر ليوما فالعشية راني مزروب؟",
+    "merchant_response": "أكيد خويا العزيز، التوصيل إكسبريس للدرارية متوفر اليوم قبل 18:00 وكولشي مريڤل كاش ما تسحق.",
+    "entities": {
+      "wilaya": "الجزائر (16)",
+      "commune": "الدرارية"
+    },
+    "notes": "Additional CENTER dialogue covering fast_delivery domain."
+  },
+  {
+    "id": "cult_050",
+    "region": "GENERAL_DARJA",
+    "domain": "bargaining_fair",
+    "intent": "BARGAINING",
+    "sentiment": "NEUTRAL",
+    "customer_message": "خويا هبلتونا بالسومات الزايدة، ديرولنا برومو شابة لولاد لبلاد رانا شاريين",
+    "merchant_response": "على الراس خويا وحقك علينا! دايرين برومو خاصة لولاد بلادنا تخفيض 20% على كامل المنتجات وتوصيل مخفض، مرحبا بيك.",
+    "entities": {
+      "discount": true
+    },
+    "notes": "Additional GENERAL_DARJA dialogue covering bargaining_fair domain."
   }
 ]

@@ -20,7 +20,9 @@ def main() -> None:
         'arabizi_rules.json',
         'wilayas.json',
         'dialects.json',
-        'dialogues.json'
+        'dialogues.json',
+        'culture.json',
+        'slang.json'
     ]
 
     for src_name in data_files:
