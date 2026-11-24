@@ -1,4 +1,4 @@
-"""Builds a standalone, zero-dependency Web Playground for GitHub Pages in docs/index.html."""
+"""Builds a standalone, zero-dependency Web Playground Studio for GitHub Pages in docs/index.html."""
 import json
 from pathlib import Path
 
@@ -11,305 +11,527 @@ def main() -> None:
 
     with open(data_dir / 'stopwords.json', 'r', encoding='utf-8') as f:
         stopwords_data = json.load(f)
-
     with open(data_dir / 'lexicon.json', 'r', encoding='utf-8') as f:
         lexicon_data = json.load(f)
-
     with open(data_dir / 'arabizi_rules.json', 'r', encoding='utf-8') as f:
         arabizi_rules = json.load(f)
-
     with open(data_dir / 'wilayas.json', 'r', encoding='utf-8') as f:
         wilayas_data = json.load(f)
-
     with open(data_dir / 'dialects.json', 'r', encoding='utf-8') as f:
         dialects_data = json.load(f)
-
     with open(data_dir / 'dialogues.json', 'r', encoding='utf-8') as f:
         dialogues_data = json.load(f)
-
     with open(data_dir / 'culture.json', 'r', encoding='utf-8') as f:
         culture_data = json.load(f)
-
     with open(data_dir / 'slang.json', 'r', encoding='utf-8') as f:
         slang_data = json.load(f)
-
     with open(data_dir / 'profanity.json', 'r', encoding='utf-8') as f:
         profanity_data = json.load(f)
-
     with open(data_dir / 'dialogue_rules.json', 'r', encoding='utf-8') as f:
         dialogue_rules_data = json.load(f)
-
     with open(data_dir / 'memes.json', 'r', encoding='utf-8') as f:
         memes_data = json.load(f)
-
     with open(data_dir / 'franco_darja.json', 'r', encoding='utf-8') as f:
         franco_data = json.load(f)
 
     sentiment_model_path = data_dir / 'sentiment_model.json'
-    sentiment_model_data = json.load(open(sentiment_model_path, 'r', encoding='utf-8')) if sentiment_model_path.exists() else {}
+    sentiment_model_data = (
+        json.load(open(sentiment_model_path, 'r', encoding='utf-8'))
+        if sentiment_model_path.exists()
+        else {}
+    )
 
     dialogue_kb_path = data_dir / 'dialogue_kb.json'
-    dialogue_kb_data = json.load(open(dialogue_kb_path, 'r', encoding='utf-8')) if dialogue_kb_path.exists() else {'entries': []}
+    dialogue_kb_data = (
+        json.load(open(dialogue_kb_path, 'r', encoding='utf-8'))
+        if dialogue_kb_path.exists()
+        else {'entries': []}
+    )
 
     template = r"""<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>darja-nlp-kit | Algerian NLP & AI Agent Playground</title>
+  <title>darja-nlp-kit | استوديو المعالجة اللغوية للدارجة الجزائرية</title>
+  <meta name="description" content="Zero-dependency dual-language (Python & TypeScript) NLP toolkit for Algerian Darja: 69 Wilayas, Hybrid 55K ML Sentiment, DarjaPipeline, DarjaClassifier, DarjaChat.">
   <link rel="icon" type="image/jpeg" href="logo.jpg?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0f19;
-      --card-bg: #111827;
-      --card-border: #1f293d;
+      --bg: #060a12;
+      --bg-elevated: #0c1220;
+      --card-bg: #101829;
+      --card-bg-alt: #0d1424;
+      --border: #1e293b;
+      --border-strong: #2b3b55;
       --primary: #10b981;
       --primary-hover: #059669;
+      --primary-soft: rgba(16, 185, 129, 0.14);
       --primary-glow: rgba(16, 185, 129, 0.25);
       --crimson: #ef4444;
+      --crimson-soft: rgba(239, 68, 68, 0.14);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.14);
+      --blue: #3b82f6;
+      --blue-soft: rgba(59, 130, 246, 0.14);
       --cyan: #06b6d4;
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --accent: #3b82f6;
+      --purple: #a855f7;
+      --text: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
       --radius: 16px;
+      --radius-sm: 10px;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Cairo', system-ui, -apple-system, sans-serif;
     }
 
     body {
       background-color: var(--bg);
-      color: var(--text-main);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(16, 185, 129, 0.12), transparent),
+        radial-gradient(ellipse 50% 40% at 90% 10%, rgba(239, 68, 68, 0.05), transparent);
+      color: var(--text);
+      font-family: 'Cairo', system-ui, -apple-system, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
       line-height: 1.6;
+      overflow-x: hidden;
     }
 
-    .container {
-      max-width: 1100px;
+    code, pre, .mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+      direction: ltr;
+      unicode-bidi: isolate;
+    }
+
+    /* Sticky Topbar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(6, 10, 18, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-inner {
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 30px 20px 60px;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      object-fit: cover;
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
+    }
+
+    .brand-title {
+      font-weight: 900;
+      font-size: 0.98rem;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .brand-pill {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-elevated);
+      padding: 4px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .nav-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.18s ease;
+    }
+
+    .nav-tab:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .nav-tab.active {
+      background: var(--primary);
+      color: #03150e;
+      box-shadow: 0 2px 12px var(--primary-glow);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      transition: all 0.18s ease;
+    }
+
+    .icon-link:hover {
+      border-color: var(--primary);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 20px 60px;
       width: 100%;
     }
 
-    /* Header */
-    header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .project-logo {
-      width: 96px;
-      height: 96px;
-      border-radius: 22px;
-      margin-bottom: 16px;
-      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.25), 0 0 10px rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: transform 0.3s ease;
-    }
-
-    .project-logo:hover {
-      transform: scale(1.05);
-    }
-
-    .logo-badge {
-      display: inline-flex;
+    /* Hero */
+    .hero {
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
-      padding: 8px 18px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 16px;
+      text-align: center;
+      padding: 6px 0 18px;
+      margin-bottom: 6px;
     }
 
-    .logo-badge span {
-      background: var(--primary);
-      color: #000;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
+    .hero-logo-wrap {
+      position: relative;
+      margin-bottom: 10px;
     }
 
-    h1 {
-      font-size: 2.8rem;
+    .hero-logo {
+      width: 68px;
+      height: 68px;
+      border-radius: 17px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 10px 26px rgba(16, 185, 129, 0.22);
+    }
+
+    .hero h1 {
+      font-size: clamp(1.75rem, 3.6vw, 2.45rem);
       font-weight: 900;
       letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #fff 40%, var(--primary) 100%);
+      line-height: 1.2;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ffffff 35%, #34d399 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 12px;
     }
 
-    p.subtitle {
+    .hero p {
+      max-width: 740px;
       color: var(--text-muted);
-      font-size: 1.1rem;
-      max-width: 680px;
-      margin: 0 auto 20px;
+      font-size: 14.5px;
+      margin-bottom: 14px;
     }
 
-    .links-bar {
+    .stats-strip {
       display: flex;
-      justify-content: center;
-      gap: 14px;
       flex-wrap: wrap;
-      margin-top: 10px;
+      justify-content: center;
+      gap: 10px;
     }
 
-    .btn-link {
+    .stat-pill {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      background: #1e293b;
-      color: #f1f5f9;
-      text-decoration: none;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      border: 1px solid #334155;
-      transition: all 0.2s ease;
-    }
-
-    .btn-link:hover {
-      background: #334155;
-      border-color: var(--primary);
-      transform: translateY(-2px);
-    }
-
-    /* Card base */
-    .card {
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Textarea */
-    .input-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    label {
-      font-weight: 700;
-      font-size: 15px;
-      color: #e2e8f0;
-    }
-
-    .char-count {
+      border: 1px solid var(--border);
       font-size: 12px;
-      color: var(--text-muted);
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .stat-pill strong {
+      color: #34d399;
       font-family: 'JetBrains Mono', monospace;
     }
 
-    textarea {
+    /* Panels / Views */
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 12px 28px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #34d399;
+      letter-spacing: 0.2px;
+    }
+
+    .section-title svg {
+      flex-shrink: 0;
+    }
+
+    /* Form Controls */
+    textarea, input[type="text"], select {
       width: 100%;
-      height: 120px;
-      background: #090d16;
-      border: 2px solid #1e293b;
+      background: #070b13;
+      border: 1.5px solid var(--border);
       border-radius: 12px;
-      color: #fff;
-      font-size: 16px;
-      padding: 16px;
-      resize: vertical;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 15px;
+      padding: 13px 16px;
       outline: none;
-      transition: border-color 0.2s;
-      line-height: 1.6;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    textarea:focus {
+    textarea:focus, input[type="text"]:focus, select:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 15px var(--primary-glow);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
     }
 
-    /* Samples chips */
+    textarea.main-input {
+      height: 112px;
+      resize: vertical;
+      line-height: 1.65;
+    }
+
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .seg-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #070b13;
+      border: 1px solid var(--border);
+      padding: 3px;
+      border-radius: 10px;
+    }
+
+    .seg-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    .seg-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 11px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .seg-btn:hover {
+      color: var(--text);
+    }
+
+    .seg-btn.active {
+      background: #1e293b;
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
     .samples-bar {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 7px;
       margin-top: 14px;
       align-items: center;
     }
 
-    .samples-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-left: 6px;
-    }
-
     .sample-chip {
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #cbd5e1;
-      padding: 6px 12px;
+      background: #0f172a;
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      padding: 5px 11px;
       border-radius: 8px;
+      font-family: inherit;
       font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.15s ease;
     }
 
     .sample-chip:hover {
-      background: #334155;
+      background: #1e293b;
       color: #fff;
-      border-color: var(--accent);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .sample-chip.highlight-emerald {
+      border-color: rgba(16, 185, 129, 0.5);
+      color: #6ee7b7;
+    }
+
+    .sample-chip.highlight-danger {
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #03150e;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      background: #263449;
     }
 
     /* Results Grid */
     .results-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 18px;
     }
 
-    .section-title {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--primary);
-      font-weight: 800;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .full-span {
+      grid-column: 1 / -1;
     }
 
-    .section-title::before {
-      content: '';
-      display: inline-block;
-      width: 6px;
-      height: 14px;
-      background: var(--primary);
-      border-radius: 2px;
-    }
-
-    /* Intent Badge */
+    /* Badges & Tags */
     .intent-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 16px;
+      padding: 7px 14px;
       border-radius: 10px;
       font-weight: 800;
-      font-size: 1rem;
+      font-size: 14px;
     }
-
     .intent-order { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; }
     .intent-price { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid #3b82f6; }
     .intent-delivery { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid #f59e0b; }
@@ -318,25 +540,24 @@ def main() -> None:
     .intent-greeting { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid #06b6d4; }
     .intent-unknown { background: rgba(100, 116, 139, 0.15); color: #94a3b8; border: 1px solid #64748b; }
 
-    /* Escalation Banner */
     .escalation-alert {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid #ef4444;
-      border-radius: 12px;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.55);
+      border-radius: 14px;
       padding: 14px 18px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 12px;
       color: #fca5a5;
     }
 
     .escalation-healthy {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.28);
       border-radius: 12px;
       padding: 10px 16px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -344,75 +565,120 @@ def main() -> None:
       font-size: 13px;
     }
 
-    /* Sentiment Display */
     .sentiment-banner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 18px;
-      background: #090d16;
-      border: 1px solid #1e293b;
+      padding: 12px 16px;
+      background: #070b13;
+      border: 1px solid var(--border);
       border-radius: 12px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .sentiment-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 14px;
+      padding: 5px 12px;
       border-radius: 8px;
       font-weight: 800;
-      font-size: 14px;
+      font-size: 13px;
+    }
+    .badge-positive { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid #10b981; }
+    .badge-negative { background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid #ef4444; }
+    .badge-neutral { background: rgba(148, 163, 184, 0.16); color: #cbd5e1; border: 1px solid #64748b; }
+    .badge-mixed { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid #f59e0b; }
+
+    .prob-bar-wrap {
+      margin: 10px 0 12px;
     }
 
-    .badge-positive { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
-    .badge-negative { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
-    .badge-neutral { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid #64748b; }
-    .badge-mixed { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+    .prob-bar-track {
+      display: flex;
+      height: 8px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #1e293b;
+      margin-bottom: 6px;
+    }
 
-    .score-display {
+    .prob-seg-pos { background: #10b981; transition: width 0.25s ease; }
+    .prob-seg-neu { background: #64748b; transition: width 0.25s ease; }
+    .prob-seg-neg { background: #ef4444; transition: width 0.25s ease; }
+
+    .prob-legend {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 20px;
-      font-weight: 700;
     }
 
-    /* Entity Tags */
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .token-pill {
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      direction: ltr;
+      unicode-bidi: isolate;
+    }
+    .token-pos { background: rgba(16, 185, 129, 0.14); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .token-neg { background: rgba(239, 68, 68, 0.14); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .token-info { background: #0f172a; color: #7dd3fc; border: 1px solid #0369a1; }
+
     .entity-tag {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 12px;
-      background: #1e293b;
-      border: 1px solid #334155;
+      padding: 7px 11px;
+      background: #0f172a;
+      border: 1px solid var(--border-strong);
       border-radius: 10px;
       font-size: 13px;
-      margin: 4px;
+      margin: 3px;
     }
 
     .entity-code {
       background: var(--primary);
-      color: #000;
+      color: #03150e;
       font-weight: 800;
       font-size: 11px;
       padding: 2px 6px;
-      border-radius: 6px;
+      border-radius: 5px;
       font-family: 'JetBrains Mono', monospace;
     }
 
     .commune-badge {
-      background: rgba(6, 182, 212, 0.2);
+      background: rgba(6, 182, 212, 0.16);
       color: #67e8f9;
       border: 1px solid #0891b2;
       font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 6px;
+      padding: 1px 7px;
+      border-radius: 5px;
+    }
+
+    .era69-badge {
+      background: rgba(245, 158, 11, 0.16);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 5px;
     }
 
     .payment-tag {
-      background: rgba(168, 85, 247, 0.2);
-      border: 1px solid #a855f7;
-      color: #d8b4fe;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      color: #e9d5ff;
       padding: 4px 10px;
       border-radius: 8px;
       font-size: 12px;
@@ -422,10 +688,10 @@ def main() -> None:
     }
 
     .price-tag {
-      background: rgba(16, 185, 129, 0.2);
+      background: rgba(16, 185, 129, 0.16);
       border: 1px solid #10b981;
       color: #6ee7b7;
-      padding: 6px 12px;
+      padding: 5px 11px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 700;
@@ -435,8 +701,8 @@ def main() -> None:
     }
 
     .carrier-tag {
-      background: rgba(245, 158, 11, 0.2);
-      border: 1px solid #f59e0b;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.55);
       color: #fde68a;
       padding: 4px 10px;
       border-radius: 8px;
@@ -446,8 +712,8 @@ def main() -> None:
     }
 
     .mode-tag {
-      background: rgba(59, 130, 246, 0.2);
-      border: 1px solid #3b82f6;
+      background: rgba(59, 130, 246, 0.16);
+      border: 1px solid rgba(59, 130, 246, 0.55);
       color: #93c5fd;
       padding: 4px 10px;
       border-radius: 8px;
@@ -457,15 +723,15 @@ def main() -> None:
     }
 
     .phone-tag {
-      background: #0f172a;
-      border: 1px solid #334155;
+      background: #070b13;
+      border: 1px solid var(--border-strong);
       padding: 6px 10px;
-      border-radius: 8px;
+      border-radius: 9px;
       font-size: 12px;
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      margin: 4px;
+      margin: 3px;
     }
 
     .operator-tag {
@@ -481,11 +747,11 @@ def main() -> None:
 
     .wa-btn {
       background: #25d366;
-      color: #000;
-      font-weight: 700;
+      color: #03150e;
+      font-weight: 800;
       font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 2px 8px;
+      border-radius: 5px;
       text-decoration: none;
     }
 
@@ -502,9 +768,9 @@ def main() -> None:
     }
 
     .attr-tag {
-      background: rgba(236, 72, 153, 0.15);
+      background: rgba(236, 72, 153, 0.14);
       border: 1px solid #db2777;
-      color: #f472b6;
+      color: #f9a8d4;
       padding: 4px 10px;
       border-radius: 8px;
       font-size: 12px;
@@ -512,49 +778,32 @@ def main() -> None:
       margin: 3px;
     }
 
-    /* Token pills */
-    .tokens-pill-box {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .token-pill {
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .token-pos { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .token-neg { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
-
-    /* Text display boxes */
     .code-box {
-      background: #0f172a;
-      border: 1px solid #1e293b;
+      background: #070b13;
+      border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 12px 14px;
+      padding: 11px 14px;
       font-size: 14px;
-      color: #e2e8f0;
+      color: var(--text);
       word-break: break-word;
-      min-height: 48px;
-      margin-bottom: 12px;
+      min-height: 44px;
+      margin-bottom: 10px;
     }
 
-    /* Dialect Meter */
-    .dialect-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 18px;
-      background: #1e293b;
-      border: 1px solid #3b82f6;
-      border-radius: 12px;
-      color: #60a5fa;
-      font-weight: 800;
-      font-size: 1.1rem;
+    .pre-code {
+      background: #070b13;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      color: #cbd5e1;
+      max-height: 290px;
+      overflow: auto;
+      white-space: pre-wrap;
+      direction: ltr;
+      text-align: left;
     }
 
     .empty-state {
@@ -563,219 +812,645 @@ def main() -> None:
       font-style: italic;
     }
 
+    /* Multi-turn Chat Simulator */
+    .chat-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(290px, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 860px) {
+      .chat-layout { grid-template-columns: 1fr; }
+    }
+
+    .chat-messages {
+      background: #070b13;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      height: 390px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .msg-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 82%;
+    }
+
+    .msg-row.user { align-self: flex-start; }
+    .msg-row.assistant { align-self: flex-end; }
+
+    .msg-bubble {
+      padding: 10px 14px;
+      border-radius: 13px;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .msg-row.user .msg-bubble {
+      background: #1e293b;
+      border: 1px solid var(--border-strong);
+      color: #f8fafc;
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg-row.assistant .msg-bubble {
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #ecfdf5;
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .slot-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #070b13;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      font-size: 13px;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .slot-label {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .slot-value {
+      color: var(--text);
+      font-weight: 700;
+      text-align: left;
+    }
+
+    /* Classifier Studio */
+    .clf-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .metric-box {
+      background: #070b13;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .metric-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #34d399;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .metric-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Wilayas Grid */
+    .wilaya-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .wilaya-card {
+      background: #070b13;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      transition: border-color 0.15s ease;
+    }
+
+    .wilaya-card:hover {
+      border-color: var(--primary);
+    }
+
+    /* Footer */
     footer {
       text-align: center;
       margin-top: auto;
-      padding: 30px 20px;
+      padding: 26px 20px;
       color: var(--text-muted);
       font-size: 13px;
-      border-top: 1px solid var(--card-border);
+      border-top: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+
+    footer a {
+      color: #34d399;
+      text-decoration: none;
+    }
+
+    @media (max-width: 640px) {
+      .topbar-inner { justify-content: center; }
+      .results-grid { grid-template-columns: 1fr; }
+      .metric-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <header>
-      <img src="logo.jpg?v=2" alt="darja-nlp-kit logo" class="project-logo">
-      <br>
-      <div class="logo-badge">
-        <span>DZ Open Suite</span>
-        <span>Zero-Dependency</span>
-        <span>69 Wilayas & 1,541 Communes</span>
-        <span>55K-Trained Hybrid ML</span>
+  <!-- Top Navigation -->
+  <nav class="topbar">
+    <div class="topbar-inner">
+      <a href="#top" class="brand" onclick="switchTab('analyzer'); return false;">
+        <img src="logo.jpg?v=2" alt="darja-nlp-kit" class="brand-logo">
+        <div>
+          <div class="brand-title">
+            <span dir="ltr">darja-nlp-kit</span>
+            <span class="brand-pill" dir="ltr">v2.0</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="nav-tabs" role="tablist">
+        <button class="nav-tab active" data-tab="analyzer" onclick="switchTab('analyzer')">المحلل الموحد</button>
+        <button class="nav-tab" data-tab="chat" onclick="switchTab('chat')">المحادثة الذكية</button>
+        <button class="nav-tab" data-tab="classifier" onclick="switchTab('classifier')">استوديو المصنف</button>
+        <button class="nav-tab" data-tab="explorer" onclick="switchTab('explorer')">الولايات والبيانات</button>
       </div>
-      <h1>darja-nlp-kit</h1>
-      <p class="subtitle">حزمة الذكاء الاصطناعي والمعالجة اللغوية للدارجة الجزائرية: تفكيك النوايا، الولايات الـ 69، المشغلين، والتصعيد الذكي</p>
-      <div class="links-bar">
-        <a href="https://github.com/test-bit-sys/darja-nlp-kit" target="_blank" class="btn-link">
-          ⭐ مستودع GitHub
-        </a>
-        <a href="https://pypi.org/project/darja-nlp-kit/" target="_blank" class="btn-link">
-          📦 PyPI Package (Python)
-        </a>
-        <a href="https://www.npmjs.com/package/@dz-open-suite/darja-nlp-kit" target="_blank" class="btn-link">
-          📦 npm Package (Node/TS)
-        </a>
+
+      <div class="nav-links">
+        <a href="https://github.com/test-bit-sys/darja-nlp-kit" target="_blank" rel="noopener" class="icon-link">GitHub</a>
+        <a href="https://pypi.org/project/darja-nlp-kit/" target="_blank" rel="noopener" class="icon-link">PyPI</a>
+        <a href="https://www.npmjs.com/package/@dz-open-suite/darja-nlp-kit" target="_blank" rel="noopener" class="icon-link">npm</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" id="top">
+    <!-- Hero -->
+    <header class="hero">
+      <div class="hero-logo-wrap">
+        <img src="logo.jpg?v=2" alt="darja-nlp-kit official logo" class="hero-logo">
+      </div>
+      <h1>بيئة التجربة التفاعلية للدارجة الجزائرية</h1>
+      <p>
+        تشغيل مباشر في المتصفح بدون خوادم: نفس خوارزميات <span dir="ltr" style="unicode-bidi:isolate;">Python &amp; TypeScript</span> لتحليل المشاعر (55K عينة)، استخراج الولايات الـ 69 والبلديات الـ 1,541، فهم الأسعار بالدارجة، الرد التلقائي، وتدريب المصنفات.
+      </p>
+      <div class="stats-strip">
+        <span class="stat-pill"><strong>69</strong> ولاية و <strong>1,541</strong> بلدية</span>
+        <span class="stat-pill"><strong>55,732</strong> عينة تدريب حقيقية</span>
+        <span class="stat-pill"><strong>8,000</strong> ميزة ML مدمجة</span>
+        <span class="stat-pill"><strong>599</strong> مرجع KB حواري</span>
+        <span class="stat-pill"><strong>0</strong> اعتماديات خارجية</span>
       </div>
     </header>
 
-    <div class="card">
-      <div class="input-header">
-        <label for="textInput">اكتب أو الصق رسالة زبون جزائري (عربي / دارجة / أرابيزي):</label>
-        <span class="char-count" id="charCount">0 حرف</span>
-      </div>
-      <textarea id="textInput" placeholder="اكتب رسالة للتحليل...">salam khoya hab 2 hbat k7la taille L b 2 mlayen w 500 alf l Rouiba fi Alger b yalidine. num ta3i: 0661234567</textarea>
-      
-      <div class="samples-bar">
-        <span class="samples-label">نماذج سريعة للتجربة:</span>
-        <button class="sample-chip" onclick="loadSample(0)">🛒 طلب 2 حبات كحلة + رويبة + موبيليس</button>
-        <button class="sample-chip" onclick="loadSample(1)">💰 استفسار عن السعر وتوفر السلعة</button>
-        <button class="sample-chip" onclick="loadSample(2)">🌟 شكر إيجابي + بلدية العلمة + جيزي</button>
-        <button class="sample-chip" onclick="loadSample(3)">🚨 تصعيد عاجل: سراقين حشيتوهالي ونشكي</button>
-        <button class="sample-chip" onclick="loadSample(4)">📍 لهجة وهران + دوزينة بونتير 42</button>
-        <button class="sample-chip" onclick="loadSample(5)">🚚 استفسار عن التوصيل لقسنطينة + مية الف</button>
-        <button class="sample-chip" onclick="loadSample(6)">🍲 ثقافة وأطباق: رشتة عاصمية لباب الواد</button>
-        <button class="sample-chip" onclick="loadSample(7)">🔥 ميمز وسلانغ: تيكي تاكا وسلعة كابا</button>
-        <button class="sample-chip" style="border-color:#10b981; color:#34d399;" onclick="loadSample(8)">💬 رد حواري: wach ya khoy</button>
-        <button class="sample-chip" style="border-color:#f43f5e; color:#fb7185;" onclick="loadSample(9)">🛡️ كشف الشتائم: يا حمار</button>
-        <button class="sample-chip" style="border-color:#ec4899; color:#f472b6;" onclick="loadSample(10)">🎭 ميمز: فاك يا حشيشة و زوخ وطير</button>
-        <button class="sample-chip" style="border-color:#06b6d4; color:#67e8f9;" onclick="loadSample(11)">🤝 مفاوضة DziriAlign: صباط غالي شوية</button>
-        <button class="sample-chip" style="border-color:#8b5cf6; color:#c4b5fd;" onclick="loadSample(12)">🧠 تحليل آلي بالدارجة: Thbliiii bravo souade</button>
-      </div>
-    </div>
-
-    <!-- Smart Escalation Status Card -->
-    <div id="escalationStatusBox"></div>
-
-    <div class="results-grid">
-      <!-- 1. Customer Intent Card -->
+    <!-- TAB 1: UNIFIED ANALYZER (DarjaPipeline) -->
+    <section id="tab-analyzer" class="tab-panel active">
       <div class="card">
-        <div class="section-title">تحليل نية الزبون (Customer Intent Classification)</div>
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-          <div id="intentBadge" class="intent-badge intent-order">🛒 طلب شراء (ORDER)</div>
-          <div id="intentConfidence" style="font-family:'JetBrains Mono',monospace; color:var(--text-muted); font-size:13px;">دقة 90%</div>
+        <div class="card-header">
+          <label for="textInput" style="font-weight:800; font-size:15px;">أدخل نصاً أو رسالة زبون جزائري (عربي / دارجة / أرابيزي / فرنسي):</label>
+          <span class="mono" id="charCount" style="font-size:12px; color:var(--text-muted);">0 chars</span>
         </div>
-        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">الكلمات الدالة المرصودة:</div>
-        <div id="intentKeywords" class="tokens-pill-box"></div>
+
+        <textarea id="textInput" dir="auto" class="main-input" placeholder="اكتب جملة بالدارجة أو العربيزي لتحليلها فورياً...">hab nchri 2 hbat XL noir b 500 doro aflou yalidine baridimob 0661234567</textarea>
+
+        <div class="samples-bar">
+          <span style="font-size:12px; color:var(--text-muted); font-weight:700; margin-left:4px;">نماذج واقعية:</span>
+          <button class="sample-chip highlight-emerald" onclick="loadSample(0)">طلب شراء + أفلو 59 + دورو</button>
+          <button class="sample-chip" onclick="loadSample(1)">استفسار عن السعر والتوفر</button>
+          <button class="sample-chip" onclick="loadSample(2)">تقييم إيجابي + العلمة + جيزي</button>
+          <button class="sample-chip highlight-danger" onclick="loadSample(3)">تصعيد عاجل وشكوى</button>
+          <button class="sample-chip" onclick="loadSample(4)">لهجة وهران + دوزينة + بونتير</button>
+          <button class="sample-chip" onclick="loadSample(5)">أطباق وأمثال: رشتة وباب الواد</button>
+          <button class="sample-chip" onclick="loadSample(6)">ميمز وفرانكو-دارجة: ncommandi caba</button>
+          <button class="sample-chip highlight-emerald" onclick="loadSample(7)">تحية عفوية: wach ya khoy</button>
+          <button class="sample-chip highlight-danger" onclick="loadSample(8)">اختبار درع الشتائم</button>
+          <button class="sample-chip" onclick="loadSample(9)">ميمز جزائرية فيروسية</button>
+          <button class="sample-chip" onclick="loadSample(10)">مفاوضة DziriAlign KB</button>
+          <button class="sample-chip" onclick="loadSample(11)">إشادة 55K ML: Thbliiii bravo souade</button>
+        </div>
+
+        <div class="controls-row">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span class="seg-label">وضع المشاعر:</span>
+            <div class="seg-group" id="sentimentModeGroup">
+              <button class="seg-btn active" data-mode="hybrid" onclick="setSentimentMode('hybrid')">هجين (Hybrid)</button>
+              <button class="seg-btn" data-mode="ml" onclick="setSentimentMode('ml')">نموذج ML (55K)</button>
+              <button class="seg-btn" data-mode="lexicon" onclick="setSentimentMode('lexicon')">القاموس فقط</button>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span class="seg-label">شخصية الرد:</span>
+            <div class="seg-group" id="personaGroup">
+              <button class="seg-btn active" data-persona="merchant" onclick="setPersona('merchant')">تاجر (Merchant)</button>
+              <button class="seg-btn" data-persona="casual" onclick="setPersona('casual')">ودي (Casual)</button>
+              <button class="seg-btn" data-persona="assistant" onclick="setPersona('assistant')">مساعد رسمي (Assistant)</button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- 2. Sentiment Card -->
+      <div id="escalationStatusBox"></div>
+
+      <div class="results-grid">
+        <!-- 1. Intent -->
+        <div class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              تحليل نية الزبون (Intent Classification)
+            </div>
+            <span id="intentConfidence" style="font-size:12px; color:var(--text-muted); font-weight:700;">-</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div id="intentBadge" class="intent-badge intent-order">ORDER</div>
+          </div>
+          <div style="font-size:12px; color:var(--text-muted);">المفاتيح اللغوية المرصودة:</div>
+          <div id="intentKeywords" class="pill-row"></div>
+        </div>
+
+        <!-- 2. Sentiment v2 -->
+        <div class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              تحليل المشاعر الهجين (Sentiment v2)
+            </div>
+            <span id="sentimentMethodBadge" class="token-pill token-info">hybrid</span>
+          </div>
+          <div class="sentiment-banner">
+            <div id="sentimentBadge" class="sentiment-badge badge-neutral">محايد</div>
+            <div id="sentimentScore" class="mono" style="font-size:20px; font-weight:800;">0.00</div>
+          </div>
+          <div class="prob-bar-wrap">
+            <div class="prob-bar-track">
+              <div id="probBarPos" class="prob-seg-pos" style="width:33%;"></div>
+              <div id="probBarNeu" class="prob-seg-neu" style="width:34%;"></div>
+              <div id="probBarNeg" class="prob-seg-neg" style="width:33%;"></div>
+            </div>
+            <div class="prob-legend" id="probLegend" dir="ltr">POS 0% | NEU 100% | NEG 0%</div>
+          </div>
+          <div style="font-size:12px; color:var(--text-muted);">المؤثرات والكلمات المرصودة:</div>
+          <div id="tokensBox" class="pill-row"></div>
+          <div id="negationFlag" style="margin-top:10px; font-size:12px; color:var(--cyan); display:none;">
+            تم رصد أسلوب نفي أو نفي مضاعف في العبارة
+          </div>
+        </div>
+
+        <!-- 3. Wilayas & Communes -->
+        <div class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              الولايات الـ 69 والبلديات (Algeria-Geo)
+            </div>
+          </div>
+          <div id="wilayasBox"></div>
+        </div>
+
+        <!-- 4. Quantities & Attributes -->
+        <div class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              الكميات والمواصفات (Quantities & Attributes)
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">الكميات بالدارجة:</div>
+            <div id="quantitiesBox"></div>
+          </div>
+          <div>
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">الألوان والمقاسات:</div>
+            <div id="attributesBox"></div>
+          </div>
+        </div>
+
+        <!-- 5. Payments & Prices -->
+        <div class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              طرق الدفع والأسعار بالدينار (دورو / ملايين)
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">وسائل الدفع:</div>
+            <div id="paymentsBox"></div>
+          </div>
+          <div>
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">المبالغ المحولة تلقائياً:</div>
+            <div id="pricesBox"></div>
+          </div>
+        </div>
+
+        <!-- 6. Deliveries & Telecom -->
+        <div class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              التوصيل، المتعاملين، وروابط واتساب
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">شركة ونمط التوصيل:</div>
+            <div id="deliveriesBox"></div>
+          </div>
+          <div>
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">أرقام الهاتف:</div>
+            <div id="phonesBox"></div>
+          </div>
+        </div>
+
+        <!-- 7. Dialect -->
+        <div class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              كشف اللهجة الجهوية (Regional Dialect)
+            </div>
+            <span id="dialectConfidence" style="font-size:12px; color:var(--text-muted); font-weight:700;">-</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <span id="dialectBadge" class="intent-badge intent-price">GENERAL_DARJA</span>
+          </div>
+          <div style="font-size:12px; color:var(--text-muted);">المؤشرات اللغوية الدقيقة:</div>
+          <div id="dialectMarkers" class="pill-row"></div>
+        </div>
+
+        <!-- 8. Culture, Memes & Franco-Darja -->
+        <div class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              الثقافة، الميمز، والفرانكو-دارجة
+            </div>
+          </div>
+          <div id="culturalBox" style="display:flex; flex-direction:column; gap:7px;"></div>
+        </div>
+
+        <!-- 9. Arabizi + Moderation -->
+        <div class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              التطبيع، العربيزي، ودرع الشتائم
+            </div>
+          </div>
+          <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">التحويل للعربية (Arabizi to Arabic):</div>
+          <div id="arabiziBox" dir="auto" class="code-box"></div>
+          <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">حالة سلامة المحتوى والمراجعة:</div>
+          <div id="profanityStatusBox" style="margin-bottom:8px;"></div>
+          <div id="censoredTextBox" dir="auto" class="code-box" style="margin-bottom:0; color:#fda4af;"></div>
+        </div>
+
+        <!-- 10. Dialogue & KB Engine -->
+        <div class="card full-span" style="border-color: rgba(16, 185, 129, 0.4); background: linear-gradient(135deg, rgba(6, 43, 31, 0.5), var(--card-bg));">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              محرك الردود بالدارجة + الاسترجاع من <span dir="ltr">DziriAlign</span> و<span dir="ltr">DziriEval</span>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <span id="dialogueScriptBadge" class="token-pill token-pos">script</span>
+              <span id="dialogueSourceBadge" class="token-pill token-info">source</span>
+              <span id="dialogueIntentBadge" class="token-pill" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155;">intent</span>
+            </div>
+          </div>
+          <div id="dialogueReplyBox" dir="auto" style="background:#070b13; border:1px solid rgba(16,185,129,0.35); border-radius:12px; padding:14px 18px; font-size:16px; font-weight:700; color:#ecfdf5;"></div>
+        </div>
+
+        <!-- 11. Developer Output & AI Agent Grounding Drawer -->
+        <div class="card full-span" style="border-color: rgba(59, 130, 246, 0.4);">
+          <div class="card-header">
+            <div class="section-title" style="color:#60a5fa;">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              مخرجات المطورين ومحاكاة وكيل الذكاء الاصطناعي
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <div class="seg-group">
+                <button class="seg-btn active" data-devtab="json" onclick="switchDevTab('json')">JSON Report</button>
+                <button class="seg-btn" data-devtab="code" onclick="switchDevTab('code')">Python &amp; TS</button>
+                <button class="seg-btn" data-devtab="agent" onclick="switchDevTab('agent')">LLM Prompt</button>
+              </div>
+              <button class="btn btn-secondary" onclick="copyDevOutput()" id="copyDevBtn" style="padding:5px 12px; font-size:12px;">نسخ</button>
+            </div>
+          </div>
+
+          <div id="devTab-json">
+            <pre id="jsonReportPre" class="pre-code"></pre>
+          </div>
+          <div id="devTab-code" style="display:none;">
+            <pre id="codeSnippetPre" class="pre-code"></pre>
+          </div>
+          <div id="devTab-agent" style="display:none;">
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:14px;">
+              <div>
+                <div style="font-size:12px; color:#93c5fd; font-weight:700; margin-bottom:6px;">System Prompt المستخرج:</div>
+                <pre id="agentPromptBox" class="pre-code" style="direction:rtl; text-align:right;"></pre>
+              </div>
+              <div>
+                <div style="font-size:12px; color:#34d399; font-weight:700; margin-bottom:6px;">محاكاة الرد الذكي المحكوم بالحقائق:</div>
+                <div id="agentReplyBox" dir="auto" style="background:#070b13; border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:14px; font-size:14px; color:#f0fdf4; min-height:110px; margin-bottom:10px;"></div>
+                <div style="font-size:12px; color:#fbbf24; font-weight:700; margin-bottom:6px;">أقرب حوار تدريبي مطابق للهجة:</div>
+                <div id="matchingDialogueBox" style="background:#070b13; border:1px solid rgba(245,158,11,0.28); border-radius:10px; padding:11px 14px; font-size:13px; color:#fef3c7;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: MULTI-TURN CHAT (DarjaChat) -->
+    <section id="tab-chat" class="tab-panel">
       <div class="card">
-        <div class="section-title">تحليل المشاعر (Sentiment Analysis)</div>
-        <div class="sentiment-banner">
-          <div id="sentimentBadge" class="sentiment-badge badge-positive">إيجابي (+)</div>
-          <div class="score-display" id="sentimentScore">+0.90</div>
+        <div class="card-header">
+          <div class="section-title">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            محاكي الجلسات الحوارية (<span dir="ltr">DarjaChat Multi-Turn Slot Filling</span>)
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="runChatAutoDemo()">تشغيل سيناريو طلبية كامل</button>
+            <button class="btn btn-secondary" onclick="resetChatSession()">جلسة جديدة</button>
+          </div>
         </div>
-        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">الكلمات المؤثرة في التقييم:</div>
-        <div id="tokensBox" class="tokens-pill-box"></div>
-        <div id="negationFlag" style="margin-top: 10px; font-size: 12px; color: var(--cyan); display: none;">
-          ⚡ تم رصد نفي معكوس في الجملة (Negation Inversion Active)
-        </div>
-      </div>
-
-      <!-- 3. Wilayas (69) & Communes Card -->
-      <div class="card">
-        <div class="section-title">الولايات والبلديات (69 ولاية و 1,541 بلدية - معتمدة على algeria-geo)</div>
-        <div id="wilayasBox"></div>
-      </div>
-
-      <!-- 4. Quantities & Attributes Card -->
-      <div class="card">
-        <div class="section-title">الكميات ومواصفات المنتج (Quantities & Attributes)</div>
-        <div style="margin-bottom: 12px;">
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">الكميات الشعبية المستخرجة:</div>
-          <div id="quantitiesBox"></div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">الألوان والمقاسات (Colors & Sizes):</div>
-          <div id="attributesBox"></div>
-        </div>
-      </div>
-
-      <!-- 5. Payments & Prices Card -->
-      <div class="card">
-        <div class="section-title">طرق الدفع والأسعار المستخرجة (Payments & Prices)</div>
-        <div style="margin-bottom: 12px;">
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">طرق الدفع:</div>
-          <div id="paymentsBox"></div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">الأسعار والمبالغ بالدينار (شاملة الملايين والألوف):</div>
-          <div id="pricesBox"></div>
-        </div>
-      </div>
-
-      <!-- 6. Logistics & Contact Card with Telecom Operator -->
-      <div class="card">
-        <div class="section-title">شركات التوصيل والمشغل ورابط واتساب (Logistics & Telecom)</div>
-        <div style="margin-bottom: 10px;">
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">شركة ونمط التوصيل:</div>
-          <div id="deliveriesBox"></div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">أرقام الهاتف مع المشغل (Mobilis/Djezzy/Ooredoo/Fixe):</div>
-          <div id="phonesBox"></div>
-        </div>
-      </div>
-
-      <!-- 7. Dialect Card -->
-      <div class="card">
-        <div class="section-title">كشف اللهجة الجهوية (Regional Dialect)</div>
-        <div style="margin-bottom: 14px;">
-          <div id="dialectBadge" class="dialect-badge">الوسط الجزائري (CENTER)</div>
-        </div>
-        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">المؤشرات اللغوية المرصودة:</div>
-        <div id="dialectMarkers" class="tokens-pill-box"></div>
-      </div>
-
-      <!-- 8. Cultural Knowledge, Slang & Food Card -->
-      <div class="card">
-        <div class="section-title">المعالم، الأمثال والمصطلحات الشعبية (Culture, Slang & Food)</div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">رصد التراث والأمثال الشعبية ومصطلحات التجارة:</div>
-        <div id="culturalBox" style="display:flex; flex-direction:column; gap:6px;"></div>
-      </div>
-
-      <!-- 9. Arabizi & Normalization -->
-      <div class="card">
-        <div class="section-title">معالجة الأرابيزي والتطبيع (Arabizi & Normalizer)</div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">الترجمة التفسيرية (Arabizi &rarr; Arabic):</div>
-        <div id="arabiziBox" class="code-box"></div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">النص المطبع (Normalized):</div>
-        <div id="normalizedBox" class="code-box"></div>
-      </div>
-
-      <!-- 10. Natural Darja Dialogue Response Engine -->
-      <div class="card" style="border-color: rgba(16, 185, 129, 0.4); background: radial-gradient(circle at top right, #062b1f, #111827);">
-        <div class="section-title" style="color: #34d399;">💬 الردود الحوارية الطبيعية (Natural Darja Chatbot Engine)</div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">توليد رد عفوي وطبيعي بلهجة الدارجة مطابق تماماً للغة السائل (مثلاً: wach ya khoy &rarr; we cv hamdoulah):</div>
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-          <span id="dialogueScriptBadge" class="token-pill" style="background:#065f46; color:#6ee7b7; border:1px solid #10b981;">Script</span>
-          <span id="dialogueIntentBadge" class="token-pill" style="background:#1e293b; color:#93c5fd; border:1px solid #3b82f6;">Intent</span>
-        </div>
-        <div id="dialogueReplyBox" style="background:#080c14; border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:12px 16px; font-size:15px; color:#ecfdf5; line-height:1.6; font-weight:600;"></div>
-      </div>
-
-      <!-- 11. Content Moderation & Profanity Shield -->
-      <div class="card" style="border-color: rgba(244, 63, 94, 0.4); background: radial-gradient(circle at top right, #2b0610, #111827);">
-        <div class="section-title" style="color: #fb7185;">🛡️ درع سلامة المحتوى والكلمات البذيئة (Content Moderation Shield)</div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">كشف الشتائم، الألفاظ البذيئة والسمية في الدارجة (عربي وعربيزي) مع الحجب التلقائي:</div>
-        <div id="profanityStatusBox" style="margin-bottom:8px;"></div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">النص المحجوب (Censored Text):</div>
-        <div id="censoredTextBox" class="code-box" style="color:#fda4af;"></div>
-      </div>
-
-      <!-- 10. AI Agent Customer Assistant Simulator -->
-      <div class="card" style="grid-column: 1 / -1; border-color: rgba(59, 130, 246, 0.4); background: radial-gradient(circle at top left, #0f1c3f, #111827);">
-        <div class="section-title" style="color: #60a5fa;">🤖 محاكي وكيل الذكاء الاصطناعي الجزائري (AI Agent Assistant Simulator)</div>
-        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 14px;">
-          كيف يستقبل نموذج الذكاء الاصطناعي (مثل GPT-4o / Claude / Gemini) هذا الزبون عبر <strong>darja-nlp-kit</strong>، مع مطابقة النية، اللهجة، الكميات، والمبالغ دون هلوسة:
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">
+          أرسل عدة رسائل متتالية كما يفعل الزبون الحقيقي: الجلسة تحفظ اللغة واللهجة والولاية والكمية والهاتف عبر الأدوار وتطلب فقط المعلومات الناقصة حتى تأكيد الطلبية.
         </p>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+
+        <div class="chat-layout">
           <div>
-            <div style="font-size: 12px; color: #93c5fd; font-weight: 700; margin-bottom: 6px;">🧠 الـ System Prompt المحقون للذكاء الاصطناعي:</div>
-            <pre id="agentPromptBox" style="background:#080c14; border:1px solid #1e293b; border-radius:10px; padding:12px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#cbd5e1; max-height:220px; overflow-y:auto; white-space:pre-wrap;"></pre>
+            <div id="chatMessages" class="chat-messages"></div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="chatInput" dir="auto" placeholder="اكتب رسالة الزبون هنا واضغط Enter..." onkeydown="if(event.key==='Enter') sendChatTurn();">
+              <button class="btn btn-primary" onclick="sendChatTurn()" style="white-space:nowrap;">إرسال</button>
+            </div>
+            <div class="samples-bar" style="margin-top:10px;">
+              <span style="font-size:12px; color:var(--text-muted);">رسائل جاهزة:</span>
+              <button class="sample-chip" dir="ltr" onclick="sendQuickChat('wach ya khoy')">wach ya khoy</button>
+              <button class="sample-chip" dir="ltr" onclick="sendQuickChat('hab nchri 2 hbat noir XL')">hab nchri 2 hbat noir XL</button>
+              <button class="sample-chip" dir="ltr" onclick="sendQuickChat('l aflou b yalidine')">l aflou b yalidine</button>
+              <button class="sample-chip" dir="ltr" onclick="sendQuickChat('0661234567 baridimob')">0661234567 baridimob</button>
+              <button class="sample-chip highlight-danger" onclick="sendQuickChat('سراقين حشيتوهالي')">سراقين حشيتوهالي</button>
+            </div>
           </div>
-          <div>
-            <div style="font-size: 12px; color: #34d399; font-weight: 700; margin-bottom: 6px;">💬 رد الذكاء الاصطناعي البشري الواقعي (AI Agent Response):</div>
-            <div id="agentReplyBox" style="background:#080c14; border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:16px; font-size:15px; color:#f0fdf4; line-height:1.7; min-height:80px; display:flex; align-items:center;"></div>
-          </div>
-          <div style="grid-column: 1 / -1; margin-top: 4px;">
-            <div style="font-size: 12px; color: #fbbf24; font-weight: 700; margin-bottom: 6px;">📚 عينة تدريب حقيقية مطابقة للهجة المستهدفة من قاعدة البيانات (150+ Dialogues Few-Shot):</div>
-            <div id="matchingDialogueBox" style="background:#080c14; border:1px solid rgba(251,191,36,0.25); border-radius:10px; padding:12px 16px; font-size:13px; color:#fef3c7; line-height:1.7;"></div>
+
+          <div style="background:#090e1a; border:1px solid var(--border); border-radius:14px; padding:16px;">
+            <div class="card-header" style="margin-bottom:10px;">
+              <span style="font-weight:800; font-size:14px; color:#34d399;">حالة الطلبية والبيانات المستخرجة</span>
+              <span id="chatReadyBadge" class="token-pill token-info">جاري التجميع</span>
+            </div>
+            <div id="chatSlotsPanel"></div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- TAB 3: IN-BROWSER CLASSIFIER STUDIO (DarjaClassifier) -->
+    <section id="tab-classifier" class="tab-panel">
+      <div class="clf-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              بيانات التدريب (صيغة: النص | التصنيف)
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn btn-secondary" style="padding:5px 10px; font-size:12px;" onclick="loadClfPreset('commerce')">بيانات متجر</button>
+              <button class="btn btn-secondary" style="padding:5px 10px; font-size:12px;" onclick="loadClfPreset('dialect')">لهجات جهوية</button>
+            </div>
+          </div>
+          <textarea id="clfTrainData" style="height:260px; font-family:'Cairo', monospace; font-size:13px; line-height:1.7;"></textarea>
+          <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="trainBrowserClassifier()">تدريب وتقييم النموذج الآن</button>
+            <button class="btn btn-secondary" onclick="downloadClassifierModel()">تنزيل النموذج (JSON لـ Python وJS)</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+              تقييم الأداء والاختبار الحي (DarjaClassifier)
+            </div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-box">
+              <div id="clfAccVal" class="metric-val">-</div>
+              <div class="metric-lbl">الدقة (Accuracy)</div>
+            </div>
+            <div class="metric-box">
+              <div id="clfF1Val" class="metric-val">-</div>
+              <div class="metric-lbl">Macro-F1</div>
+            </div>
+            <div class="metric-box">
+              <div id="clfVocabVal" class="metric-val">-</div>
+              <div class="metric-lbl">حجم المفردات (N-grams)</div>
+            </div>
+          </div>
+
+          <label for="clfTestInput" style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">اختبر النموذج المدرب بأي جملة بالدارجة:</label>
+          <input type="text" id="clfTestInput" value="شحال السومة تاع السبردينة لسطيف؟" oninput="predictWithBrowserClf()">
+
+          <div id="clfPredBox" style="margin-top:14px; background:#070b13; border:1px solid var(--border); border-radius:12px; padding:14px;"></div>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:12px;">
+            ملف JSON المصدر متوافق 100% مع <code>DarjaClassifier.load("classifier_model.json")</code> في Python وTypeScript.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: 69 WILAYAS EXPLORER & BENCHMARKS -->
+    <section id="tab-explorer" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="section-title">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            النتائج القياسية الفعلية على معيار 600 عينة جزائرية (eval_benchmark.json)
+          </div>
+        </div>
+        <div class="metric-row" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+          <div class="metric-box">
+            <div class="metric-val">70.83%</div>
+            <div class="metric-lbl">وضع ML الخالص (425/600)</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-val">68.00%</div>
+            <div class="metric-lbl">الوضع الهجين Hybrid (408/600)</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-val">85.56%</div>
+            <div class="metric-lbl">دقة ML على Algerian_sentiment</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-val">8,628 + 1,000</div>
+            <div class="metric-lbl">عينات SFT + أزواج DPO حقيقية</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+          <pre class="pre-code" style="max-height:110px;"># Python
+pip install darja-nlp-kit
+darja-nlp analyze "salam kho hab nchri 2 hbat..."
+darja-nlp eval --mode ml</pre>
+          <pre class="pre-code" style="max-height:110px;"># Node.js / TypeScript
+npm install @dz-open-suite/darja-nlp-kit
+npx darja-nlp eval --mode hybrid
+npx darja-nlp server --port 8080</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="section-title">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            مستكشف الولايات الـ 69 والبلديات (متزامن مع algeria-geo)
+          </div>
+          <div class="seg-group">
+            <button class="seg-btn active" data-wfilter="all" onclick="setWilayaFilter('all')">جميع الولايات (69)</button>
+            <button class="seg-btn" data-wfilter="era69" onclick="setWilayaFilter('era69')">الولايات الجديدة (59–69)</button>
+          </div>
+        </div>
+        <input type="text" id="wilayaSearchInput" placeholder="ابحث بالاسم بالعربية أو الفرنسية أو الرمز أو البلدية (مثال: أفلو، وهران، 31، العلمة)..." oninput="renderWilayasExplorer()">
+        <div id="wilayaCountInfo" style="font-size:12px; color:var(--text-muted); margin-top:8px;"></div>
+        <div id="wilayaExplorerGrid" class="wilaya-grid"></div>
+      </div>
+    </section>
   </div>
 
   <footer>
-    <p><strong>darja-nlp-kit</strong> — Zero-dependency Algerian Darja NLP & AI Automation Toolkit. Open Source under MIT License.</p>
-    <p style="margin-top: 4px;">Developed for Algerian developers, merchants, and AI automation creators.</p>
+    <p dir="ltr"><strong>darja-nlp-kit</strong> — Zero-Dependency Algerian Darja NLP Toolkit (Python &amp; TypeScript). Open Source under MIT License.</p>
+    <p style="margin-top:6px;">
+      <a href="https://github.com/test-bit-sys/darja-nlp-kit" target="_blank" rel="noopener">GitHub Repository</a>
+      &middot;
+      <a href="https://github.com/test-bit-sys/algeria-geo" target="_blank" rel="noopener">Algeria-Geo 69 Wilayas</a>
+    </p>
   </footer>
 
   <script>
-    // Embedded Linguistic Datasets
+    // Embedded Linguistic Datasets & Trained Models
     const STOPWORDS_DATA = __STOPWORDS_DATA__;
     const LEXICON_DATA = __LEXICON_DATA__;
     const ARABIZI_RULES = __ARABIZI_RULES__;
@@ -791,7 +1466,34 @@ def main() -> None:
     const SENTIMENT_MODEL = __SENTIMENT_MODEL__;
     const DIALOGUE_KB_DATA = __DIALOGUE_KB_DATA__;
 
-    // Core Algorithms
+    // UI State
+    let sentimentMode = 'hybrid';
+    let currentPersona = 'merchant';
+    let currentDevTab = 'json';
+    let currentWilayaFilter = 'all';
+    let lastAnalyzeReport = null;
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Core Tokenizer (exact parity with TS & Python)
+    function tokenize(text) {
+      if (!text) return { tokens: [], hasCircumfixNegation: false };
+      const arabicNegRe = /ما[^\s]+ش(?=\s|$|[.,!?;:])/g;
+      const arabiziNegRe = /\bma[a-zA-Z0-9']+ch\b/gi;
+      const hasCircumfixNegation = arabicNegRe.test(text) || arabiziNegRe.test(text);
+      const clean = text.replace(/[.,!?;:()\[\]{}"'«»؟،؛]/g, ' ');
+      const tokens = clean.split(/\s+/).filter(Boolean);
+      return { tokens, hasCircumfixNegation };
+    }
+
+    // Normalizer
     const ALEF_VARIANTS = /[\u0622\u0623\u0625]/g;
     const TA_MARBUTA = /\u0629/g;
     const ALEF_MAQSURA = /\u0649/g;
@@ -805,17 +1507,16 @@ def main() -> None:
 
     function normalize(text) {
       if (!text) return '';
-      let res = text.replace(ALEF_VARIANTS, '\u0627')
-                    .replace(TA_MARBUTA, '\u0647')
-                    .replace(ALEF_MAQSURA, '\u064A')
-                    .replace(TASHKEEL, '')
-                    .replace(TATWEEL, '')
-                    .replace(ARABIC_ELONGATION, '$1')
-                    .replace(LATIN_ELONGATION, (m, c) => VALID_DOUBLES.has(c.toLowerCase()+c.toLowerCase()) ? c+c : c)
-                    .replace(MULTI_SPACE, ' ')
-                    .replace(MULTI_PUNCT, '$1')
-                    .trim();
-      return res;
+      return text.replace(ALEF_VARIANTS, '\u0627')
+                 .replace(TA_MARBUTA, '\u0647')
+                 .replace(ALEF_MAQSURA, '\u064A')
+                 .replace(TASHKEEL, '')
+                 .replace(TATWEEL, '')
+                 .replace(ARABIC_ELONGATION, '$1')
+                 .replace(LATIN_ELONGATION, (m, c) => VALID_DOUBLES.has(c.toLowerCase()+c.toLowerCase()) ? c+c : c)
+                 .replace(MULTI_SPACE, ' ')
+                 .replace(MULTI_PUNCT, '$1')
+                 .trim();
     }
 
     function isFrenchWord(word) {
@@ -835,32 +1536,15 @@ def main() -> None:
         const lower = tok.toLowerCase();
         if (ARABIZI_RULES.overrides[lower]) return ARABIZI_RULES.overrides[lower];
         if (isFrenchWord(lower) || /^[0-9+]+$/.test(tok)) return tok;
-
         let res = lower;
-        for (const [k, v] of Object.entries(ARABIZI_RULES.digraphs)) {
-          res = res.replaceAll(k, v);
-        }
-        for (const [k, v] of Object.entries(ARABIZI_RULES.numbers)) {
-          res = res.replaceAll(k, v);
-        }
-        for (const [k, v] of Object.entries(ARABIZI_RULES.singles)) {
-          res = res.replaceAll(k, v);
-        }
+        for (const [k, v] of Object.entries(ARABIZI_RULES.digraphs)) res = res.replaceAll(k, v);
+        for (const [k, v] of Object.entries(ARABIZI_RULES.numbers)) res = res.replaceAll(k, v);
+        for (const [k, v] of Object.entries(ARABIZI_RULES.singles)) res = res.replaceAll(k, v);
         return res;
       }).join('');
     }
 
-    function removeStopwords(text) {
-      if (!text) return '';
-      const allStops = new Set();
-      for (const list of Object.values(STOPWORDS_DATA)) {
-        list.forEach(w => allStops.add(w.toLowerCase()));
-      }
-      const tokens = text.split(/\s+/);
-      const filtered = tokens.filter(t => !allStops.has(t.toLowerCase()) && !allStops.has(normalize(t)));
-      return filtered.join(' ');
-    }
-
+    // 55K ML Sentiment Predictor
     function predictMlSentiment(text) {
       if (!SENTIMENT_MODEL || !SENTIMENT_MODEL.priors || !SENTIMENT_MODEL.weights) return null;
       let t = text.toLowerCase().replace(/https?:\/\/\S+|@\w+/g, ' ')
@@ -900,19 +1584,38 @@ def main() -> None:
       if (probs[2] >= probs[0] && probs[2] >= probs[1]) label = 'POSITIVE';
       else if (probs[0] >= probs[2] && probs[0] >= probs[1]) label = 'NEGATIVE';
       const pol = Math.round(Math.max(-1, Math.min(1, probs[2] - probs[0])) * 100) / 100;
-      return { score: pol, label, positiveTokens: mPos.slice(0, 6), negativeTokens: mNeg.slice(0, 6), negated: false, method: 'ml' };
+      return {
+        score: pol,
+        label,
+        positiveTokens: mPos.slice(0, 6),
+        negativeTokens: mNeg.slice(0, 6),
+        negated: false,
+        method: 'ml',
+        probabilities: {
+          NEGATIVE: Math.round(probs[0] * 1000) / 1000,
+          NEUTRAL: Math.round(probs[1] * 1000) / 1000,
+          POSITIVE: Math.round(probs[2] * 1000) / 1000,
+        }
+      };
     }
 
-    function analyzeSentiment(text) {
-      if (!text) return { score: 0, label: 'NEUTRAL', positiveTokens: [], negativeTokens: [], negated: false, method: 'hybrid' };
+    function analyzeSentiment(text, mode = 'hybrid') {
+      if (!text || !text.trim()) {
+        return { score: 0, label: 'NEUTRAL', positiveTokens: [], negativeTokens: [], negated: false, method: mode, probabilities: { NEGATIVE: 0, NEUTRAL: 1, POSITIVE: 0 } };
+      }
+      if (mode === 'ml') {
+        const mlOnly = predictMlSentiment(text);
+        if (mlOnly) return mlOnly;
+      }
+
       const clean = normalize(text);
       const words = clean.split(/[\s,،!?;:.]+/).filter(Boolean);
+      const lowerWords = words.map(w => w.toLowerCase());
+      const negatorSet = new Set((LEXICON_DATA.negators || []).map(n => normalize(n).toLowerCase()));
       let total = 0, count = 0, hasNeg = false;
       const pos = [], neg = [];
       const covered = new Set();
 
-      // Multi-word phrase check
-      const lowerWords = words.map(w => w.toLowerCase());
       for (const win of [4, 3, 2]) {
         for (let i = 0; i <= lowerWords.length - win; i++) {
           let skip = false;
@@ -925,7 +1628,7 @@ def main() -> None:
           if (pScore !== null) {
             const origPhrase = words.slice(i, i + win).join(' ');
             const prev = i > 0 ? lowerWords[i - 1] : null;
-            if (prev && LEXICON_DATA.negators.includes(prev)) { pScore = -pScore * 0.8; hasNeg = true; }
+            if (prev && negatorSet.has(prev)) { pScore = -pScore * 0.8; hasNeg = true; }
             total += pScore; count++;
             if (pScore > 0) pos.push(origPhrase); else if (pScore < 0) neg.push(origPhrase);
             for (let k = i; k < i + win; k++) covered.add(k);
@@ -937,31 +1640,23 @@ def main() -> None:
         if (covered.has(i)) continue;
         const w = lowerWords[i];
         let score = null;
-        let t = words[i];
-
-        if (LEXICON_DATA.positive[w] !== undefined) {
-          score = LEXICON_DATA.positive[w];
-        } else if (LEXICON_DATA.negative[w] !== undefined) {
-          score = LEXICON_DATA.negative[w];
-        }
-
+        if (LEXICON_DATA.positive[w] !== undefined) score = LEXICON_DATA.positive[w];
+        else if (LEXICON_DATA.negative[w] !== undefined) score = LEXICON_DATA.negative[w];
         if (score === null) continue;
 
         const prev = i > 0 ? lowerWords[i - 1] : null;
-        if (prev && LEXICON_DATA.negators.includes(prev)) {
+        if (prev && negatorSet.has(prev)) {
           score = -score * 0.8;
           hasNeg = true;
         }
-        if (prev && LEXICON_DATA.intensifiers[prev] && !LEXICON_DATA.negators.includes(prev)) {
+        if (prev && LEXICON_DATA.intensifiers[prev] && !negatorSet.has(prev)) {
           score *= LEXICON_DATA.intensifiers[prev];
         }
-
-        total += score;
-        count++;
-        if (score > 0) pos.push(t); else if (score < 0) neg.push(t);
+        total += score; count++;
+        if (score > 0) pos.push(words[i]); else if (score < 0) neg.push(words[i]);
       }
 
-      if (count === 0) {
+      if (mode === 'hybrid' && count === 0) {
         const mlRes = predictMlSentiment(text);
         if (mlRes && mlRes.label !== 'NEUTRAL' && Math.abs(mlRes.score) >= 0.15) return mlRes;
       }
@@ -973,73 +1668,31 @@ def main() -> None:
       else if (rounded > 0.05) label = 'POSITIVE';
       else if (rounded < -0.05) label = 'NEGATIVE';
 
-      return { score: rounded, label, positiveTokens: pos, negativeTokens: neg, negated: hasNeg, method: 'hybrid' };
+      const mlBg = mode !== 'lexicon' ? predictMlSentiment(text) : null;
+      const probs = mlBg ? mlBg.probabilities : (
+        label === 'POSITIVE' ? { NEGATIVE: 0.05, NEUTRAL: 0.1, POSITIVE: 0.85 } :
+        label === 'NEGATIVE' ? { NEGATIVE: 0.85, NEUTRAL: 0.1, POSITIVE: 0.05 } :
+        { NEGATIVE: 0.05, NEUTRAL: 0.9, POSITIVE: 0.05 }
+      );
+
+      return { score: rounded, label, positiveTokens: pos, negativeTokens: neg, negated: hasNeg, method: mode, probabilities: probs };
     }
 
     function identifyIntent(text) {
       if (!text) return { intent: 'UNKNOWN', confidence: 0, matchedKeywords: [] };
       const lower = text.toLowerCase();
       const rules = [
-        {
-          intent: 'COMPLAINT',
-          keywords: [
-            'مكسرة', 'مكسر', 'ما وصلتش', 'ما لحقتش', 'روطار', 'سلعة عيانة', 'سلعة ميتة', 'حشيتوهالي',
-            'حشاوها لي', 'بدلوهالي', 'روتور', 'رجعولي دراهمي', 'ما رديتوش', 'حقار', 'سراقين', 'سرقة',
-            'فضيحة', 'سلعة مفاتشة', 'ماشي كيما الفوتو', 'ماشي كيما التصويرة', 'ناقصة', 'معطوبة', 'مخدوعة',
-            'reclamation', 'retour', 'casse', 'mfetcha', 'retard', 'ma wesletch', '7chawhali',
-            'arnaque', 'ser9a', 'khorda', 'naqsa'
-          ]
-        },
-        {
-          intent: 'ORDER',
-          keywords: [
-            'كوموندي', 'نكوموندي', 'كومونديلي', 'كوموندالي', 'باغي نشري', 'راني باغي', 'باغي', 'حاب نشري',
-            'حبيت نشري', 'راني حاب', 'حاب', 'حبيت', 'ابعثلي', 'ابعثهالي', 'ابعثوهالي', 'احجزلي', 'حجز', 'احجز',
-            'راني شاري', 'نشريها', 'نشري', 'جيبهالي', 'حاب نطلب', 'طلب شراء', 'نحتاج حبة', 'نحتاج زوج', 'نحتاج',
-            'commander', 'ncommander', 'baghi nchri', 'rani baghi', 'baghi', 'hab nchri', '7ab nchri',
-            'rani hab', 'rani 7ab', 'hab', '7ab', 'habb', 'nchri', 'chrit', 'nchriha', 'nchrihoum',
-            'ab3atli', 'ab3athali', 'livrili', 'livrihali', 'livreli', '7jezli', 'reserver', 'je veux acheter'
-          ]
-        },
-        {
-          intent: 'DELIVERY_INQUIRY',
-          keywords: [
-            'التوصيل', 'توصيل', 'شحال التوصيل', 'شحال لا ليفريزون', 'كاين توصيل', 'توصلو', 'توصلوا',
-            'وقتاش تلحق', 'وقتاش يوصل', 'شحال يقعد', 'شحال الوقت', 'توصيل للدار', 'توصيل للمكتب', 'توصيل متوفر',
-            'livraison', 'la livraison', 'frais de livraison', 'délai', 'delai', 'livriw', 'touslou', 'chal livraison'
-          ]
-        },
-        {
-          intent: 'PRICE_INQUIRY',
-          keywords: [
-            'السعر', 'السومة', 'بشحال', 'شحال', 'شحال يدير', 'شحال راه يدير', 'بقداش', 'قداش', 'شحال السومة',
-            'سومة', 'prix', 'bchhal', 'chhal', 'ch7al', 'bch7al', 'kadech', '9dach', 'c combien', 'combien'
-          ]
-        },
-        {
-          intent: 'AVAILABILITY_INQUIRY',
-          keywords: [
-            'متوفر', 'متوفرة', 'كاين منها', 'مازال كاين', 'مازالت كاينة', 'كاين ستوك', 'كاين كولور', 'كاين لاطاي',
-            'متوفر هذا الموديل', 'خلاصت', 'dispo', 'disponible', 'disponibilité', 'kayen', 'mazal'
-          ]
-        },
-        {
-          intent: 'GREETING',
-          keywords: [
-            'سلام', 'سلام عليكم', 'السلام عليكم', 'صباح الخير', 'مساء الخير', 'صحا', 'صحيت', 'واش راك',
-            'salam', 'slm', 'bonjour', 'bonsoir', 'salut', 'coucou', 'salam alikoum'
-          ]
-        }
+        { intent: 'COMPLAINT', keywords: ['مكسرة', 'مكسر', 'ما وصلتش', 'ما لحقتش', 'روطار', 'سلعة عيانة', 'سلعة ميتة', 'حشيتوهالي', 'حشاوها لي', 'بدلوهالي', 'روتور', 'رجعولي دراهمي', 'ما رديتوش', 'حقار', 'سراقين', 'سرقة', 'فضيحة', 'سلعة مفاتشة', 'ناقصة', 'معطوبة', 'reclamation', 'retour', 'casse', 'mfetcha', 'retard', 'ma wesletch', '7chawhali', 'arnaque', 'ser9a', 'khorda'] },
+        { intent: 'ORDER', keywords: ['كوموندي', 'نكوموندي', 'كومونديلي', 'باغي نشري', 'راني باغي', 'باغي', 'حاب نشري', 'حبيت نشري', 'راني حاب', 'حاب', 'حبيت', 'ابعثلي', 'ابعثهالي', 'احجزلي', 'احجز', 'نشريها', 'نشري', 'commander', 'ncommander', 'ncommandi', 'baghi nchri', 'rani baghi', 'baghi', 'hab nchri', '7ab nchri', 'rani hab', 'hab', '7ab', 'nchri', 'ab3atli', 'livrili', '7jezli', 'reserver'] },
+        { intent: 'DELIVERY_INQUIRY', keywords: ['التوصيل', 'توصيل', 'شحال التوصيل', 'شحال لا ليفريزون', 'كاين توصيل', 'توصلو', 'وقتاش تلحق', 'وقتاش يوصل', 'livraison', 'frais de livraison', 'delai', 'touslou', 'chal livraison'] },
+        { intent: 'PRICE_INQUIRY', keywords: ['السعر', 'السومة', 'بشحال', 'شحال', 'شحال يدير', 'بقداش', 'قداش', 'شحال السومة', 'سومة', 'prix', 'bchhal', 'chhal', 'ch7al', 'kadech', '9dach', 'combien'] },
+        { intent: 'AVAILABILITY_INQUIRY', keywords: ['متوفر', 'متوفرة', 'كاين منها', 'مازال كاين', 'كاين ستوك', 'خلاصت', 'dispo', 'disponible', 'kayen', 'mazal'] },
+        { intent: 'GREETING', keywords: ['سلام', 'السلام عليكم', 'صباح الخير', 'مساء الخير', 'صحا', 'صحيت', 'واش راك', 'salam', 'slm', 'bonjour', 'bonsoir', 'salut', 'wach'] }
       ];
-
       for (const rule of rules) {
         const matched = rule.keywords.filter(k => lower.includes(k.toLowerCase()));
         if (matched.length > 0) {
-          return {
-            intent: rule.intent,
-            confidence: Math.min(0.98, 0.70 + matched.length * 0.1),
-            matchedKeywords: matched
-          };
+          return { intent: rule.intent, confidence: Math.min(0.99, Math.round((0.70 + matched.length * 0.1) * 100) / 100), matchedKeywords: matched };
         }
       }
       return { intent: 'UNKNOWN', confidence: 0, matchedKeywords: [] };
@@ -1048,42 +1701,17 @@ def main() -> None:
     function detectEscalation(text) {
       if (!text) return { needsEscalation: false, urgency: 'NONE', reason: null, matchedTriggers: [], guideline: '' };
       const lower = text.toLowerCase();
-
       const legals = ['نشكي بيكم', 'لابوليس', 'حماية المستهلك', 'العدالة', 'نديرلكم شكوى', 'محكمة', 'la police', 'protection du consommateur', 'plainte', 'tribunal'];
       const mLegal = legals.filter(t => lower.includes(t.toLowerCase()));
-      if (mLegal.length > 0) {
-        return {
-          needsEscalation: true,
-          urgency: 'CRITICAL',
-          reason: 'LEGAL_THREAT',
-          matchedTriggers: mLegal,
-          guideline: '🚨 الزبون يهدد بمتابعة قانونية أو شكوى رسمية! يجب تحويل المحادثة فوراً للإدارة وتجنب أي جدال آلي.'
-        };
-      }
+      if (mLegal.length > 0) return { needsEscalation: true, urgency: 'CRITICAL', reason: 'LEGAL_THREAT', matchedTriggers: mLegal, guideline: 'الزبون يلوّح بمتابعة قانونية أو شكوى رسمية، حوّل المحادثة فوراً للمسؤول.' };
 
-      const angry = ['حشيتوهالي', 'حشاوها لي', 'سراقين', 'سرقة عيني عينك', 'فضيحة', 'رجعولي دراهمي', 'وكيلكم ربي', 'حقارين', 'الله لا يربحكم', 'بهدلتو بينا', 'خردة', '7chawhali', 'ser9a', 'arnaqueurs', 'voleurs'];
+      const angry = ['حشيتوهالي', 'حشاوها لي', 'سراقين', 'سرقة عيني عينك', 'فضيحة', 'رجعولي دراهمي', 'وكيلكم ربي', 'حقارين', 'بهدلتو بينا', 'خردة', '7chawhali', 'ser9a', 'arnaqueurs', 'voleurs'];
       const mAngry = angry.filter(t => lower.includes(t.toLowerCase()));
-      if (mAngry.length > 0) {
-        return {
-          needsEscalation: true,
-          urgency: 'HIGH',
-          reason: 'ANGRY_CUSTOMER',
-          matchedTriggers: mAngry,
-          guideline: '⚠️ الزبون غاضب جداً ويتهم المتجر بسوء النية أو السرقة. يجب تدخل عون بشري لامتصاص الغضب وتقديم تعويض/استرجاع.'
-        };
-      }
+      if (mAngry.length > 0) return { needsEscalation: true, urgency: 'HIGH', reason: 'ANGRY_CUSTOMER', matchedTriggers: mAngry, guideline: 'الزبون غاضب جداً ويشتكي من الغش أو الرداءة، تدخل عون بشري مطلوب فوراً.' };
 
-      const human = ['احكي مع بنادم', 'مع انسان', 'مع بنادم', 'كاش انسان', 'عطيني المدير', 'خدمة الزبائن', 'عيطلي', 'كلمني', 'كلموني', 'appel moi', 'appelez moi', 'parler a un responsable', 'parler a un agent', 'service client', 'humain'];
+      const human = ['احكي مع بنادم', 'مع انسان', 'مع بنادم', 'عطيني المدير', 'خدمة الزبائن', 'عيطلي', 'كلمني', 'appel moi', 'appelez moi', 'service client', 'humain'];
       const mHuman = human.filter(t => lower.includes(t.toLowerCase()));
-      if (mHuman.length > 0) {
-        return {
-          needsEscalation: true,
-          urgency: 'HIGH',
-          reason: 'HUMAN_REQUESTED',
-          matchedTriggers: mHuman,
-          guideline: '👤 الزبون يطلب التحدث مع شخص حقيقي أو مسؤول. تجنب الردود الآلية وسهّل التواصل البشري.'
-        };
-      }
+      if (mHuman.length > 0) return { needsEscalation: true, urgency: 'HIGH', reason: 'HUMAN_REQUESTED', matchedTriggers: mHuman, guideline: 'الزبون طلب التحدث مع شخص حقيقي من خدمة الزبائن.' };
 
       return { needsEscalation: false, urgency: 'NONE', reason: null, matchedTriggers: [], guideline: '' };
     }
@@ -1092,12 +1720,10 @@ def main() -> None:
       const results = [];
       const unitWords = { 'زوج': 2, 'تلات': 3, 'تلاتة': 3, 'ربع': 4, 'ربعة': 4, 'خمس': 5, 'خمسة': 5, 'zouj': 2, 'tlata': 3 };
       const dynReg = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:\.\d+)?|زوج|تلات|تلاتة|ربع|ربعة|خمس|خمسة|zouj|tlata)\s*(حبات|حبة|حبه|شكاير|شكارة|باكيات|باكية|كراتن|كراطن|كرطونة|hbat|7bat|chkayer|bakyat|boites|cartons)(?=$|\s|[^\w\u0600-\u06FF])/gi;
-      let m;
-      let masked = text;
+      let m, masked = text;
       while ((m = dynReg.exec(text)) !== null) {
-        const rawNum = m[1].toLowerCase();
-        const rawUnit = m[2].toLowerCase();
-        let val = unitWords[rawNum] !== undefined ? unitWords[rawNum] : (parseFloat(rawNum) || 1);
+        const rawNum = m[1].toLowerCase(), rawUnit = m[2].toLowerCase();
+        const val = unitWords[rawNum] !== undefined ? unitWords[rawNum] : (parseFloat(rawNum) || 1);
         let uNorm = rawUnit;
         if (['حبات', 'hbat', '7bat'].includes(rawUnit)) uNorm = 'حبة';
         else if (['شكاير', 'chkayer'].includes(rawUnit)) uNorm = 'شكارة';
@@ -1106,25 +1732,15 @@ def main() -> None:
         results.push({ raw: m[0].trim(), value: val, unit: uNorm });
         masked = masked.slice(0, m.index) + ' '.repeat(m[0].length) + masked.slice(m.index + m[0].length);
       }
-
-      // Fixed units like دوزينة
-      const fixed = [
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(دوزينة|دزينة|douzina|douzaine)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 12, unit: 'دوزينة' },
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(حبة\s*وحدة|1\s*hba)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 1, unit: 'حبة' },
-      ];
-      for (const item of fixed) {
-        const fm = masked.match(item.reg);
-        if (fm) {
-          results.push({ raw: fm[0].trim(), value: item.val, unit: item.unit });
-        }
-      }
+      const douz = masked.match(/(?:^|\s|[^\w\u0600-\u06FF])(دوزينة|دزينة|douzina|douzaine)(?=$|\s|[^\w\u0600-\u06FF])/i);
+      if (douz) results.push({ raw: douz[0].trim(), value: 12, unit: 'دوزينة' });
       return results;
     }
 
     function extractProductAttributes(text) {
       const colors = [];
       const colorDefs = [
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(كحل|كحلة|noir|noire|k7al)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'كحل / noir' },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(كحل|كحلة|noir|noire|k7al|k7la)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'كحل / noir' },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(بيض|بيضا|blanc|blanche|byad)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'بيض / blanc' },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(غوج|حمرا|rouge|7mar)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'غوج / rouge' },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(بلو|زرقة|bleu|bleue)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'بلو / bleu' },
@@ -1132,27 +1748,32 @@ def main() -> None:
         { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(بيج|beige)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'بيج / beige' },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF]|و)(مارون|قهوي|marron)(?=$|\s|[^\w\u0600-\u06FF])/i, label: 'مارون / marron' },
       ];
-      for (const c of colorDefs) {
-        if (c.reg.test(text) && !colors.includes(c.label)) colors.push(c.label);
-      }
+      for (const c of colorDefs) if (c.reg.test(text) && !colors.includes(c.label)) colors.push(c.label);
 
       const sizes = [];
-      const sizePats = [/\b(xxxl|3xl)\b/i, /\b(xxl|2xl)\b/i, /\b(xl)\b/i, /\b(l)\b/i, /\b(m)\b/i, /\b(s)\b/i];
-      for (const sp of sizePats) {
-        const sm = text.match(sp);
-        if (sm) {
-          const sVal = sm[1].toUpperCase();
-          if (!sizes.includes(sVal)) sizes.push(sVal);
-        }
+      const explicitSizeReg = /(?:taille|size|مقاس|طاي|لاطاي)\s*[:=]?\s*(xxxl|3xl|xxl|2xl|xl|xs|l|m|s)\b/gi;
+      let esm;
+      while ((esm = explicitSizeReg.exec(text)) !== null) {
+        const sv = esm[1].toUpperCase();
+        if (!sizes.includes(sv)) sizes.push(sv);
       }
-      const shoeReg = /(?:pointure|taille|مقاس|نمرة)?\s*([3-4][0-9])\b/gi;
+      const multiCharSizes = /\b(xxxl|3xl|xxl|2xl|xl|xs)\b/gi;
+      let mcs;
+      while ((mcs = multiCharSizes.exec(text)) !== null) {
+        const sv = mcs[1].toUpperCase();
+        if (!sizes.includes(sv)) sizes.push(sv);
+      }
+      const shoeReg = /(?:pointure|taille|مقاس|بونتير|نمرة)\s*[:=]?\s*([3-4][0-9])\b/gi;
       let shm;
       while ((shm = shoeReg.exec(text)) !== null) {
         const num = parseInt(shm[1], 10);
         if (num >= 35 && num <= 48 && !sizes.includes(shm[1])) sizes.push(shm[1]);
       }
-
       return { colors, sizes };
+    }
+
+    function escapeRx(s) {
+      return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     function extractEntities(text) {
@@ -1160,41 +1781,41 @@ def main() -> None:
       const lower = text.toLowerCase();
       const addedCodes = new Set();
 
-      // Wilayas (69) direct code
       const codeRegex = /\b(?:wilaya|w|ولاية|ولايه|l)\s*([0-6]?[0-9])\b/gi;
       let cm;
       while ((cm = codeRegex.exec(text)) !== null) {
         const num = parseInt(cm[1], 10);
         if (num >= 1 && num <= 69 && !addedCodes.has(num)) {
           const w = WILAYAS_DATA.find(item => item.code === num);
-          if (w) {
-            addedCodes.add(num);
-            wilayas.push({ ...w, matched: cm[0] });
-          }
+          if (w) { addedCodes.add(num); wilayas.push({ ...w, matched: cm[0], commune: null }); }
         }
       }
 
-      // Wilayas names & aliases
       for (const w of WILAYAS_DATA) {
         if (addedCodes.has(w.code)) continue;
-        for (const alias of w.aliases) {
-          if (alias.length >= 3 && lower.includes(alias.toLowerCase())) {
+        const cands = [w.name_ar, w.name_fr, w.name_en, ...(w.aliases || [])];
+        for (const alias of cands) {
+          if (!alias || alias.length < 3) continue;
+          const alLow = alias.toLowerCase();
+          if (!lower.includes(alLow)) continue;
+          const bRe = new RegExp(`(?:^|\\s|[^\\w\\u0600-\\u06FF])${escapeRx(alLow)}(?=$|\\s|[^\\w\\u0600-\\u06FF])`, 'i');
+          if (bRe.test(lower)) {
             addedCodes.add(w.code);
-            let comMatch = null;
-            if (w.communes_sample && w.communes_sample.includes(alias)) comMatch = alias;
-            else if (w.communes_fr_sample && w.communes_fr_sample.some(c => c.toLowerCase() === alias.toLowerCase())) comMatch = alias;
-            wilayas.push({ ...w, matched: alias, commune: comMatch });
+            wilayas.push({ ...w, matched: alias, commune: null });
             break;
           }
         }
       }
 
-      // Communes (550+)
       for (const w of WILAYAS_DATA) {
         if (addedCodes.has(w.code)) continue;
         const allComs = (w.communes_sample || []).concat(w.communes_fr_sample || []);
         for (const com of allComs) {
-          if (com && com.length >= 3 && lower.includes(com.toLowerCase())) {
+          if (!com || com.length < 3) continue;
+          const comLow = com.toLowerCase();
+          if (!lower.includes(comLow)) continue;
+          const bRe = new RegExp(`(?:^|\\s|[^\\w\\u0600-\\u06FF])${escapeRx(comLow)}(?=$|\\s|[^\\w\\u0600-\\u06FF])`, 'i');
+          if (bRe.test(lower)) {
             addedCodes.add(w.code);
             wilayas.push({ ...w, matched: com, commune: com });
             break;
@@ -1202,103 +1823,74 @@ def main() -> None:
         }
       }
 
-      // Payments
       const payments = [];
       const payPatterns = [
         { type: 'BARIDIMOB', label: 'BaridiMob (بريدي موب)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(baridimob|baridi\s*mob|بريدي\s*موب|بريديموب)(?=$|\s|[^\w\u0600-\u06FF])/i },
         { type: 'EDAHABIA', label: 'Carte Edahabia (البطاقة الذهبية)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(edahabia|dahabia|الذهبية|البطاقة\s*الذهبية)(?=$|\s|[^\w\u0600-\u06FF])/i },
         { type: 'CCP', label: 'CCP (الحساب البريدي الجاري)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(ccp|سي\s*سي\s*بي)(?=$|\s|[^\w\u0600-\u06FF])/i },
-        { type: 'COD', label: 'Paiement à la livraison (الدفع عند الاستلام)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(cod|الدفع\s*عند\s*الاستلام|كي\s*يوصلني|كي\s*تلحق|كي\s*توصل|main\s*à\s*main)(?=$|\s|[^\w\u0600-\u06FF])/i },
+        { type: 'COD', label: 'Paiement à la livraison (الدفع عند الاستلام)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(cod|كاش|الدفع\s*عند\s*الاستلام|كي\s*يوصلني|كي\s*تلحق|main\s*à\s*main)(?=$|\s|[^\w\u0600-\u06FF])/i },
       ];
-      for (const p of payPatterns) {
-        if (p.reg.test(text)) payments.push({ type: p.type, label: p.label });
-      }
+      for (const p of payPatterns) if (p.reg.test(text)) payments.push({ type: p.type, label: p.label });
 
-      // Prices & colloquial Darja amounts
       const prices = [];
       let maskedText = text;
       const millionsMap = { 'زوج': 2, 'تلات': 3, 'تلاتة': 3, 'ربع': 4, 'ربعة': 4, 'خمس': 5, 'خمسة': 5, 'عشر': 10, 'عشرة': 10, 'zouj': 2, 'tlata': 3 };
       const thousandsMap = { 'مية': 100, 'ميتين': 200, 'تلمية': 300, 'ربعمية': 400, 'خمسمية': 500, 'ستين': 60, 'سبعين': 70, 'mya': 100, 'mitin': 200, 'khamsmya': 500 };
-      const mStr = 'زوج|تلات|تلاتة|ربع|ربعة|خمس|خمسة|ست|ستة|سبع|سبعة|تمن|تمنية|تسع|تسعة|عشر|عشرة|zouj|zoudj|tlata|tleta|rab3a|khamsa|setta|seb3a|tmenya|tes3a|3achra';
-      const kStr = 'مية|ميتين|تلمية|تلاتمية|ربعمية|خمسمية|ستمية|سبعمية|تمنمية|تسعمية|عشرين|تلاتين|ربعين|خمسين|ستين|سبعين|تمانين|تسعين|mya|mitin|teltmya|khamsmya|khamsin';
+      const mStr = 'زوج|تلات|تلاتة|ربع|ربعة|خمس|خمسة|ست|ستة|سبع|سبعة|عشر|عشرة|zouj|zoudj|tlata|khamsa|3achra';
+      const kStr = 'مية|ميتين|تلمية|ربعمية|خمسمية|mya|mitin|khamsmya|khamsin';
 
-      // 1. Compound prices (e.g. 2 mlayen w 500 alf)
-      const compReg = new RegExp(`(?:^|\\s|[^\\w\\u0600-\\u06FF])(\\d+(?:[.,]\\d+)?|${mStr})?\\s*(?:ملاين|ملايين|مليون|mlyon|mlayen|mlayin)\\s*(?:و|\\+|et|w)\\s*(\\d+(?:[.,]\\d+)?|${kStr})?\\s*(?:الف|ألف|alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])`, 'gi');
+      const compReg = new RegExp(`(?:^|\\s|[^\\w\\u0600-\\u06FF])(\\d+(?:[.,]\\d+)?|${mStr})?\\s*(?:ملاين|ملايين|مليون|mlyon|melyon|melyoun|mlayen|mlayin)\\s*(?:و|\\+|et|w)\\s*(\\d+(?:[.,]\\d+)?|${kStr})?\\s*(?:الف|ألف|alf)(?=$|\\s|[^\\w\\u0600-\\u06FF])`, 'gi');
       let compM;
       while ((compM = compReg.exec(text)) !== null) {
-        const rM = compM[1];
-        const rK = compM[2];
-        let mVal = 1;
-        if (rM) {
-          const k = rM.toLowerCase();
-          mVal = millionsMap[k] !== undefined ? millionsMap[k] : (parseFloat(k.replace(',', '.')) || 1);
-        }
-        let kVal = 1;
-        if (rK) {
-          const k = rK.toLowerCase();
-          kVal = thousandsMap[k] !== undefined ? thousandsMap[k] : (parseFloat(k.replace(',', '.')) || 0);
-        }
-        const total = (mVal * 10000) + (kVal * 10);
-        prices.push({ raw: compM[0].trim(), amount: total });
+        let mVal = 1, kVal = 0;
+        if (compM[1]) { const k = compM[1].toLowerCase(); mVal = millionsMap[k] ?? (parseFloat(k.replace(',', '.')) || 1); }
+        if (compM[2]) { const k = compM[2].toLowerCase(); kVal = thousandsMap[k] ?? (parseFloat(k.replace(',', '.')) || 0); }
+        prices.push({ raw: compM[0].trim(), amount: (mVal * 10000) + (kVal * 10) });
         maskedText = maskedText.slice(0, compM.index) + ' '.repeat(compM[0].length) + maskedText.slice(compM.index + compM[0].length);
       }
 
-      // 2. Numeric prices with currency
       const priceNumReg = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(da|dzd|دج|دينار|الف|ألف|alf)(?=$|\s|[^\w\u0600-\u06FF])/gi;
       let pm;
       while ((pm = priceNumReg.exec(maskedText)) !== null) {
         let val = parseFloat(pm[1].replace(',', '.'));
-        const u = pm[2].toLowerCase();
-        if (u === 'الف' || u === 'ألف' || u === 'alf') val *= 1000;
+        if (['الف', 'ألف', 'alf'].includes(pm[2].toLowerCase())) val *= 1000;
         prices.push({ raw: pm[0].trim(), amount: val });
         maskedText = maskedText.slice(0, pm.index) + ' '.repeat(pm[0].length) + maskedText.slice(pm.index + pm[0].length);
       }
 
-      // 2b. Numeric doro prices (1 doro = 5 DZD)
       const doroNumReg = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:دورو|doro|doros)(?=$|\s|[^\w\u0600-\u06FF])/gi;
       let dmDoro;
       while ((dmDoro = doroNumReg.exec(maskedText)) !== null) {
-        const val = parseFloat(dmDoro[1].replace(',', '.')) * 5;
-        prices.push({ raw: dmDoro[0].trim(), amount: val });
+        prices.push({ raw: dmDoro[0].trim(), amount: parseFloat(dmDoro[1].replace(',', '.')) * 5 });
         maskedText = maskedText.slice(0, dmDoro.index) + ' '.repeat(dmDoro[0].length) + maskedText.slice(dmDoro.index + dmDoro[0].length);
       }
 
-      // 3. Dynamic millions
       const dynMilReg = /(?:^|\s|[^\w\u0600-\u06FF])(\d+(?:[.,]\d+)?)\s*(?:ملاين|ملايين|مليون|mlyon|melyon|melyoun|mlayen|mlayin|mlayoun)(?=$|\s|[^\w\u0600-\u06FF])/gi;
       let dmDyn;
       while ((dmDyn = dynMilReg.exec(maskedText)) !== null) {
-        const val = parseFloat(dmDyn[1].replace(',', '.')) * 10000;
-        prices.push({ raw: dmDyn[0].trim(), amount: val });
+        prices.push({ raw: dmDyn[0].trim(), amount: parseFloat(dmDyn[1].replace(',', '.')) * 10000 });
         maskedText = maskedText.slice(0, dmDyn.index) + ' '.repeat(dmDyn[0].length) + maskedText.slice(dmDyn.index + dmDyn[0].length);
       }
 
-      // 4. Fixed colloquial amounts
       const darjaAmounts = [
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(عشرين\s*دورو|20\s*doro)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 100 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(مية\s*دورو|100\s*doro)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 500 },
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(مية\s*الف|100\s*الف|mya|myat\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 1000 },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(مية\s*الف|100\s*الف|myat\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 1000 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(ميتين\s*الف|200\s*الف|mitin\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 2000 },
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(خمسمية\s*الف|500\s*الف|khams\s*mya|500\s*alf)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 5000 },
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(مليون|mlyon|melyon|melyoun|1\s*mlyon)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 10000 },
+        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(خمسمية\s*الف|500\s*الف)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 5000 },
         { reg: /(?:^|\s|[^\w\u0600-\u06FF])(زوج\s*ملاين|زوج\s*ملايين|zoudj\s*mlayen|zouj\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 20000 },
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(خمس\s*ملاين|khams\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 50000 },
-        { reg: /(?:^|\s|[^\w\u0600-\u06FF])(عشر\s*ملاين|3achr\s*mlayen)(?=$|\s|[^\w\u0600-\u06FF])/i, val: 100000 },
       ];
       for (const item of darjaAmounts) {
         const dm = maskedText.match(item.reg);
-        if (dm) {
-          prices.push({ raw: dm[0].trim(), amount: item.val });
-          maskedText = maskedText.slice(0, dm.index) + ' '.repeat(dm[0].length) + maskedText.slice(dm.index + dm[0].length);
-        }
+        if (dm) { prices.push({ raw: dm[0].trim(), amount: item.val }); }
       }
 
-      // Deliveries
       const deliveries = [];
       const deliveryPatterns = [
         { company: 'YALIDINE', label: 'Yalidine Express (ياليدين)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(yalidine|yalidin|ياليدين)(?=$|\s|[^\w\u0600-\u06FF])/i },
         { company: 'ZR_EXPRESS', label: 'ZR Express (زد ار اكسبرس)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(zr\s*express|zr|زد\s*ار\s*اكسبرس|زد\s*ار)(?=$|\s|[^\w\u0600-\u06FF])/i },
         { company: 'MAYSTRO', label: 'Maystro Delivery (مايسترو)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(maystro\s*delivery|maystro|مايسترو)(?=$|\s|[^\w\u0600-\u06FF])/i },
-        { company: 'PROCOLIS', label: 'Procolis (بروكولي)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(procolis|pro\s*colis|بروكولي|بروكوليس)(?=$|\s|[^\w\u0600-\u06FF])/i },
+        { company: 'PROCOLIS', label: 'Procolis (بروكولي)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(procolis|pro\s*colis|بروكولي)(?=$|\s|[^\w\u0600-\u06FF])/i },
         { company: 'EMS', label: 'EMS Algérie Poste (البريد السريع)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(ems|ems\s*algerie|البريد\s*السريع)(?=$|\s|[^\w\u0600-\u06FF])/i },
         { company: 'KAZITOUR', label: 'Kazitour Express (كازيتور)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(kazitour|kazi\s*tour|كازيتور)(?=$|\s|[^\w\u0600-\u06FF])/i },
         { company: 'GUEPEX', label: 'Guepex Express (قيباكس)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(guepex|قيباكس)(?=$|\s|[^\w\u0600-\u06FF])/i },
@@ -1308,79 +1900,78 @@ def main() -> None:
         if (m) deliveries.push({ company: d.company, label: d.label, matched: m[0].trim() });
       }
 
-      // Delivery Mode
       let deliveryMode = null;
       const modePatterns = [
-        { mode: 'STOP_DESK', label: 'Stop Desk (استلام من المكتب)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(stop\s*desk|stopdesk|سطوب\s*ديسك|ستوب\s*ديسك|المكتب|فالبيرو|في\s*البيرو|agence)(?=$|\s|[^\w\u0600-\u06FF])/i },
-        { mode: 'HOME_DELIVERY', label: 'Home Delivery (توصيل للمنزل)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(a\s*domicile|[aà]\s*domicile|للدار|لباب\s*الدار|توصيل\s*للمنزل|توصيل\s*للدار|فالدار)(?=$|\s|[^\w\u0600-\u06FF])/i },
+        { mode: 'STOP_DESK', label: 'Stop Desk (استلام من المكتب)', reg: /(?:^|\s|[^\w\u0600-\u06FF])(stop\s*desk|stopdesk|ستوب\s*ديسك|المكتب|فالبيرو|في\s*البيرو|agence)(?=$|\s|[^\w\u0600-\u06FF])/i },
+        { mode: 'HOME_DELIVERY', label: 'Home Delivery (توصيل للمنزل)', reg: /(?:^|\s|[^\w\u0600-\u06FF])([aà]\s*domicile|للدار|لباب\s*الدار|توصيل\s*للمنزل|توصيل\s*للدار|فالدار)(?=$|\s|[^\w\u0600-\u06FF])/i },
       ];
       for (const dm of modePatterns) {
-        const m = text.match(dm.reg);
-        if (m) { deliveryMode = dm.label; break; }
+        if (dm.reg.test(text)) { deliveryMode = dm.label; break; }
       }
 
-      // Phones & Telecom Operator
       const phones = [];
       const phoneReg = /(?:^|\s|[^\w\u0600-\u06FF])((?:\+213|00213|0)\s*(?:[5-7](?:[\s.-]?\d){8}|(?:2[0-9]|3[0-9]|4[0-9])(?:[\s.-]?\d){6}))(?=$|\s|[^\w\u0600-\u06FF])/gi;
       let phMatch;
       while ((phMatch = phoneReg.exec(text)) !== null) {
-        let raw = phMatch[1].trim();
+        const raw = phMatch[1].trim();
         let norm = raw.replace(/[\s.-]/g, '');
         if (norm.startsWith('00213')) norm = '0' + norm.slice(5);
         else if (norm.startsWith('+213')) norm = '0' + norm.slice(4);
-
         let op = null, opLabel = null, opClass = '';
         const pref = norm.slice(0, 2);
-        if (pref === '06') { op = 'MOBILIS'; opLabel = 'Mobilis (موبيليس)'; opClass = 'op-mobilis'; }
-        else if (pref === '07') { op = 'DJEZZY'; opLabel = 'Djezzy (جيزي)'; opClass = 'op-djezzy'; }
-        else if (pref === '05') { op = 'OOREDOO'; opLabel = 'Ooredoo (أوريدو)'; opClass = 'op-ooredoo'; }
-        else if (['02', '03', '04'].includes(pref)) { op = 'ALGERIE_TELECOM'; opLabel = 'Fixe (الهاتف الثابت)'; opClass = 'op-landline'; }
-
+        if (pref === '06') { op = 'MOBILIS'; opLabel = 'Mobilis'; opClass = 'op-mobilis'; }
+        else if (pref === '07') { op = 'DJEZZY'; opLabel = 'Djezzy'; opClass = 'op-djezzy'; }
+        else if (pref === '05') { op = 'OOREDOO'; opLabel = 'Ooredoo'; opClass = 'op-ooredoo'; }
+        else if (['02', '03', '04'].includes(pref)) { op = 'ALGERIE_TELECOM'; opLabel = 'Fixe'; opClass = 'op-landline'; }
         const waUrl = (norm.length === 10 && ['05', '06', '07'].includes(pref)) ? `https://wa.me/213${norm.slice(1)}` : null;
         phones.push({ raw, normalized: norm, operator: op, operatorLabel: opLabel, opClass, waUrl });
       }
-
       return { wilayas, payments, prices, deliveries, deliveryMode, phones };
     }
 
     function detectDialect(text) {
-      const markers = {
-        WEST: ['شوالا', 'شاكاين', 'شا', 'غايا', 'باغي', 'حرز', 'راك عاقل', 'شراكم', 'كيراك', 'كيراكم', 'درك', 'chwala', 'chakayn', 'ghaya', 'baghi', 'kirak', 'drk'],
-        EAST: ['واشنهي', 'قداش', 'ياسر', 'ضرك', 'زي', 'باهي', 'علاشنهي', 'واشبيك', 'كفاه', 'ضروك', 'سيرتا', 'بونة', '9dach', 'yaser', 'bahi'],
-        CENTER: ['واشنو', 'حكاية', 'دروك', 'هكدا', 'هكداك', 'حوايج', 'البهجة', 'العاصمة', 'دزاير', 'wachnou', 'hakda', 'hakdak'],
-        SOUTH: ['واه', 'لاه', 'حتة', 'سوف', 'ميزاب', 'غرداية', 'ادرار', 'wah', 'lah', '7ata'],
+      if (!text) return { region: 'GENERAL_DARJA', confidence: 0, detectedMarkers: [] };
+      const baseMarkers = {
+        WEST: ['شوالا', 'شاكاين', 'شا', 'غايا', 'باغي', 'حرز', 'راك عاقل', 'شراكم', 'كيراك', 'كيراكم', 'درك', 'صايي', 'غادي', 'chwala', 'chakayn', 'ghaya', 'baghi', 'kirak', 'drk', 'sayi', 'ghadi'],
+        EAST: ['واشنهي', 'قداش', 'ياسر', 'ضرك', 'زي', 'باهي', 'علاشنهي', 'واشبيك', 'كفاه', 'ضروك', 'سيرتا', 'بونة', 'عيشك', 'يعيشك', '9dach', 'yaser', 'bahi', '3aychek'],
+        CENTER: ['واشنو', 'حكاية', 'دروك', 'هكدا', 'هكداك', 'حوايج', 'البهجة', 'العاصمة', 'دزاير', 'مريڤل', 'حطة', 'wachnou', 'hakda', 'hakdak', 'mrigel', 'hbal'],
+        SOUTH: ['واه', 'لاه', 'حتة', 'سوف', 'ميزاب', 'غرداية', 'ادرار', 'بسكرة', 'ورقلة', 'wah', 'lah', '7ata', 'zin'],
       };
+      const merged = {};
+      for (const reg of ['WEST', 'EAST', 'CENTER', 'SOUTH']) {
+        const extra = (DIALECTS_DATA && DIALECTS_DATA.regions && DIALECTS_DATA.regions[reg] && DIALECTS_DATA.regions[reg].markers) || [];
+        merged[reg] = Array.from(new Set([...baseMarkers[reg], ...extra]));
+      }
       const { tokens } = tokenize(text);
-      const lowerTokens = tokens.map((t) => t.toLowerCase());
+      const lowerTokens = tokens.map(t => t.toLowerCase());
       const tokenSet = new Set(lowerTokens);
-      const paddedTokens = ` ${lowerTokens.join(' ')} `;
+      const padded = ` ${lowerTokens.join(' ')} `;
       const scores = { WEST: [], EAST: [], CENTER: [], SOUTH: [] };
-      for (const [reg, words] of Object.entries(markers)) {
+
+      for (const [reg, words] of Object.entries(merged)) {
         for (const w of words) {
-          const lw = w.toLowerCase().trim();
+          const lw = String(w).toLowerCase().trim();
           if (!lw) continue;
           if (lw.includes(' ')) {
-            if (paddedTokens.includes(` ${lw} `)) scores[reg].push(w);
-          } else if (tokenSet.has(lw)) {
+            if (padded.includes(` ${lw} `) && !scores[reg].includes(w)) scores[reg].push(w);
+          } else if (tokenSet.has(lw) && !scores[reg].includes(w)) {
             scores[reg].push(w);
           }
         }
       }
-      let top = 'GENERAL_DARJA';
-      let max = 0;
-      let detected = [];
+
+      let top = 'GENERAL_DARJA', max = 0, detected = [];
       for (const [r, list] of Object.entries(scores)) {
         if (list.length > max) { max = list.length; top = r; detected = list; }
       }
       return {
         region: top,
         confidence: max > 0 ? Math.min(0.99, Math.round((0.6 + max * 0.15) * 100) / 100) : 0.5,
-        detectedMarkers: detected,
+        detectedMarkers: detected
       };
     }
 
     const GENERIC_CULTURE_STOP = new Set(['سلعة', 'سوق', 'حي', 'شارع', 'باب', 'واد', 'ساحة', 'جبل', 'جبال', 'طاجين', 'طبق', 'أكلة']);
-
     function extractKeywords(text) {
       if (!text) return [];
       const clean = text.split(' (')[0].trim();
@@ -1390,24 +1981,8 @@ def main() -> None:
         const p = part.trim();
         if (p.length > 2 && !GENERIC_CULTURE_STOP.has(p)) {
           res.add(p);
-          if (p.startsWith('ال') && p.length > 3) {
-            res.add(p.slice(2));
-          } else if (!p.startsWith('ال')) {
-            res.add('ال' + p);
-          }
-          const words = p.split(/\s+/);
-          if (words.length === 2) {
-            for (const w of words) {
-              if (w.length > 3 && !GENERIC_CULTURE_STOP.has(w)) {
-                res.add(w);
-                if (w.startsWith('ال') && w.length > 4) {
-                  res.add(w.slice(2));
-                } else if (!w.startsWith('ال')) {
-                  res.add('ال' + w);
-                }
-              }
-            }
-          }
+          if (p.startsWith('ال') && p.length > 3) res.add(p.slice(2));
+          else if (!p.startsWith('ال')) res.add('ال' + p);
         }
       }
       return Array.from(res).filter(x => x.length > 2 && !GENERIC_CULTURE_STOP.has(x));
@@ -1415,172 +1990,72 @@ def main() -> None:
 
     function detectCulturalReferences(text) {
       if (!text || !text.trim()) {
-        return {
-          hasCulturalReference: false,
-          proverbs: [],
-          memesAndTrends: [],
-          landmarks: [],
-          gastronomy: [],
-          slangExpressions: [],
-          allMatches: [],
-          culturalSummary: 'لا توجد إشارات ثقافية خاصة.'
-        };
+        return { hasCulturalReference: false, proverbs: [], memesAndTrends: [], viralMemes: [], francoDarja: [], landmarks: [], gastronomy: [], slangExpressions: [], allMatches: [], culturalSummary: 'لا توجد إشارات ثقافية خاصة.' };
       }
       const lowerText = text.toLowerCase();
-      const cultureDb = (typeof CULTURE_DATA !== 'undefined' && CULTURE_DATA) ? CULTURE_DATA : { proverbs: [], memes_and_trends: [], landmarks: [], gastronomy: [] };
-      const slangDb = (typeof SLANG_DATA !== 'undefined' && SLANG_DATA) ? SLANG_DATA : { expressions: [] };
+      const { tokens } = tokenize(text);
+      const tokenSet = new Set(tokens.map(t => t.toLowerCase()));
+      const cultureDb = CULTURE_DATA || { proverbs: [], memes_and_trends: [], landmarks: [], gastronomy: [] };
+      const slangDb = SLANG_DATA || { expressions: [] };
 
-      const matchedProverbs = [];
-      const matchedMemes = [];
-      const matchedLandmarks = [];
-      const matchedGastronomy = [];
-      const matchedSlang = [];
+      const matchedProverbs = [], matchedTrends = [], matchedLandmarks = [], matchedGastronomy = [], matchedSlang = [], matchedMemes = [], matchedFranco = [];
 
-      // 1. Proverbs
       for (const p of cultureDb.proverbs || []) {
-        const pText = p.text || '';
-        const pArabizi = p.arabizi || '';
-        if ((pText && text.includes(pText)) || (pArabizi && lowerText.includes(pArabizi.toLowerCase()))) {
-          matchedProverbs.push({
-            matchedText: text.includes(pText) ? pText : pArabizi,
-            category: 'proverb',
-            canonicalName: pText,
-            meaning: p.meaning || '',
-            metadata: { category: p.category, region: p.region }
-          });
+        if ((p.text && text.includes(p.text)) || (p.arabizi && lowerText.includes(p.arabizi.toLowerCase()))) {
+          matchedProverbs.push({ category: 'proverb', canonicalName: p.text, meaning: p.meaning || '' });
         }
       }
-
-      // 2. Memes & Trends
       for (const m of cultureDb.memes_and_trends || []) {
-        const mPhrase = m.phrase || '';
-        const mArabizi = m.arabizi || '';
-        if ((mPhrase && text.includes(mPhrase)) || (mArabizi && lowerText.includes(mArabizi.toLowerCase()))) {
-          matchedMemes.push({
-            matchedText: text.includes(mPhrase) ? mPhrase : mArabizi,
-            category: 'meme_trend',
-            canonicalName: mPhrase,
-            meaning: m.meaning || '',
-            metadata: { tone: m.tone, context: m.context }
-          });
+        if ((m.phrase && text.includes(m.phrase)) || (m.arabizi && lowerText.includes(m.arabizi.toLowerCase()))) {
+          matchedTrends.push({ category: 'meme_trend', canonicalName: m.phrase, meaning: m.meaning || '' });
         }
       }
-
-      // 3. Landmarks
+      for (const vm of (MEMES_DATA && MEMES_DATA.memes) || []) {
+        if ((vm.phrase && text.includes(vm.phrase)) || (vm.arabizi && lowerText.includes(vm.arabizi.toLowerCase()))) {
+          matchedMemes.push({ category: 'viral_meme', canonicalName: vm.phrase, meaning: (vm.meaning || '') + (vm.origin ? ` [${vm.origin}]` : '') });
+        }
+      }
+      for (const fd of (FRANCO_DATA && FRANCO_DATA.words) || []) {
+        const arW = (fd.darja_ar || '').toLowerCase();
+        const azW = (fd.arabizi || '').toLowerCase();
+        if ((arW && (tokenSet.has(arW) || text.includes(fd.darja_ar))) || (azW && (tokenSet.has(azW) || lowerText.includes(azW)))) {
+          matchedFranco.push({ category: 'franco_darja', canonicalName: `${fd.darja_ar} (${fd.arabizi})`, meaning: `${fd.meaning_ar || ''} — الأصل الفرنسي: ${fd.fr_origin}` });
+        }
+      }
       for (const lmk of cultureDb.landmarks || []) {
-        const lName = lmk.name || '';
-        const keywords = extractKeywords(lName);
-        for (const kw of keywords) {
-          if (kw && text.includes(kw)) {
-            matchedLandmarks.push({
-              matchedText: kw,
-              category: 'landmark',
-              canonicalName: lName,
-              meaning: lmk.description || '',
-              metadata: { city: lmk.city, wilaya_code: lmk.wilaya_code }
-            });
-            break;
-          }
+        for (const kw of extractKeywords(lmk.name || '')) {
+          if (kw && text.includes(kw)) { matchedLandmarks.push({ category: 'landmark', canonicalName: lmk.name, meaning: lmk.description || '' }); break; }
         }
       }
-
-      // 4. Gastronomy
       for (const f of cultureDb.gastronomy || []) {
-        const fName = f.name || '';
-        const fArabizi = f.arabizi || '';
-        const keywords = extractKeywords(fName);
-        let matched = false;
-        for (const kw of keywords) {
-          if (kw && text.includes(kw)) {
-            matchedGastronomy.push({
-              matchedText: kw,
-              category: 'gastronomy',
-              canonicalName: fName,
-              meaning: f.description || '',
-              metadata: { origin: f.origin, category: f.category }
-            });
-            matched = true;
-            break;
-          }
+        let hit = false;
+        for (const kw of extractKeywords(f.name || '')) {
+          if (kw && text.includes(kw)) { matchedGastronomy.push({ category: 'gastronomy', canonicalName: f.name, meaning: f.description || '' }); hit = true; break; }
         }
-        if (!matched && fArabizi) {
-          const parts = fArabizi.split('/');
-          for (const part of parts) {
-            if (part.trim() && lowerText.includes(part.trim().toLowerCase())) {
-              matchedGastronomy.push({
-                matchedText: part.trim(),
-                category: 'gastronomy',
-                canonicalName: fName,
-                meaning: f.description || '',
-                metadata: { origin: f.origin, category: f.category }
-              });
-              break;
-            }
+        if (!hit && f.arabizi) {
+          for (const part of f.arabizi.split('/')) {
+            if (part.trim() && lowerText.includes(part.trim().toLowerCase())) { matchedGastronomy.push({ category: 'gastronomy', canonicalName: f.name, meaning: f.description || '' }); break; }
           }
         }
       }
-
-      // 5. Slang Expressions
       for (const s of slangDb.expressions || []) {
-        const sTerm = s.term || '';
-        const sArabizi = s.arabizi || '';
-        const keywords = extractKeywords(sTerm);
-        let matched = false;
-        for (const kw of keywords) {
-          if (kw && text.includes(kw)) {
-            matchedSlang.push({
-              matchedText: kw,
-              category: 'slang',
-              canonicalName: sTerm,
-              meaning: s.meaning || '',
-              metadata: { type: s.type, polarity: s.polarity }
-            });
-            matched = true;
-            break;
-          }
+        let hit = false;
+        for (const kw of extractKeywords(s.term || '')) {
+          if (kw && text.includes(kw)) { matchedSlang.push({ category: 'slang', canonicalName: s.term, meaning: s.meaning || '' }); hit = true; break; }
         }
-        if (!matched && sArabizi && lowerText.includes(sArabizi.toLowerCase())) {
-          matchedSlang.push({
-            matchedText: sArabizi,
-            category: 'slang',
-            canonicalName: sTerm,
-            meaning: s.meaning || '',
-            metadata: { type: s.type, polarity: s.polarity }
-          });
+        if (!hit && s.arabizi && lowerText.includes(s.arabizi.toLowerCase())) {
+          matchedSlang.push({ category: 'slang', canonicalName: s.term, meaning: s.meaning || '' });
         }
       }
 
-      const allMatches = [
-        ...matchedProverbs,
-        ...matchedMemes,
-        ...matchedLandmarks,
-        ...matchedGastronomy,
-        ...matchedSlang
-      ];
-
-      const summaryParts = [];
-      if (matchedProverbs.length > 0) summaryParts.push(`أمثال شعبية: ${matchedProverbs.map(p => `"${p.canonicalName}"`).join('، ')}`);
-      if (matchedMemes.length > 0) summaryParts.push(`ترندات وميمز: ${matchedMemes.map(m => `"${m.canonicalName}"`).join('، ')}`);
-      if (matchedLandmarks.length > 0) summaryParts.push(`معالم وأسواق: ${matchedLandmarks.map(l => `"${l.canonicalName}"`).join('، ')}`);
-      if (matchedGastronomy.length > 0) summaryParts.push(`مأكولات جزائرية: ${matchedGastronomy.map(f => `"${f.canonicalName}"`).join('، ')}`);
-      if (matchedSlang.length > 0) summaryParts.push(`مصطلحات شارع: ${matchedSlang.map(s => `"${s.canonicalName}"`).join('، ')}`);
-
-      return {
-        hasCulturalReference: allMatches.length > 0,
-        proverbs: matchedProverbs,
-        memesAndTrends: matchedMemes,
-        landmarks: matchedLandmarks,
-        gastronomy: matchedGastronomy,
-        slangExpressions: matchedSlang,
-        allMatches,
-        culturalSummary: summaryParts.length > 0 ? summaryParts.join(' | ') : 'لا توجد إشارات ثقافية خاصة.'
-      };
+      const allMatches = [...matchedProverbs, ...matchedTrends, ...matchedMemes, ...matchedFranco, ...matchedLandmarks, ...matchedGastronomy, ...matchedSlang];
+      return { hasCulturalReference: allMatches.length > 0, proverbs: matchedProverbs, memesAndTrends: matchedTrends, viralMemes: matchedMemes, francoDarja: matchedFranco, landmarks: matchedLandmarks, gastronomy: matchedGastronomy, slangExpressions: matchedSlang, allMatches };
     }
 
     function detectScript(text) {
-      const latinCount = (text.match(/[a-zA-Z]/g) || []).length;
-      const arabicCount = (text.match(/[\u0600-\u06FF]/g) || []).length;
-      return arabicCount > latinCount ? 'arabic' : 'arabizi';
+      const latin = (text.match(/[a-zA-Z]/g) || []).length;
+      const arabic = (text.match(/[\u0600-\u06FF]/g) || []).length;
+      return arabic > latin ? 'arabic' : 'arabizi';
     }
 
     function kbTokenize(text) {
@@ -1589,11 +2064,11 @@ def main() -> None:
       return (clean.match(/[a-z0-9\u0600-\u06FF']+/g) || []).filter(t => t.length >= 2 && !stop.has(t));
     }
 
-    function respondToDarja(text, persona = 'casual') {
+    function respondToDarja(text, persona = 'merchant', forcedScript = 'auto') {
       if (!text || !text.trim()) {
-        return { reply: 'مرحباً بيك خويا، كاش ما نسحقو نخدموك؟', intent: 'EMPTY', script: 'arabic', source: 'default' };
+        return { reply: 'مرحباً بيك خويا، كاش ما نسحقو نخدموك؟', intent: 'EMPTY', script: 'arabic', confidence: 1, source: 'default' };
       }
-      const resolvedScript = detectScript(text);
+      const resolvedScript = forcedScript === 'auto' ? detectScript(text) : forcedScript;
       const normInput = text.toLowerCase().replace(/[!?.,;:\-_/\\]+/g, ' ').replace(/[\u064B-\u065F\u0670\u0640]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/(.)\1{2,}/g, '$1').replace(/\s+/g, ' ').trim();
       const rules = (DIALOGUE_RULES_DATA && DIALOGUE_RULES_DATA.rules) || [];
 
@@ -1601,7 +2076,6 @@ def main() -> None:
       for (const rule of rules) {
         const patterns = resolvedScript === 'arabizi' ? rule.patterns_arabizi : rule.patterns_arabic;
         const altPatterns = resolvedScript === 'arabizi' ? rule.patterns_arabic : rule.patterns_arabizi;
-
         for (const p of (patterns || [])) {
           const normP = p.toLowerCase().trim();
           let score = 0;
@@ -1625,11 +2099,12 @@ def main() -> None:
         let chosen = (responses && responses[0]) || '';
         if (persona === 'merchant' && rule.intent === 'WELLBEING_INQUIRY') {
           chosen = resolvedScript === 'arabizi' ? 'We cv hamdoulah kho! Marhba bik f la boutique ta3na, kash ma khasek sel3a?' : 'لاباس الحمد لله ربي يحفظك خويا! مرحباً بيك في متجرنا، كاش ما راك تحوس سلعة؟';
+        } else if (persona === 'assistant' && rule.intent === 'WELLBEING_INQUIRY') {
+          chosen = resolvedScript === 'arabizi' ? 'Hamdoulah! Marhba bik, kifach naqder n3awnek lyoum?' : 'الحمد لله! أهلاً بك، كيف يمكنني مساعدتك اليوم؟';
         }
-        return { reply: chosen, intent: rule.intent, script: resolvedScript, source: 'rule' };
+        return { reply: chosen, intent: rule.intent, script: resolvedScript, confidence: 0.95, source: 'rule' };
       }
 
-      // KB Retrieval over DziriAlign + DziriEval
       const entries = (DIALOGUE_KB_DATA && DIALOGUE_KB_DATA.entries) || [];
       const qToks = new Set(kbTokenize(text));
       if (qToks.size >= 2 && entries.length > 0) {
@@ -1645,14 +2120,17 @@ def main() -> None:
           if (sim > bestSim) { bestSim = sim; bestKb = entry; }
         }
         if (bestKb && bestSim >= 0.34) {
-          return { reply: bestKb.reply, intent: bestKb.intent || 'CONVERSATION', script: bestKb.script, source: 'kb_retrieval' };
+          return { reply: bestKb.reply, intent: bestKb.intent || 'CONVERSATION', script: bestKb.script, confidence: Math.min(0.92, Math.round(bestSim * 100) / 100), source: 'kb_retrieval' };
         }
       }
 
-      if (resolvedScript === 'arabizi') {
-        return { reply: 'We cv hamdoulah w nta kho? Marhba bik!', intent: 'CASUAL_CHAT', script: 'arabizi', source: 'default' };
-      }
-      return { reply: 'مرحباً بيك خويا العزيز! واش راك وكاش ما نسحقو نخدموك؟', intent: 'CASUAL_CHAT', script: 'arabic', source: 'default' };
+      return {
+        reply: resolvedScript === 'arabizi' ? 'We cv hamdoulah w nta kho? Marhba bik!' : 'مرحباً بيك خويا العزيز! واش راك وكاش ما نسحقو نخدموك؟',
+        intent: 'CASUAL_CHAT',
+        script: resolvedScript,
+        confidence: 0.65,
+        source: 'default'
+      };
     }
 
     function detectProfanity(text) {
@@ -1668,15 +2146,12 @@ def main() -> None:
         const variants = [];
         if (item.ar) variants.push(item.ar);
         if (item.arabizi) variants.push(...item.arabizi);
-
         for (const v of variants) {
           if (!v) continue;
-          const escaped = v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const pattern = new RegExp(`(?<![\\w\u0600-\u06FF])${escaped}(?![\\w\u0600-\u06FF])`, 'gi');
+          const pattern = new RegExp(`(?<![\\w\\u0600-\\u06FF])${escapeRx(v)}(?![\\w\\u0600-\\u06FF])`, 'gi');
           let m;
           while ((m = pattern.exec(normText)) !== null) {
-            const start = m.index;
-            const end = start + m[0].length;
+            const start = m.index, end = start + m[0].length;
             matches.push({ term: item.term || v, category: item.category, severity: item.severity, matchedText: text.slice(start, end) });
             if (severityOrder[item.severity] > severityOrder[highestSeverity]) highestSeverity = item.severity;
             for (let i = start; i < Math.min(end, censoredChars.length); i++) censoredChars[i] = '*';
@@ -1684,27 +2159,60 @@ def main() -> None:
         }
       }
       const isProfane = matches.length > 0;
-      return {
-        isProfane,
-        severity: isProfane ? highestSeverity : 'none',
-        matches,
-        censoredText: censoredChars.join('').replace(/\*+/g, '***')
-      };
+      return { isProfane, severity: isProfane ? highestSeverity : 'none', matches, censoredText: censoredChars.join('').replace(/\*+/g, '***') };
     }
 
-    // UI Controller
+    // Tab Navigation
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabId));
+    }
+
+    function setSentimentMode(mode) {
+      sentimentMode = mode;
+      document.querySelectorAll('#sentimentModeGroup .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+      processText();
+    }
+
+    function setPersona(p) {
+      currentPersona = p;
+      document.querySelectorAll('#personaGroup .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.persona === p));
+      processText();
+    }
+
+    function switchDevTab(tab) {
+      currentDevTab = tab;
+      document.querySelectorAll('[data-devtab]').forEach(b => b.classList.toggle('active', b.dataset.devtab === tab));
+      ['json', 'code', 'agent'].forEach(t => {
+        document.getElementById('devTab-' + t).style.display = t === tab ? 'block' : 'none';
+      });
+    }
+
+    async function copyDevOutput() {
+      let textToCopy = '';
+      if (currentDevTab === 'json') textToCopy = document.getElementById('jsonReportPre').textContent;
+      else if (currentDevTab === 'code') textToCopy = document.getElementById('codeSnippetPre').textContent;
+      else textToCopy = document.getElementById('agentPromptBox').textContent;
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        const btn = document.getElementById('copyDevBtn');
+        btn.textContent = 'تم النسخ';
+        setTimeout(() => { btn.textContent = 'نسخ'; }, 1400);
+      } catch {}
+    }
+
+    // Analyzer Controller
     const inputArea = document.getElementById('textInput');
     const charCount = document.getElementById('charCount');
 
     const SAMPLES = [
-      "salam khoya hab 2 hbat k7la taille L b 2 mlayen w 500 alf l Rouiba fi Alger b yalidine. num ta3i: 0661234567",
+      "hab nchri 2 hbat XL noir b 500 doro aflou yalidine baridimob 0661234567",
       "بشحال هاذي خاوة السومة تاعها قداش؟ كاش جديد متوفر منها ولا خلاصت؟",
       "السلعة هاااااايلة بزاااااف و الخدمة فور، يعطيك الصحة! توصيل للعلمة سطيف رقمي 0770112233 و نخلصك بـ baridimob",
       "سراقين حشيتوهالي رجعولي دراهمي سلعة خردة وما رديتوش عليا ونشكي بيكم للعدالة ولابوليس!",
       "شوالا راك باغي خوية غايا درك؟ حاب دوزينة مقاس 42 لعين الترك ولاية 31 بـ zr express للدار و نخلصك كاش",
-      "واشنهي هادا قداش التوصيل لقسنطينة سيرتا و وقتاش تلحق؟ نخلصك كاش بـ مية الف",
-      "طاح الحك وصاب غطاه، ابعثلي رشتة عاصمية و طبق شخشوخة لباب الواد و نخلصك كاش",
-      "تيكي تاكا يا خويا الكولي وصلني وسلعتكم كابا أصلية ولوز وهبال يعطيكم الصحة",
+      "طاح الحك وصاب غطاه، ابعثلي رشتة عاصمية لباب الواد و نخلصك كاش",
+      "rabi yhfdk hab ncommandi sabat caba mrigel l wahran",
       "wach ya khoy",
       "يا حمار ما تبعثليش سلعة خردة وناقصة",
       "قالو فاك يا حشيشة و زوخ وطير و وان تو ثري فيفا لالجيري",
@@ -1719,412 +2227,515 @@ def main() -> None:
 
     function processText() {
       const text = inputArea.value;
-      charCount.textContent = `${text.length} حرف`;
+      charCount.textContent = `${text.length} chars`;
 
-      // Escalation Detection
       const esc = detectEscalation(text);
       const escBox = document.getElementById('escalationStatusBox');
       if (esc.needsEscalation) {
-        escBox.innerHTML = `
-          <div class="escalation-alert">
-            <span style="font-size:22px;">🚨</span>
-            <div>
-              <div style="font-weight:800; font-size:15px; color:#f87171;">تنبيه تصعيد بشري عاجل (Human Escalation Required)</div>
-              <div style="font-size:13px; margin-top:2px;">السبب: <strong>${esc.reason}</strong> (درجة الإلحاح: <strong>${esc.urgency}</strong>) — ${esc.guideline}</div>
-              <div style="font-size:11px; color:#fca5a5; margin-top:4px;">الكلمات المفتاحية المرصودة: ${esc.matchedTriggers.join(', ')}</div>
-            </div>
-          </div>
-        `;
+        escBox.innerHTML = `<div class="escalation-alert"><div><div style="font-weight:800; font-size:15px; color:#f87171;">تنبيه تصعيد بشري عاجل (${escapeHtml(esc.urgency)})</div><div style="font-size:13px; margin-top:2px;">السبب: <strong>${escapeHtml(esc.reason)}</strong> — ${escapeHtml(esc.guideline)}</div><div style="font-size:11px; color:#fca5a5; margin-top:4px;">الكلمات المرصودة: ${esc.matchedTriggers.map(escapeHtml).join('، ')}</div></div></div>`;
       } else {
-        escBox.innerHTML = `
-          <div class="escalation-healthy">
-            <span>✅</span>
-            <span>محادثة طبيعية: لا تتطلب تدخلاً بشرياً عاجلاً، يمكن لوكيل الذكاء الاصطناعي الرد تلقائياً.</span>
-          </div>
-        `;
+        escBox.innerHTML = `<div class="escalation-healthy"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>محادثة آمنة وطبيعية: لا تتطلب تصعيداً بشرياً ويمكن للوكيل الآلي معالجتها مباشرة.</span></div>`;
       }
 
-      // 1. Intent Classification
       const intentRes = identifyIntent(text);
-      const iBadge = document.getElementById('intentBadge');
-      const iConf = document.getElementById('intentConfidence');
-      const iKws = document.getElementById('intentKeywords');
-
-      const intentDisplay = {
-        ORDER: { label: '🛒 طلب شراء (ORDER)', cls: 'intent-order' },
-        PRICE_INQUIRY: { label: '💰 استفسار عن السعر (PRICE_INQUIRY)', cls: 'intent-price' },
-        DELIVERY_INQUIRY: { label: '🚚 استفسار عن التوصيل (DELIVERY_INQUIRY)', cls: 'intent-delivery' },
-        AVAILABILITY_INQUIRY: { label: '📦 توفر السلعة (AVAILABILITY_INQUIRY)', cls: 'intent-availability' },
-        COMPLAINT: { label: '⚠️ شكوى / مشكلة (COMPLAINT)', cls: 'intent-complaint' },
-        GREETING: { label: '👋 تحية وتواصل (GREETING)', cls: 'intent-greeting' },
-        UNKNOWN: { label: '❓ غير محدد (UNKNOWN)', cls: 'intent-unknown' }
+      const intentMap = {
+        ORDER: { label: 'طلب شراء (ORDER)', cls: 'intent-order' },
+        PRICE_INQUIRY: { label: 'استفسار عن السعر (PRICE_INQUIRY)', cls: 'intent-price' },
+        DELIVERY_INQUIRY: { label: 'استفسار عن التوصيل (DELIVERY_INQUIRY)', cls: 'intent-delivery' },
+        AVAILABILITY_INQUIRY: { label: 'توفر السلعة (AVAILABILITY_INQUIRY)', cls: 'intent-availability' },
+        COMPLAINT: { label: 'شكوى / مشكلة (COMPLAINT)', cls: 'intent-complaint' },
+        GREETING: { label: 'تحية وتواصل (GREETING)', cls: 'intent-greeting' },
+        UNKNOWN: { label: 'غير محدد (UNKNOWN)', cls: 'intent-unknown' }
       };
+      const iInfo = intentMap[intentRes.intent] || intentMap.UNKNOWN;
+      const iBadge = document.getElementById('intentBadge');
+      iBadge.className = 'intent-badge ' + iInfo.cls;
+      iBadge.textContent = iInfo.label;
+      document.getElementById('intentConfidence').textContent = intentRes.confidence > 0 ? `ثقة ${(intentRes.confidence * 100).toFixed(0)}%` : '-';
+      document.getElementById('intentKeywords').innerHTML = intentRes.matchedKeywords.length
+        ? intentRes.matchedKeywords.map(k => `<span class="token-pill token-info">${escapeHtml(k)}</span>`).join('')
+        : '<span class="empty-state">لا توجد مفاتيح نية صريحة</span>';
 
-      const info = intentDisplay[intentRes.intent] || intentDisplay.UNKNOWN;
-      iBadge.className = 'intent-badge ' + info.cls;
-      iBadge.textContent = info.label;
-      iConf.textContent = intentRes.confidence > 0 ? `دقة ${(intentRes.confidence * 100).toFixed(0)}%` : '-';
-
-      iKws.innerHTML = '';
-      if (intentRes.matchedKeywords.length > 0) {
-        intentRes.matchedKeywords.forEach(k => {
-          iKws.innerHTML += `<span class="token-pill" style="background:#1e293b; color:#38bdf8; border:1px solid #0284c7;">${k}</span>`;
-        });
-      } else {
-        iKws.innerHTML = '<span class="empty-state">لا توجد كلمات نية صريحة</span>';
-      }
-
-      // 2. Sentiment
-      const sent = analyzeSentiment(text);
+      const sent = analyzeSentiment(text, sentimentMode);
       const sBadge = document.getElementById('sentimentBadge');
-      const sScore = document.getElementById('sentimentScore');
-      const tokensBox = document.getElementById('tokensBox');
-      const negFlag = document.getElementById('negationFlag');
+      document.getElementById('sentimentScore').textContent = (sent.score >= 0 ? '+' : '') + sent.score.toFixed(2);
+      document.getElementById('sentimentMethodBadge').textContent = sent.method;
+      sBadge.className = 'sentiment-badge ' + (sent.label === 'POSITIVE' ? 'badge-positive' : sent.label === 'NEGATIVE' ? 'badge-negative' : sent.label === 'MIXED' ? 'badge-mixed' : 'badge-neutral');
+      sBadge.textContent = { POSITIVE: 'إيجابي (POSITIVE)', NEGATIVE: 'سلبي (NEGATIVE)', MIXED: 'مختلط (MIXED)', NEUTRAL: 'محايد (NEUTRAL)' }[sent.label] || sent.label;
 
-      sScore.textContent = (sent.score >= 0 ? '+' : '') + sent.score.toFixed(2);
-      sBadge.className = 'sentiment-badge ' + (
-        sent.label === 'POSITIVE' ? 'badge-positive' :
-        sent.label === 'NEGATIVE' ? 'badge-negative' :
-        sent.label === 'MIXED' ? 'badge-mixed' : 'badge-neutral'
-      );
-      sBadge.textContent = {
-        POSITIVE: 'إيجابي (+)',
-        NEGATIVE: 'سلبي (-)',
-        MIXED: 'مختلط (~)',
-        NEUTRAL: 'محايد (o)'
-      }[sent.label] || sent.label;
+      const pPos = Math.round((sent.probabilities?.POSITIVE || 0) * 100);
+      const pNeu = Math.round((sent.probabilities?.NEUTRAL || 0) * 100);
+      const pNeg = Math.max(0, 100 - pPos - pNeu);
+      document.getElementById('probBarPos').style.width = pPos + '%';
+      document.getElementById('probBarNeu').style.width = pNeu + '%';
+      document.getElementById('probBarNeg').style.width = pNeg + '%';
+      document.getElementById('probLegend').textContent = `POS ${pPos}%  |  NEU ${pNeu}%  |  NEG ${pNeg}%`;
 
-      tokensBox.innerHTML = '';
-      sent.positiveTokens.forEach(t => {
-        tokensBox.innerHTML += `<span class="token-pill token-pos">+ ${t}</span>`;
-      });
-      sent.negativeTokens.forEach(t => {
-        tokensBox.innerHTML += `<span class="token-pill token-neg">- ${t}</span>`;
-      });
-      if (sent.positiveTokens.length === 0 && sent.negativeTokens.length === 0) {
-        tokensBox.innerHTML = '<span class="empty-state">لا توجد كلمات مشاعر مباشرة</span>';
-      }
-      negFlag.style.display = sent.negated ? 'block' : 'none';
+      const tPills = [
+        ...sent.positiveTokens.map(t => `<span class="token-pill token-pos">+ ${escapeHtml(t)}</span>`),
+        ...sent.negativeTokens.map(t => `<span class="token-pill token-neg">- ${escapeHtml(t)}</span>`)
+      ];
+      document.getElementById('tokensBox').innerHTML = tPills.length ? tPills.join('') : '<span class="empty-state">لا توجد كلمات مشاعر مباشرة</span>';
+      document.getElementById('negationFlag').style.display = sent.negated ? 'block' : 'none';
 
-      // 3. Wilayas & Entities
       const entities = extractEntities(text);
-      const wilayasBox = document.getElementById('wilayasBox');
-      const paymentsBox = document.getElementById('paymentsBox');
-      const pricesBox = document.getElementById('pricesBox');
+      document.getElementById('wilayasBox').innerHTML = entities.wilayas.length
+        ? entities.wilayas.map(w => `<div class="entity-tag"><span class="entity-code">${escapeHtml(w.code_str || w.code)}</span><strong>${escapeHtml(w.name_ar)}</strong><span style="color:var(--text-muted); font-size:11px;">(${escapeHtml(w.name_fr)})</span>${w.era === 69 ? '<span class="era69-badge">جديدة 59-69</span>' : ''}${w.commune ? `<span class="commune-badge">بلدية ${escapeHtml(w.commune)}</span>` : ''}</div>`).join('')
+        : '<span class="empty-state">لم يتم رصد ولايات أو بلديات في النص</span>';
 
-      wilayasBox.innerHTML = '';
-      if (entities.wilayas.length > 0) {
-        entities.wilayas.forEach(w => {
-          const comBadge = w.commune ? `<span class="commune-badge">📍 بلدية ${w.commune}</span>` : '';
-          wilayasBox.innerHTML += `
-            <div class="entity-tag">
-              <span class="entity-code">${w.code_str || w.code}</span>
-              <strong>${w.name_ar}</strong>
-              <span style="color:var(--text-muted); font-size:11px;">(${w.name_fr})</span>
-              ${comBadge}
-            </div>
-          `;
-        });
-      } else {
-        wilayasBox.innerHTML = '<span class="empty-state">لم يتم رصد ولايات أو بلديات في النص</span>';
-      }
-
-      // 4. Quantities & Product Attributes
       const quantities = extractQuantities(text);
       const attrs = extractProductAttributes(text);
-      const quantitiesBox = document.getElementById('quantitiesBox');
-      const attributesBox = document.getElementById('attributesBox');
+      document.getElementById('quantitiesBox').innerHTML = quantities.length
+        ? quantities.map(q => `<span class="qty-tag">${escapeHtml(q.value)} ${escapeHtml(q.unit)} (${escapeHtml(q.raw)})</span>`).join('')
+        : '<span class="empty-state">لم ترصد كميات محددة</span>';
+      document.getElementById('attributesBox').innerHTML = (attrs.colors.length || attrs.sizes.length)
+        ? [...attrs.colors.map(c => `<span class="attr-tag">${escapeHtml(c)}</span>`), ...attrs.sizes.map(s => `<span class="attr-tag">مقاس ${escapeHtml(s)}</span>`)].join('')
+        : '<span class="empty-state">لا توجد ألوان أو مقاسات مرصودة</span>';
 
-      quantitiesBox.innerHTML = '';
-      if (quantities.length > 0) {
-        quantities.forEach(q => {
-          quantitiesBox.innerHTML += `<span class="qty-tag">📦 ${q.value} ${q.unit} (${q.raw})</span> `;
-        });
-      } else {
-        quantitiesBox.innerHTML = '<span class="empty-state">لم ترصد كميات محددة</span>';
-      }
+      document.getElementById('paymentsBox').innerHTML = entities.payments.length
+        ? entities.payments.map(p => `<span class="payment-tag">${escapeHtml(p.label)}</span>`).join('')
+        : '<span class="empty-state">لم تحدد وسيلة دفع</span>';
+      document.getElementById('pricesBox').innerHTML = entities.prices.length
+        ? entities.prices.map(pr => `<span class="price-tag">${escapeHtml(pr.raw)} &rarr; ${pr.amount.toLocaleString()} دج</span>`).join('')
+        : '<span class="empty-state">لا توجد أسعار مرصودة</span>';
 
-      attributesBox.innerHTML = '';
-      if (attrs.colors.length > 0 || attrs.sizes.length > 0) {
-        attrs.colors.forEach(c => {
-          attributesBox.innerHTML += `<span class="attr-tag">🎨 ${c}</span> `;
-        });
-        attrs.sizes.forEach(s => {
-          attributesBox.innerHTML += `<span class="attr-tag">📏 مقاس ${s}</span> `;
-        });
-      } else {
-        attributesBox.innerHTML = '<span class="empty-state">لا توجد ألوان أو مقاسات مرصودة</span>';
-      }
+      const delHtml = [
+        ...(entities.deliveries || []).map(d => `<span class="carrier-tag">${escapeHtml(d.label)}</span>`),
+        entities.deliveryMode ? `<span class="mode-tag">${escapeHtml(entities.deliveryMode)}</span>` : ''
+      ].filter(Boolean);
+      document.getElementById('deliveriesBox').innerHTML = delHtml.length ? delHtml.join('') : '<span class="empty-state">لم تحدد شركة توصيل</span>';
 
-      // Payments & Prices
-      paymentsBox.innerHTML = '';
-      if (entities.payments.length > 0) {
-        entities.payments.forEach(p => {
-          paymentsBox.innerHTML += `<span class="payment-tag">${p.label}</span> `;
-        });
-      } else {
-        paymentsBox.innerHTML = '<span class="empty-state">لا توجد وسيلة دفع محددة</span>';
-      }
+      document.getElementById('phonesBox').innerHTML = (entities.phones && entities.phones.length)
+        ? entities.phones.map(ph => `<div class="phone-tag"><span class="mono">${escapeHtml(ph.normalized)}</span>${ph.operatorLabel ? `<span class="operator-tag ${ph.opClass}">${escapeHtml(ph.operatorLabel)}</span>` : ''}${ph.waUrl ? `<a href="${escapeHtml(ph.waUrl)}" target="_blank" rel="noopener" class="wa-btn">WhatsApp</a>` : ''}</div>`).join('')
+        : '<span class="empty-state">لا توجد أرقام هواتف</span>';
 
-      pricesBox.innerHTML = '';
-      if (entities.prices.length > 0) {
-        entities.prices.forEach(pr => {
-          pricesBox.innerHTML += `<span class="price-tag">${pr.raw} &rarr; ${pr.amount.toLocaleString()} دج</span> `;
-        });
-      } else {
-        pricesBox.innerHTML = '<span class="empty-state">لا توجد أسعار مرصودة</span>';
-      }
-
-      // Logistics & Phones with Operator & WhatsApp
-      const deliveriesBox = document.getElementById('deliveriesBox');
-      const phonesBox = document.getElementById('phonesBox');
-
-      deliveriesBox.innerHTML = '';
-      if (entities.deliveries && entities.deliveries.length > 0) {
-        entities.deliveries.forEach(d => {
-          deliveriesBox.innerHTML += `<span class="carrier-tag">${d.label}</span> `;
-        });
-      }
-      if (entities.deliveryMode) {
-        deliveriesBox.innerHTML += `<span class="mode-tag">${entities.deliveryMode}</span>`;
-      }
-      if ((!entities.deliveries || entities.deliveries.length === 0) && !entities.deliveryMode) {
-        deliveriesBox.innerHTML = '<span class="empty-state">لم تحدد شركة توصيل أو نمط</span>';
-      }
-
-      phonesBox.innerHTML = '';
-      if (entities.phones && entities.phones.length > 0) {
-        entities.phones.forEach(ph => {
-          const opBadge = ph.operatorLabel ? `<span class="operator-tag ${ph.opClass}">${ph.operatorLabel}</span>` : '';
-          const waLink = ph.waUrl ? `<a href="${ph.waUrl}" target="_blank" class="wa-btn">💬 واتساب</a>` : '';
-          phonesBox.innerHTML += `
-            <div class="phone-tag">
-              <span>📞 ${ph.normalized}</span>
-              ${opBadge}
-              ${waLink}
-            </div>
-          `;
-        });
-      } else {
-        phonesBox.innerHTML = '<span class="empty-state">لا توجد أرقام هواتف مرصودة</span>';
-      }
-
-      // 5. Dialect
       const dialect = detectDialect(text);
-      const dBadge = document.getElementById('dialectBadge');
-      const dMarkers = document.getElementById('dialectMarkers');
-      const regionNames = {
-        WEST: 'الغرب الجزائري (WEST - وهران وتلمسان)',
-        EAST: 'الشرق الجزائري (EAST - قسنطينة وسطيف وعنابة)',
-        CENTER: 'الوسط الجزائري (CENTER - الجزائر والبليدة)',
-        SOUTH: 'الجنوب الجزائري (SOUTH - الصحراء والواحات)',
-        GENERAL_DARJA: 'دارجة جزائرية عامة (GENERAL)'
-      };
-      dBadge.textContent = regionNames[dialect.region] || dialect.region;
-      dMarkers.innerHTML = '';
-      if (dialect.detectedMarkers.length > 0) {
-        dialect.detectedMarkers.forEach(m => {
-          dMarkers.innerHTML += `<span class="token-pill" style="background:#1e293b; color:#60a5fa; border:1px solid #3b82f6;">${m}</span>`;
-        });
-      } else {
-        dMarkers.innerHTML = '<span class="empty-state">لا توجد مؤشرات جهوية حصرية</span>';
-      }
+      const regNames = { WEST: 'الغرب الجزائري (WEST)', EAST: 'الشرق الجزائري (EAST)', CENTER: 'الوسط الجزائري (CENTER)', SOUTH: 'الجنوب الجزائري (SOUTH)', GENERAL_DARJA: 'دارجة جزائرية عامة (GENERAL)' };
+      document.getElementById('dialectBadge').textContent = regNames[dialect.region] || dialect.region;
+      document.getElementById('dialectConfidence').textContent = `ثقة ${(dialect.confidence * 100).toFixed(0)}%`;
+      document.getElementById('dialectMarkers').innerHTML = dialect.detectedMarkers.length
+        ? dialect.detectedMarkers.map(m => `<span class="token-pill token-info">${escapeHtml(m)}</span>`).join('')
+        : '<span class="empty-state">لا توجد مؤشرات جهوية حصرية</span>';
 
-      // 6. Cultural & Slang Detection
       const cultural = detectCulturalReferences(text);
-      const cultBox = document.getElementById('culturalBox');
-      cultBox.innerHTML = '';
-      if (cultural.allMatches.length > 0) {
-        cultural.allMatches.forEach(m => {
-          let badgeStyle = 'background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#60a5fa;';
-          let icon = '🏛️';
-          let catTitle = 'معلم / سوق';
-          if (m.category === 'proverb') {
-            badgeStyle = 'background:rgba(245,158,11,0.15); border:1px solid #f59e0b; color:#fbbf24;';
-            icon = '📜';
-            catTitle = 'مثل شعبي';
-          } else if (m.category === 'meme_trend') {
-            badgeStyle = 'background:rgba(236,72,153,0.15); border:1px solid #ec4899; color:#f472b6;';
-            icon = '🎭';
-            catTitle = 'ترند / ميم';
-          } else if (m.category === 'gastronomy') {
-            badgeStyle = 'background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#34d399;';
-            icon = '🍲';
-            catTitle = 'أكلة / طبق';
-          } else if (m.category === 'slang') {
-            badgeStyle = 'background:rgba(139,92,246,0.15); border:1px solid #8b5cf6; color:#a78bfa;';
-            icon = '💬';
-            catTitle = 'مصطلح شارع';
-          }
-          cultBox.innerHTML += `
-            <div style="${badgeStyle} border-radius:8px; padding:6px 10px; font-size:12px; display:flex; align-items:center; gap:8px;">
-              <span style="font-size:16px;">${icon}</span>
-              <div>
-                <strong>${catTitle}: ${m.canonicalName}</strong>
-                <span style="opacity:0.85; margin-right:6px;">(${m.meaning})</span>
-              </div>
-            </div>
-          `;
-        });
-      } else {
-        cultBox.innerHTML = '<span class="empty-state">لا توجد إشارات شعبية أو أمثال في النص</span>';
-      }
+      const catMeta = {
+        proverb: { title: 'مثل شعبي', style: 'background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.45); color:#fcd34d;' },
+        meme_trend: { title: 'ترند شائع', style: 'background:rgba(236,72,153,0.12); border:1px solid rgba(236,72,153,0.45); color:#f9a8d4;' },
+        viral_meme: { title: 'ميم جزائري', style: 'background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.45); color:#fda4af;' },
+        franco_darja: { title: 'فرانكو-دارجة', style: 'background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.45); color:#67e8f9;' },
+        landmark: { title: 'معلم / سوق', style: 'background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.45); color:#93c5fd;' },
+        gastronomy: { title: 'مأكولات تقليدية', style: 'background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.45); color:#6ee7b7;' },
+        slang: { title: 'لغة الشارع والتجارة', style: 'background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.45); color:#d8b4fe;' }
+      };
+      document.getElementById('culturalBox').innerHTML = cultural.allMatches.length
+        ? cultural.allMatches.map(m => {
+            const c = catMeta[m.category] || catMeta.slang;
+            return `<div style="${c.style} border-radius:9px; padding:7px 11px; font-size:12px;"><strong>${c.title}: ${escapeHtml(m.canonicalName)}</strong> <span style="opacity:0.88;">— ${escapeHtml(m.meaning)}</span></div>`;
+          }).join('')
+        : '<span class="empty-state">لا توجد إشارات ثقافية أو ميمز أو فرانكو-دارجة في هذا النص</span>';
 
-      // 7. Arabizi & Normalization
       const arabiziClean = arabiziToArabic(text);
       document.getElementById('arabiziBox').textContent = arabiziClean || '-';
-      document.getElementById('normalizedBox').textContent = normalize(text) || '-';
-
-      // 8. Natural Darja Dialogue Response Engine
-      const chatRes = respondToDarja(text);
-      document.getElementById('dialogueReplyBox').textContent = chatRes.reply;
-      const scriptBadge = document.getElementById('dialogueScriptBadge');
-      scriptBadge.textContent = chatRes.script === 'arabizi' ? '🔤 Arabizi' : '🔤 عربية';
-      const intentBadge = document.getElementById('dialogueIntentBadge');
-      intentBadge.textContent = chatRes.intent;
-
-      // 9. Content Moderation & Profanity Shield
       const profRes = detectProfanity(text);
-      const profStatusBox = document.getElementById('profanityStatusBox');
-      const censoredBox = document.getElementById('censoredTextBox');
-      censoredBox.textContent = profRes.censoredText;
-      if (profRes.isProfane) {
-        profStatusBox.innerHTML = `
-          <div style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#f87171; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:700;">
-            ⚠️ تم رصد محتوى بذيء أو شتائم (درجة الخطورة: ${profRes.severity.toUpperCase()}) — ${profRes.matches.length} كلمة مرصودة
-          </div>
-        `;
-      } else {
-        profStatusBox.innerHTML = `
-          <div style="background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#34d399; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:700;">
-            ✅ المحتوى آمن ونظيف (Clean & Safe)
-          </div>
-        `;
-      }
+      document.getElementById('profanityStatusBox').innerHTML = profRes.isProfane
+        ? `<div style="background:var(--crimson-soft); border:1px solid var(--crimson); color:#fca5a5; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:700;">رصد محتوى غير لائق (الخطورة: ${escapeHtml(profRes.severity.toUpperCase())}) — ${profRes.matches.length} كلمة</div>`
+        : `<div style="background:var(--primary-soft); border:1px solid rgba(16,185,129,0.4); color:#6ee7b7; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:700;">النص آمن ونظيف (Clean &amp; Safe)</div>`;
+      document.getElementById('censoredTextBox').textContent = profRes.censoredText || '-';
 
-      // 8. AI Agent Simulator
-      let wilayaName = null;
-      if (entities.wilayas.length > 0) {
-        const firstW = entities.wilayas[0];
-        const comPart = firstW.commune ? ' - بلدية ' + firstW.commune : '';
-        wilayaName = `${firstW.name_ar} (${firstW.code_str || firstW.code})${comPart}`;
-      }
-      const carrierName = entities.deliveries && entities.deliveries.length > 0 ? entities.deliveries[0].label : null;
-      const priceText = entities.prices.length > 0 ? entities.prices[0].amount.toLocaleString() + ' دج' : null;
-      const qtyText = quantities.length > 0 ? quantities.map(q => `${q.value} ${q.unit}`).join(', ') : 'غير محددة';
-      const attrText = (attrs.colors.concat(attrs.sizes)).join(' | ') || 'غير محدد';
+      const chatRes = respondToDarja(text, currentPersona);
+      document.getElementById('dialogueReplyBox').textContent = chatRes.reply;
+      document.getElementById('dialogueScriptBadge').textContent = chatRes.script === 'arabizi' ? 'Script: Arabizi' : 'Script: Arabic';
+      document.getElementById('dialogueSourceBadge').textContent = chatRes.source === 'kb_retrieval' ? `DziriAlign/KB (${Math.round(chatRes.confidence * 100)}%)` : `Engine: ${chatRes.source}`;
+      document.getElementById('dialogueIntentBadge').textContent = chatRes.intent;
 
-      const escNotice = esc.needsEscalation ? `\n🚨 [تنبيه تصعيد عاجل]: ${esc.reason} (${esc.urgency}) - ${esc.guideline}\n` : '';
-      const culturalLine = cultural.hasCulturalReference ? `\n- المراجع الثقافية والتراثية المرصودة: ${cultural.culturalSummary}` : '';
+      lastAnalyzeReport = {
+        intent: intentRes,
+        sentiment: sent,
+        dialect,
+        entities: {
+          wilayas: entities.wilayas.map(w => ({ code: w.code, name_ar: w.name_ar, name_fr: w.name_fr, commune: w.commune })),
+          payments: entities.payments.map(p => p.type),
+          prices_dzd: entities.prices,
+          deliveries: entities.deliveries.map(d => d.company),
+          delivery_mode: entities.deliveryMode,
+          phones: entities.phones.map(p => ({ normalized: p.normalized, operator: p.operator, whatsapp_url: p.waUrl })),
+          quantities,
+          attributes: attrs
+        },
+        escalation: esc,
+        profanity: { is_profane: profRes.isProfane, severity: profRes.severity, censored_text: profRes.censoredText },
+        cultural_matches: cultural.allMatches.length,
+        reply: chatRes
+      };
 
-      const agentPrompt = `أنت مساعد خدمة عملاء ذكي وبشري لمتجر إلكتروني جزائري 'Bazar El Djazair'.${escNotice}
-[سياق الزبون المستخرج بدقة عبر darja-nlp-kit]:
-- الرسالة الأصلية: "${text}"
-- الترجمة التفسيرية: "${arabiziClean}"
-- النية الأساسية (Intent): ${intentRes.intent} (${info.label})
-- المنطقة واللهجة: ${dialect.region} (${regionNames[dialect.region] || 'عامة'})
-- المزاج والشعور: ${sent.label} (الدرجة: ${sent.score.toFixed(2)})
-- الولاية والبلدية: ${wilayaName || 'غير محددة'}
-- الكمية المطلوبة: ${qtyText}
-- المواصفات (ألوان ومقاسات): ${attrText}
-- شركة التوصيل: ${carrierName || 'غير محددة'}
-- المبالغ بالدينار: ${priceText || 'غير محددة'}
-- وسائل الدفع: ${entities.payments.length > 0 ? entities.payments.map(p => p.label).join(', ') : 'غير محددة'}
-- أرقام الهاتف: ${entities.phones.length > 0 ? entities.phones.map(ph => ph.normalized + (ph.operatorLabel ? ' ('+ph.operatorLabel+')' : '')).join(', ') : 'غير متوفرة'}${culturalLine}
+      document.getElementById('jsonReportPre').textContent = JSON.stringify(lastAnalyzeReport, null, 2);
+      const safeStr = JSON.stringify(text);
+      document.getElementById('codeSnippetPre').textContent =
+`# Python (Zero-Dependency)
+from darja_nlp import DarjaPipeline, analyze
+report = analyze(${safeStr}, sentiment_mode="${sentimentMode}")
+print(report.intent.intent, report.entities.wilayas, report.reply.reply)
 
-[التعليمات]: طابق نية الزبون ولهجته بدقة، وأجب بدارجة جزائرية عفوية ومحترمة (لا فصحى معربة)، والتزم بالأسعار والولايات بدون أي هلوسة.`;
+// TypeScript / Node.js (Zero-Dependency)
+import { analyze } from '@dz-open-suite/darja-nlp-kit';
+const report = analyze(${safeStr}, { sentimentMode: '${sentimentMode}', persona: '${currentPersona}' });
+console.log(report.intent?.intent, report.entities?.wilayas, report.reply?.reply);`;
 
-      document.getElementById('agentPromptBox').textContent = agentPrompt;
+      const wilayaName = entities.wilayas.length ? `${entities.wilayas[0].name_ar} (${entities.wilayas[0].code})` : 'غير محددة';
+      const priceText = entities.prices.length ? `${entities.prices[0].amount.toLocaleString()} دج` : 'غير محدد';
+      document.getElementById('agentPromptBox').textContent =
+`[سياق الزبون المستخرج عبر darja-nlp-kit]:
+- الرسالة: ${text}
+- النية: ${intentRes.intent} | اللهجة: ${dialect.region} | المشاعر: ${sent.label} (${sent.score.toFixed(2)})
+- الولاية: ${wilayaName} | السعر: ${priceText}
+- التصعيد البشري: ${esc.needsEscalation ? esc.urgency + ' (' + esc.reason + ')' : 'لا'}
+[التعليمات]: التزم بهذه الحقائق وأجب بدارجة جزائرية عفوية دون هلوسة.`;
 
-      let agentReply = '';
-      if (esc.needsEscalation) {
-        agentReply = '🚨 تنبيه النظام: تم إيقاف الرد الآلي وتحويل المحادثة لمشرف خدمة العملاء البشري بسبب التصعيد (' + esc.reason + ').';
-      } else if (cultural.proverbs.length > 0) {
-        const prov = cultural.proverbs[0];
-        agentReply = `وعليكم السلام خويا لعزيز! كيما يقول المثل الشعبي "${prov.canonicalName}". رانا في الخدمة وسلعتنا مضمونة ونوصلوها حتى لباب دارك، مرحب بيك في كل وقت!`;
-      } else if (cultural.gastronomy.length > 0) {
-        const food = cultural.gastronomy[0];
-        agentReply = `أهلاً وسهلاً خويا! بصحتكم مسبقاً ${food.canonicalName}، بنة وهمة وشان. سلعتنا راهي واجدة والتوصيل متوفر لجميع الولايات مع خيار الدفع عند الاستلام!`;
-      } else if (intentRes.intent === 'COMPLAINT' || sent.label === 'NEGATIVE') {
-        agentReply = 'سلام عليكم خويا، حقك علينا ونعتذروا منك بزاف بزاف! ما تقلقش روحك كامل، المشكل نحلوهولك درك. قولي برك واش صرا بالضبط ونبدلولك السلعة ولا نرجعولك دراهمك في الحين.';
-      } else if (intentRes.intent === 'PRICE_INQUIRY') {
-        const pDesc = priceText ? `السعر راهو ${priceText}` : 'السعر راهو مدروس وفي متناول الجميع';
-        agentReply = `وعليكم السلام خويا لعزيز! ${pDesc}. والتوصيل متوفر لجميع الولايات (خدمة سريعة للدار أو المكتب). تحب نسجلك طلبية؟`;
-      } else if (intentRes.intent === 'AVAILABILITY_INQUIRY') {
-        agentReply = 'أهلاً خويا! السلعة مازالت متوفرة والستوك كاين، بصح الكمية محدودة بزاف. إذا راك مهتم ابعثلي معلوماتك درك نريڤلوهالك قبل ما تفرى!';
-      } else {
-        const targetWilaya = wilayaName ? 'لـ ' + wilayaName : 'عندك';
-        const targetPrice = priceText ? 'والحساب راهو ' + priceText : 'والسعر مضبوط';
-        const targetCarrier = carrierName ? 'مع ' + carrierName : 'مع شركة التوصيل';
-
-        if (dialect.region === 'WEST') {
-          agentReply = `وعليكم السلام خويا لعزيز! مرحبا بيك، السلعة راها كاينة ونوصلوها ${targetWilaya} ${targetCarrier}. ${targetPrice}. تقدر تفيرسي في BaridiMob ولا تخلص كاش كي توصلك السلعة غايا!`;
-        } else if (dialect.region === 'EAST') {
-          agentReply = `أهلاً وسهلاً بيك خويا ربي يحفظك! سلعة لوز وضرك نوجدوهالك ${targetWilaya} ${targetCarrier}، ${targetPrice}. تقدر تخلص بالـ BaridiMob ولا تكاشي كي يوصلهالك الليفرور، عيشك!`;
-        } else if (dialect.region === 'SOUTH') {
-          agentReply = `أهلاً وسهلاً بيك خويا وعلى الراس والعين! السلعة زينة ومضمونة وتوصلكم ${targetWilaya} ${targetCarrier}، ${targetPrice}. وربي يباركلك في رزقك. مرحب بيك في كل وقت!`;
-        } else {
-          agentReply = `سلام خويا، مرحبا بيك عندنا! ما كاش مشكل خلاص، السلعة متوفرة ونوصلوها ${targetWilaya} ${targetCarrier}، ${targetPrice}. بالنسبة للدفع تحب بريدي موب ولا كاش كي تلحقك السلعة للباب؟`;
-        }
-      }
+      let agentReply = chatRes.reply;
+      if (esc.needsEscalation) agentReply = `تم إيقاف الرد الآلي وتحويل المحادثة للمشرف البشري بسبب (${esc.reason}).`;
+      else if (entities.wilayas.length && entities.prices.length) agentReply = `مرحباً خويا، الطلبية مسجلة لـ ${wilayaName} بقيمة ${priceText}. ${chatRes.reply}`;
       document.getElementById('agentReplyBox').textContent = agentReply;
 
-      // Match few-shot dialogue
-      const matchedDialogue = (DIALOGUES_DATA || []).find(d => d.region === dialect.region && d.intent === intentRes.intent)
-        || (DIALOGUES_DATA || []).find(d => d.region === dialect.region)
-        || (DIALOGUES_DATA || [])[0];
-
-      const diagBox = document.getElementById('matchingDialogueBox');
-      if (matchedDialogue && diagBox) {
-        diagBox.innerHTML = `
-          <div style="margin-bottom:6px;"><span style="background:#3b82f6; color:#fff; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:700;">${matchedDialogue.region}</span> <span style="color:#f59e0b; font-weight:700;">سؤال الزبون:</span> "${matchedDialogue.customer_message}"</div>
-          <div><span style="background:#10b981; color:#fff; font-size:11px; padding:2px 7px; border-radius:4px; font-weight:700;">رد التاجر البشري</span> <span style="color:#34d399; font-weight:700;">رد التاجر الواقعي:</span> "${matchedDialogue.merchant_response}"</div>
-        `;
+      const matchedDialogue = (DIALOGUES_DATA || []).find(d => d.region === dialect.region && d.intent === intentRes.intent) || (DIALOGUES_DATA || [])[0];
+      if (matchedDialogue) {
+        document.getElementById('matchingDialogueBox').innerHTML = `<div style="margin-bottom:4px;"><strong>[${escapeHtml(matchedDialogue.region)}] الزبون:</strong> "${escapeHtml(matchedDialogue.customer_message)}"</div><div><strong>رد التاجر:</strong> "${escapeHtml(matchedDialogue.merchant_response)}"</div>`;
       }
     }
 
+    // DarjaChat Multi-Turn Engine
+    const chatState = {
+      history: [],
+      dialect: 'GENERAL_DARJA',
+      preferredScript: null,
+      activeIntent: 'UNKNOWN',
+      slots: { wilayas: [], phones: [], deliveries: [], delivery_mode: null, payments: [], prices_dzd: [], quantities: [], colors: [], sizes: [] }
+    };
+
+    function resetChatSession() {
+      chatState.history = [];
+      chatState.dialect = 'GENERAL_DARJA';
+      chatState.preferredScript = null;
+      chatState.activeIntent = 'UNKNOWN';
+      chatState.slots = { wilayas: [], phones: [], deliveries: [], delivery_mode: null, payments: [], prices_dzd: [], quantities: [], colors: [], sizes: [] };
+      renderChatUI();
+    }
+
+    function sendQuickChat(msg) {
+      document.getElementById('chatInput').value = msg;
+      sendChatTurn();
+    }
+
+    function runChatAutoDemo() {
+      resetChatSession();
+      ['wach ya khoy', 'hab nchri 2 hbat noir XL', 'l aflou b yalidine 0661234567'].forEach(m => {
+        document.getElementById('chatInput').value = m;
+        sendChatTurn();
+      });
+    }
+
+    function sendChatTurn() {
+      const inp = document.getElementById('chatInput');
+      const msg = inp.value.trim();
+      if (!msg) return;
+      inp.value = '';
+
+      const turnScript = detectScript(msg);
+      chatState.preferredScript = turnScript;
+      const esc = detectEscalation(msg);
+      const dia = detectDialect(msg);
+      if (dia.region !== 'GENERAL_DARJA') chatState.dialect = dia.region;
+      const intentRes = identifyIntent(msg);
+      if (intentRes.intent !== 'UNKNOWN') chatState.activeIntent = intentRes.intent;
+
+      const ent = extractEntities(msg);
+      const qts = extractQuantities(msg);
+      const attrs = extractProductAttributes(msg);
+      let newlyCaptured = 0;
+
+      for (const w of ent.wilayas) if (!chatState.slots.wilayas.some(x => x.code === w.code)) { chatState.slots.wilayas.push(w); newlyCaptured++; }
+      for (const p of ent.phones) if (!chatState.slots.phones.some(x => x.normalized === p.normalized)) { chatState.slots.phones.push(p); newlyCaptured++; }
+      for (const d of ent.deliveries) if (!chatState.slots.deliveries.includes(d.label)) chatState.slots.deliveries.push(d.label);
+      if (ent.deliveryMode && !chatState.slots.delivery_mode) chatState.slots.delivery_mode = ent.deliveryMode;
+      for (const py of ent.payments) if (!chatState.slots.payments.includes(py.label)) chatState.slots.payments.push(py.label);
+      for (const pr of ent.prices) if (!chatState.slots.prices_dzd.includes(pr.amount)) chatState.slots.prices_dzd.push(pr.amount);
+      for (const q of qts) { chatState.slots.quantities.push(q); newlyCaptured++; }
+      for (const c of attrs.colors) if (!chatState.slots.colors.includes(c)) chatState.slots.colors.push(c);
+      for (const s of attrs.sizes) if (!chatState.slots.sizes.includes(s)) chatState.slots.sizes.push(s);
+
+      chatState.history.push({ role: 'user', text: msg, intent: intentRes.intent });
+
+      const missing = [];
+      if (chatState.slots.wilayas.length === 0) missing.push('wilaya');
+      if (chatState.slots.phones.length === 0) missing.push('phone');
+      const ready = missing.length === 0;
+      const isOrderFlow = chatState.activeIntent === 'ORDER' || chatState.activeIntent === 'DELIVERY_INQUIRY' || newlyCaptured > 0;
+
+      let reply = '', tIntent = '';
+      if (esc.needsEscalation) {
+        reply = turnScript === 'arabizi'
+          ? "Smahlna bzaf kho! Rani n7awel had l'message drk l'responsable bach yreglihleek koulchi."
+          : 'نعتذرو منك بزاف خويا! راني نحول رسالتك فوراً للمسؤول باش يتواصل معاك ويريڤليلك الإشكال.';
+        tIntent = `ESCALATION_${esc.reason}`;
+      } else if (isOrderFlow && ready && newlyCaptured > 0) {
+        const w = chatState.slots.wilayas[chatState.slots.wilayas.length - 1];
+        const ph = chatState.slots.phones[chatState.slots.phones.length - 1].normalized;
+        reply = turnScript === 'arabizi'
+          ? `Sahit kho! La commande ta3ek mrigla w confirmée: wilaya ${w.name_fr} (${w.code}), téléphone ${ph}. Livraison f 24-48h!`
+          : `صحيت خويا! طلبيتك مؤكدة ومسجلة: ولاية ${w.name_ar} (${w.code})، الهاتف ${ph}. التوصيل خلال 24-48 ساعة!`;
+        tIntent = 'ORDER_CONFIRMED';
+      } else if (chatState.activeIntent === 'ORDER' && !ready && (newlyCaptured > 0 || intentRes.intent === 'ORDER')) {
+        if (missing.includes('wilaya') && missing.includes('phone')) {
+          reply = turnScript === 'arabizi'
+            ? 'Marhba bik kho! Ab3atli bark lwilaya w numéro de téléphone bach nconfirmiwlek la commande.'
+            : 'مرحباً بيك خويا! ابعثلي برك الولاية ورقم الهاتف باش نكونفيرميولك الطلبية.';
+        } else if (missing.includes('phone')) {
+          const w = chatState.slots.wilayas[chatState.slots.wilayas.length - 1];
+          reply = turnScript === 'arabizi'
+            ? `C'est bon lwilaya ${w.name_fr} msajla! Ba9i ghi numéro de téléphone kho.`
+            : `ممتاز، ولاية ${w.name_ar} مسجلة! بقالنا برك رقم الهاتف خويا باش نكملو الطلب.`;
+        } else {
+          const ph = chatState.slots.phones[chatState.slots.phones.length - 1].normalized;
+          reply = turnScript === 'arabizi'
+            ? `Numéro ${ph} msajel kho! 9olli bark chmen wilaya w nwalou f lwa9t.`
+            : `رقم الهاتف ${ph} مسجل! قولي برك واش من ولاية باش نكونفيرميو الطلب.`;
+        }
+        tIntent = 'ORDER_SLOT_FILLING';
+      } else {
+        const dRes = respondToDarja(msg, currentPersona, turnScript);
+        reply = dRes.reply;
+        tIntent = dRes.intent;
+      }
+
+      chatState.history.push({ role: 'assistant', text: reply, intent: tIntent });
+      renderChatUI();
+    }
+
+    function renderChatUI() {
+      const box = document.getElementById('chatMessages');
+      if (chatState.history.length === 0) {
+        box.innerHTML = '<div style="margin:auto; text-align:center; color:var(--text-muted); font-size:13px;">ابدأ بإرسال رسالة من الأسفل أو اضغط "تشغيل سيناريو طلبية كامل"</div>';
+      } else {
+        box.innerHTML = chatState.history.map(m => `<div class="msg-row ${m.role}"><div class="msg-bubble" dir="auto">${escapeHtml(m.text)}</div><div class="msg-meta" dir="ltr">${m.role === 'user' ? 'User' : 'Bot'} · ${escapeHtml(m.intent)}</div></div>`).join('');
+        box.scrollTop = box.scrollHeight;
+      }
+
+      const s = chatState.slots;
+      const ready = s.wilayas.length > 0 && s.phones.length > 0;
+      const rBadge = document.getElementById('chatReadyBadge');
+      rBadge.textContent = ready ? 'الطلبية جاهزة للتأكيد' : 'بانتظار إكمال البيانات';
+      rBadge.className = 'token-pill ' + (ready ? 'token-pos' : 'token-info');
+
+      const items = [
+        ['الولاية (مطلوب)', s.wilayas.length ? s.wilayas.map(w => `${w.code} - ${w.name_ar}`).join('، ') : 'ناقصة'],
+        ['الهاتف (مطلوب)', s.phones.length ? s.phones.map(p => `${p.normalized} (${p.operatorLabel || '-'})`).join('، ') : 'ناقص'],
+        ['الكمية', s.quantities.length ? s.quantities.map(q => `${q.value} ${q.unit}`).join('، ') : '-'],
+        ['الألوان والمقاسات', [...s.colors, ...s.sizes].join(' | ') || '-'],
+        ['شركة التوصيل', s.deliveries.join('، ') || '-'],
+        ['وسيلة الدفع', s.payments.join('، ') || '-'],
+        ['السعر المحسوب', s.prices_dzd.length ? s.prices_dzd.map(p => p.toLocaleString() + ' دج').join('، ') : '-'],
+        ['اللهجة المرصودة', chatState.dialect]
+      ];
+      document.getElementById('chatSlotsPanel').innerHTML = items.map(([k, v]) => `<div class="slot-item"><span class="slot-label">${escapeHtml(k)}</span><span class="slot-value">${escapeHtml(v)}</span></div>`).join('');
+    }
+
+    // DarjaClassifier Studio (100% JSON compatible with Python & TS)
+    class BrowserClassifier {
+      constructor(alpha = 1.0) {
+        this.alpha = alpha;
+        this.classCounts = {};
+        this.tokenCounts = {};
+        this.classTotals = {};
+        this.vocab = new Set();
+      }
+      extractFeatures(text) {
+        const normed = normalize((text || '').toLowerCase());
+        const toks = normed.match(/[a-zA-Z0-9\u0621-\u064A\u0671-\u06D3]+/g) || [];
+        const feats = [...toks];
+        for (let i = 0; i < toks.length - 1; i++) feats.push(toks[i] + '_' + toks[i + 1]);
+        for (const w of toks) {
+          if (w.length >= 5 && /^[a-zA-Z\u0621-\u064A\u0671-\u06D3]+$/.test(w)) {
+            feats.push('p3:' + w.slice(0, 3));
+            feats.push('s3:' + w.slice(-3));
+          }
+        }
+        return feats;
+      }
+      fit(pairs) {
+        this.classCounts = {}; this.tokenCounts = {}; this.classTotals = {}; this.vocab = new Set();
+        for (const [text, lbl] of pairs) {
+          if (this.classCounts[lbl] === undefined) { this.classCounts[lbl] = 0; this.tokenCounts[lbl] = {}; this.classTotals[lbl] = 0; }
+          this.classCounts[lbl]++;
+          for (const f of this.extractFeatures(text)) {
+            this.tokenCounts[lbl][f] = (this.tokenCounts[lbl][f] || 0) + 1;
+            this.classTotals[lbl]++;
+            this.vocab.add(f);
+          }
+        }
+        return this;
+      }
+      predict(text) {
+        const labels = Object.keys(this.classCounts).sort();
+        if (!labels.length) return { label: 'N/A', confidence: 0, probabilities: {} };
+        const totalDocs = Object.values(this.classCounts).reduce((a, b) => a + b, 0);
+        const vSize = Math.max(1, this.vocab.size);
+        const feats = this.extractFeatures(text);
+        const logs = {};
+        for (const lbl of labels) {
+          let sc = Math.log(this.classCounts[lbl] / totalDocs);
+          const denom = this.classTotals[lbl] + this.alpha * vSize;
+          for (const f of feats) if (this.vocab.has(f)) sc += Math.log(((this.tokenCounts[lbl][f] || 0) + this.alpha) / denom);
+          logs[lbl] = sc;
+        }
+        const maxS = Math.max(...Object.values(logs));
+        const exps = {}; let sumE = 0;
+        for (const lbl of labels) { exps[lbl] = Math.exp(Math.max(-50, logs[lbl] - maxS)); sumE += exps[lbl]; }
+        const probabilities = {}; let best = labels[0];
+        for (const lbl of labels) {
+          probabilities[lbl] = Math.round((exps[lbl] / (sumE || 1)) * 10000) / 10000;
+          if (probabilities[lbl] > probabilities[best]) best = lbl;
+        }
+        return { label: best, confidence: probabilities[best], probabilities };
+      }
+      toJSON() {
+        return { version: '1.0', alpha: this.alpha, use_bigrams: true, use_subwords: true, class_counts: this.classCounts, class_totals: this.classTotals, token_counts: this.tokenCounts };
+      }
+    }
+
+    const browserClf = new BrowserClassifier();
+    const CLF_PRESETS = {
+      commerce: `سلام حاب نكوموندي زوج حبات لوهران | ORDER
+راني باغي نشري واحدة لسطيف | ORDER
+ابعثلي حبة للجزائر 0661234567 | ORDER
+شحال السومة تاعها خويا | PRICE
+بشحال يدير هذا الكولي | PRICE
+شحال السعر تاع السبردينة لسطيف | PRICE
+سلعة مكسرة رجعولي دراهمي | COMPLAINT
+خردة وحشيتوهالي روتور | COMPLAINT
+ما وصلتنيش الأمانة روطار | COMPLAINT
+شحال التوصيل لياليدين للدار | DELIVERY
+توصلو لولاية أفلو ولا لا | DELIVERY
+وقتاش تلحقني الكولي لورقلة | DELIVERY`,
+      dialect: `شوالا راك باغي خويا غايا درك | WEST
+صايي مريڤل راني نوليلك غادي | WEST
+واشنهي هادا قداش يدير ياسر باهي | EAST
+عيشك خويا ضرك نشوفولك قندورة في بونة | EAST
+واشنو هكداك حوايج البهجة العاصمة دروك | CENTER
+رانا هنا في دزاير صحيت خويا | CENTER
+واه مرحب بيك في غرداية وبسكرة وورقلة | SOUTH
+على الراس والعين في ادرار سومة زينة | SOUTH`
+    };
+
+    function loadClfPreset(key) {
+      document.getElementById('clfTrainData').value = CLF_PRESETS[key];
+      if (key === 'dialect') document.getElementById('clfTestInput').value = 'شوالا خويا غايا راك باغي واحدة لوهران';
+      else document.getElementById('clfTestInput').value = 'شحال السومة تاع السبردينة لسطيف؟';
+      trainBrowserClassifier();
+    }
+
+    function trainBrowserClassifier() {
+      const raw = document.getElementById('clfTrainData').value.split('\n');
+      const pairs = raw.map(l => l.trim()).filter(Boolean).map(l => {
+        const idx = l.lastIndexOf('|');
+        return idx > 0 ? [l.slice(0, idx).trim(), l.slice(idx + 1).trim()] : null;
+      }).filter(Boolean);
+      if (!pairs.length) return;
+      browserClf.fit(pairs);
+      let correct = 0;
+      const classes = Object.keys(browserClf.classCounts);
+      const stats = Object.fromEntries(classes.map(c => [c, { tp: 0, fp: 0, fn: 0 }]));
+      for (const [t, y] of pairs) {
+        const pred = browserClf.predict(t).label;
+        if (pred === y) { correct++; stats[y].tp++; }
+        else { stats[pred].fp++; stats[y].fn++; }
+      }
+      const acc = Math.round((correct / pairs.length) * 1000) / 10;
+      const f1s = classes.map(c => {
+        const { tp, fp, fn } = stats[c];
+        const p = tp + fp ? tp / (tp + fp) : 0;
+        const r = tp + fn ? tp / (tp + fn) : 0;
+        return p + r ? (2 * p * r) / (p + r) : 0;
+      });
+      const macroF1 = Math.round((f1s.reduce((a, b) => a + b, 0) / f1s.length) * 1000) / 10;
+      document.getElementById('clfAccVal').textContent = acc + '%';
+      document.getElementById('clfF1Val').textContent = macroF1 + '%';
+      document.getElementById('clfVocabVal').textContent = browserClf.vocab.size;
+      predictWithBrowserClf();
+    }
+
+    function predictWithBrowserClf() {
+      const txt = document.getElementById('clfTestInput').value;
+      const res = browserClf.predict(txt);
+      const bars = Object.entries(res.probabilities).sort((a, b) => b[1] - a[1]).map(([lbl, pr]) => {
+        const pct = Math.round(pr * 1000) / 10;
+        return `<div style="margin-bottom:8px;"><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;"><strong class="mono">${escapeHtml(lbl)}</strong><span class="mono">${pct}%</span></div><div style="background:#1e293b; height:7px; border-radius:999px; overflow:hidden;"><div style="background:var(--primary); width:${pct}%; height:100%;"></div></div></div>`;
+      }).join('');
+      document.getElementById('clfPredBox').innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><span style="font-size:13px; color:var(--text-muted);">التصنيف المتوقع:</span><span class="intent-badge intent-order mono">${escapeHtml(res.label)} (${Math.round(res.confidence * 100)}%)</span></div>${bars}`;
+    }
+
+    function downloadClassifierModel() {
+      const blob = new Blob([JSON.stringify(browserClf.toJSON(), null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'classifier_model.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // 69 Wilayas Explorer
+    function setWilayaFilter(f) {
+      currentWilayaFilter = f;
+      document.querySelectorAll('[data-wfilter]').forEach(b => b.classList.toggle('active', b.dataset.wfilter === f));
+      renderWilayasExplorer();
+    }
+
+    function renderWilayasExplorer() {
+      const q = (document.getElementById('wilayaSearchInput').value || '').trim().toLowerCase();
+      const filtered = WILAYAS_DATA.filter(w => {
+        if (currentWilayaFilter === 'era69' && w.era !== 69) return false;
+        if (!q) return true;
+        const coms = [...(w.communes_sample || []), ...(w.communes_fr_sample || [])].join(' ').toLowerCase();
+        return String(w.code).includes(q) || String(w.code_str).includes(q) || (w.name_ar || '').toLowerCase().includes(q) || (w.name_fr || '').toLowerCase().includes(q) || coms.includes(q);
+      });
+      document.getElementById('wilayaCountInfo').textContent = `عرض ${filtered.length} ولاية من أصل ${WILAYAS_DATA.length} ولاية رسمية`;
+      document.getElementById('wilayaExplorerGrid').innerHTML = filtered.map(w => {
+        const sampleComs = (w.communes_sample || []).slice(0, 5).map(escapeHtml).join('، ');
+        return `<div class="wilaya-card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><span class="entity-code">${escapeHtml(w.code_str || w.code)}</span>${w.era === 69 ? '<span class="era69-badge">ولاية جديدة</span>' : `<span class="mono" style="font-size:11px; color:var(--text-muted);">هاتف ${escapeHtml(w.phone_code || '-')}</span>`}</div><div style="font-weight:800; font-size:15px;">${escapeHtml(w.name_ar)} <span style="font-weight:400; color:var(--text-muted); font-size:12px;">(${escapeHtml(w.name_fr)})</span></div><div style="font-size:11px; color:var(--text-muted); margin-top:6px;">البلديات: ${sampleComs || '-'}</div></div>`;
+      }).join('');
+    }
+
+    // Initialize Everything
     inputArea.addEventListener('input', processText);
     processText();
+    renderChatUI();
+    loadClfPreset('commerce');
+    renderWilayasExplorer();
   </script>
 </body>
 </html>
 """
 
-    html_content = template.replace(
-        '__STOPWORDS_DATA__', json.dumps(stopwords_data, ensure_ascii=False)
-    ).replace(
-        '__LEXICON_DATA__', json.dumps(lexicon_data, ensure_ascii=False)
-    ).replace(
-        '__ARABIZI_RULES__', json.dumps(arabizi_rules, ensure_ascii=False)
-    ).replace(
-        '__WILAYAS_DATA__', json.dumps(wilayas_data, ensure_ascii=False)
-    ).replace(
-        '__DIALECTS_DATA__', json.dumps(dialects_data, ensure_ascii=False)
-    ).replace(
-        '__DIALOGUES_DATA__', json.dumps(dialogues_data, ensure_ascii=False)
-    ).replace(
-        '__CULTURE_DATA__', json.dumps(culture_data, ensure_ascii=False)
-    ).replace(
-        '__SLANG_DATA__', json.dumps(slang_data, ensure_ascii=False)
-    ).replace(
-        '__PROFANITY_DATA__', json.dumps(profanity_data, ensure_ascii=False)
-    ).replace(
-        '__DIALOGUE_RULES_DATA__', json.dumps(dialogue_rules_data, ensure_ascii=False)
-    ).replace(
-        '__MEMES_DATA__', json.dumps(memes_data, ensure_ascii=False)
-    ).replace(
-        '__FRANCO_DATA__', json.dumps(franco_data, ensure_ascii=False)
-    ).replace(
-        '__SENTIMENT_MODEL__', json.dumps(sentiment_model_data, ensure_ascii=False, separators=(',', ':'))
-    ).replace(
-        '__DIALOGUE_KB_DATA__', json.dumps(dialogue_kb_data, ensure_ascii=False, separators=(',', ':'))
+    html_content = (
+        template.replace('__STOPWORDS_DATA__', json.dumps(stopwords_data, ensure_ascii=False))
+        .replace('__LEXICON_DATA__', json.dumps(lexicon_data, ensure_ascii=False))
+        .replace('__ARABIZI_RULES__', json.dumps(arabizi_rules, ensure_ascii=False))
+        .replace('__WILAYAS_DATA__', json.dumps(wilayas_data, ensure_ascii=False))
+        .replace('__DIALECTS_DATA__', json.dumps(dialects_data, ensure_ascii=False))
+        .replace('__DIALOGUES_DATA__', json.dumps(dialogues_data, ensure_ascii=False))
+        .replace('__CULTURE_DATA__', json.dumps(culture_data, ensure_ascii=False))
+        .replace('__SLANG_DATA__', json.dumps(slang_data, ensure_ascii=False))
+        .replace('__PROFANITY_DATA__', json.dumps(profanity_data, ensure_ascii=False))
+        .replace('__DIALOGUE_RULES_DATA__', json.dumps(dialogue_rules_data, ensure_ascii=False))
+        .replace('__MEMES_DATA__', json.dumps(memes_data, ensure_ascii=False))
+        .replace('__FRANCO_DATA__', json.dumps(franco_data, ensure_ascii=False))
+        .replace('__SENTIMENT_MODEL__', json.dumps(sentiment_model_data, ensure_ascii=False, separators=(',', ':')))
+        .replace('__DIALOGUE_KB_DATA__', json.dumps(dialogue_kb_data, ensure_ascii=False, separators=(',', ':')))
     )
 
     out_file = docs_dir / 'index.html'
     with open(out_file, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-    print(f'[OK] Standalone web playground generated successfully at: {out_file}')
+    print(f'[OK] Standalone web playground studio generated at: {out_file} ({len(html_content):,} bytes)')
 
 
 if __name__ == '__main__':
