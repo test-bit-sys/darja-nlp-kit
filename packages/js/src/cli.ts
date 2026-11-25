@@ -14,6 +14,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as readline from 'readline';
 import { normalize } from './normalizer';
 import { arabiziToArabic } from './arabizi';
 import { extractEntities } from './entities';
@@ -26,7 +27,8 @@ import { detectCulturalReferences, detectMemes } from './cultural';
 import { respondToDarja, DialoguePersona, DialogueScript, DialogueStrategy } from './dialogue';
 import { detectProfanity, censorProfanity } from './profanity';
 import { analyze as runAnalyze } from './pipeline';
-import { buildAgentContext, formatAgentSystemPrompt } from './agent';
+import { DarjaAIAgent, buildAgentContext, formatAgentSystemPrompt } from './agent';
+import { runMcpServer } from './mcp';
 import { startServer } from './server';
 import { SentimentMode } from './types';
 
@@ -52,6 +54,9 @@ Commands:
   moderate <text>      Detect profanities, toxic slurs, and censor Algerian text
   memes <text>         Detect Algerian viral memes and TV comedy quotes
   eval                 Evaluate sentiment accuracy on held-out real Algerian benchmark
+  agent [text]         Run plug-and-play AI Agent (interactive REPL if text omitted)
+  mcp                  Start zero-dependency MCP stdio server (Claude/Cursor/Antigravity)
+  agent-setup          Generate MCP client configuration & quick installation snippet
   agent-prompt <text>  Build grounded prompt for AI LLM agents (GPT-4o, Claude, etc.)
   server               Start zero-dependency HTTP microservice (for n8n, Make, Docker)
 
@@ -65,7 +70,11 @@ Options:
   --mask <str>         Censor mask for moderate (default: ***)
   --port <number>      Port for server (default: 8080)
   --host <string>      Host for server (default: 0.0.0.0)
-  --store <string>     Store name for agent-prompt (default: "Bazar El Djazair")
+  --store <string>     Store name for agent / agent-prompt (default: "Bazar El Djazair")
+  --provider <name>    LLM provider: offline | openai | gemini | groq | deepseek | ollama
+  --model <name>       Model override for agent command
+  --api-key <key>      API key for agent command (or DARJA_API_KEY / OPENAI_API_KEY)
+  --out <path>         Optional output JSON path for agent-setup
 `);
 }
 
@@ -78,7 +87,7 @@ function parseArgs(args: string[]) {
     if (arg === '--json' || arg === '--vary') {
       flags[arg.slice(2)] = true;
     } else if (
-      ['--port', '--host', '--store', '--mode', '--persona', '--script', '--strategy', '--mask'].includes(arg) &&
+      ['--port', '--host', '--store', '--mode', '--persona', '--script', '--strategy', '--mask', '--provider', '--model', '--api-key', '--base-url', '--client', '--out'].includes(arg) &&
       i + 1 < args.length
     ) {
       flags[arg.slice(2)] = args[++i];
@@ -90,7 +99,7 @@ function parseArgs(args: string[]) {
   return { flags, positional };
 }
 
-function main() {
+async function main() {
   const argv = process.argv.slice(2);
   if (argv.length === 0 || argv.includes('--help') || argv.includes('-h')) {
     printHelp();
@@ -546,6 +555,75 @@ function main() {
       break;
     }
 
+    case 'agent': {
+      const agent = new DarjaAIAgent({
+        storeName: typeof flags.store === 'string' ? flags.store : 'Bazar El Djazair',
+        persona: (typeof flags.persona === 'string' ? flags.persona : 'merchant') as DialoguePersona,
+        provider: typeof flags.provider === 'string' ? flags.provider : undefined,
+        apiKey: typeof flags['api-key'] === 'string' ? flags['api-key'] : undefined,
+        model: typeof flags.model === 'string' ? flags.model : undefined,
+        baseUrl: typeof flags['base-url'] === 'string' ? flags['base-url'] : undefined,
+      });
+      if (text) {
+        const res = await agent.ask(text);
+        if (flags.json) {
+          console.log(JSON.stringify(res, null, 2));
+        } else {
+          console.log(`[${res.provider}:${res.model}] (${res.intent} | ${res.dialect})`);
+          console.log(`Agent > ${res.reply}`);
+          if (res.missingSlots.length && !res.needsEscalation) {
+            console.log(`Slots missing: ${res.missingSlots.join(', ')}`);
+          }
+        }
+      } else {
+        console.log(`=== DarjaAIAgent Interactive Chat (${agent.provider}:${agent.model}) ===`);
+        console.log('Type customer messages in Arabic/Arabizi. Commands: /slots, /reset, /exit');
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: 'You > ' });
+        rl.prompt();
+        for await (const rawLine of rl) {
+          const line = rawLine.trim();
+          if (!line) { rl.prompt(); continue; }
+          if (['/exit', 'exit', 'quit'].includes(line)) { rl.close(); break; }
+          if (line === '/reset') { agent.reset(); console.log('[session reset]'); rl.prompt(); continue; }
+          if (line === '/slots') { console.log(JSON.stringify(agent.slots, null, 2)); rl.prompt(); continue; }
+          const res = await agent.ask(line);
+          console.log(`Agent [${res.intent}] > ${res.reply}`);
+          rl.prompt();
+        }
+      }
+      break;
+    }
+
+    case 'mcp': {
+      runMcpServer();
+      break;
+    }
+
+    case 'agent-setup': {
+      const cfg = {
+        mcpServers: {
+          'darja-nlp': {
+            command: process.execPath,
+            args: [path.resolve(__dirname, 'cli.js'), 'mcp'],
+          },
+        },
+      };
+      if (typeof flags.out === 'string') {
+        const outPath = path.resolve(flags.out);
+        fs.mkdirSync(path.dirname(outPath), { recursive: true });
+        fs.writeFileSync(outPath, JSON.stringify(cfg, null, 2) + '\n', 'utf-8');
+      }
+      if (flags.json) {
+        console.log(JSON.stringify(cfg, null, 2));
+      } else {
+        console.log('=== darja-nlp-kit AI Agent Setup (Node.js) ===');
+        console.log('MCP Server Config (Claude Desktop / Cursor / VS Code / Antigravity):');
+        console.log(JSON.stringify(cfg, null, 2));
+        if (typeof flags.out === 'string') console.log(`\n[SAVED] Wrote MCP config to: ${flags.out}`);
+      }
+      break;
+    }
+
     case 'server': {
       const port = flags.port ? parseInt(String(flags.port), 10) : 8080;
       const host = typeof flags.host === 'string' ? flags.host : '0.0.0.0';
@@ -564,4 +642,7 @@ function censor_profanity_compat(text: string, mask: string): string {
   return censorProfanity(text, mask);
 }
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

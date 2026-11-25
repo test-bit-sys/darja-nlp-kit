@@ -30,7 +30,8 @@ from .cultural import detect_cultural_references, detect_memes
 from .dialogue import respond_to_darja
 from .profanity import detect_profanity, censor_profanity
 from .pipeline import analyze as run_analyze
-from .agent import build_agent_context, format_agent_system_prompt
+from .agent import DarjaAIAgent, LLM_PROVIDERS, build_agent_context, format_agent_system_prompt
+from .mcp import run_mcp_server
 from .server import start_server
 
 
@@ -98,6 +99,26 @@ def main():
     p_prompt = subparsers.add_parser("agent-prompt", help="Build grounded context and system prompt for LLMs (GPT, Claude, Gemini)")
     p_prompt.add_argument("text", help="Customer message")
     p_prompt.add_argument("--store", default="Bazar El Djazair", help="Store name")
+
+    # Command: agent (interactive or single-turn plug-and-play AI Agent)
+    p_agent = subparsers.add_parser("agent", help="Run plug-and-play Algerian Darja AI Agent (offline or OpenAI/Gemini/Groq/Ollama)")
+    p_agent.add_argument("text", nargs="*", help="Optional message (omit to start interactive terminal chat)")
+    p_agent.add_argument("--provider", choices=["offline", *LLM_PROVIDERS.keys()], default=None, help="LLM provider (default: auto/offline)")
+    p_agent.add_argument("--model", default=None, help="Optional model override")
+    p_agent.add_argument("--api-key", default=None, help="Optional API key (or set DARJA_API_KEY / OPENAI_API_KEY)")
+    p_agent.add_argument("--base-url", default=None, help="Custom OpenAI-compatible base URL")
+    p_agent.add_argument("--store", default="Bazar El Djazair", help="Store name")
+    p_agent.add_argument("--persona", choices=["casual", "merchant", "assistant"], default="merchant")
+    p_agent.add_argument("--json", action="store_true", help="Output raw JSON")
+
+    # Command: mcp (stdio Model Context Protocol server)
+    subparsers.add_parser("mcp", help="Start zero-dependency MCP stdio server for Claude, Cursor, VS Code, or Antigravity")
+
+    # Command: agent-setup (1-step installation & MCP config helper)
+    p_setup = subparsers.add_parser("agent-setup", help="Generate plug-and-play MCP config and quickstart guide for AI clients")
+    p_setup.add_argument("--client", choices=["generic", "claude", "cursor", "vscode", "antigravity"], default="generic")
+    p_setup.add_argument("--out", default=None, help="Optional file path to write MCP JSON configuration")
+    p_setup.add_argument("--json", action="store_true", help="Print only the MCP JSON configuration")
 
     # Command: chat
     p_chat = subparsers.add_parser("chat", help="Generate natural Algerian Darja response (e.g. 'wach ya khoy' -> 'we cv')")
@@ -440,6 +461,84 @@ def main():
         ctx = build_agent_context(args.text, store_name=args.store)
         prompt = format_agent_system_prompt(ctx)
         print(prompt)
+
+    elif args.command == "agent":
+        agent = DarjaAIAgent(
+            store_name=args.store,
+            persona=args.persona,
+            provider=args.provider,
+            api_key=args.api_key,
+            model=args.model,
+            base_url=args.base_url,
+        )
+        msg_text = " ".join(args.text).strip()
+        if msg_text:
+            res = agent.ask(msg_text)
+            if args.json:
+                print(json.dumps({
+                    "reply": res.reply,
+                    "provider": res.provider,
+                    "model": res.model,
+                    "intent": res.intent,
+                    "dialect": res.dialect,
+                    "needs_escalation": res.needs_escalation,
+                    "ready_to_confirm": res.ready_to_confirm,
+                    "missing_slots": res.missing_slots,
+                    "slots": res.slots,
+                    "tool_calls_executed": res.tool_calls_executed,
+                }, ensure_ascii=False, indent=2))
+            else:
+                print(f"[{res.provider}:{res.model}] ({res.intent} | {res.dialect})")
+                print(f"Agent > {res.reply}")
+                if res.missing_slots and not res.needs_escalation:
+                    print(f"Slots missing: {', '.join(res.missing_slots)}")
+        else:
+            print(f"=== DarjaAIAgent Interactive Chat ({agent.provider}:{agent.model}) ===")
+            print("Type customer messages in Arabic/Arabizi. Commands: /slots, /reset, /exit")
+            while True:
+                try:
+                    line = input("You > ").strip()
+                except (EOFError, KeyboardInterrupt):
+                    print()
+                    break
+                if not line:
+                    continue
+                if line in ("/exit", "exit", "quit"):
+                    break
+                if line == "/reset":
+                    agent.reset()
+                    print("[session reset]")
+                    continue
+                if line == "/slots":
+                    print(json.dumps(agent.slots, ensure_ascii=False, indent=2))
+                    continue
+                res = agent.ask(line)
+                print(f"Agent [{res.intent}] > {res.reply}")
+
+    elif args.command == "mcp":
+        run_mcp_server()
+
+    elif args.command == "agent-setup":
+        cfg = DarjaAIAgent.get_mcp_config(runtime="python")
+        if args.out:
+            out_path = Path(args.out)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(cfg, ensure_ascii=False, indent=2))
+        else:
+            print(f"=== darja-nlp-kit AI Agent Setup ({args.client}) ===")
+            print("1. One-Command Install (Python from GitHub):")
+            print('   pip install "git+https://github.com/test-bit-sys/darja-nlp-kit.git#subdirectory=packages/python"')
+            print("\n2. MCP Server Config (Claude Desktop / Cursor / VS Code / Antigravity):")
+            print(json.dumps(cfg, ensure_ascii=False, indent=2))
+            if args.out:
+                print(f"\n[SAVED] Wrote MCP config to: {args.out}")
+            print("\n3. Quick Terminal AI Agent Chat:")
+            print("   darja-nlp agent                          # Offline Algerian Darja Agent")
+            print("   darja-nlp agent --provider ollama        # Local Ollama (qwen2.5:7b)")
+            print("   darja-nlp agent --provider openai        # GPT-4o-mini (uses OPENAI_API_KEY)")
+            print("   darja-nlp agent --provider gemini        # Gemini 2.5 Flash (uses DARJA_API_KEY)")
 
     elif args.command == "server":
         start_server(host=args.host, port=args.port)

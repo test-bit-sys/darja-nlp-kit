@@ -7,7 +7,18 @@ export { extractQuantities, extractProductAttributes } from './quantities';
 export { detectEscalation } from './escalation';
 export { detectDialect, getDialectMetadata } from './dialect';
 export { identifyIntent } from './intent';
-export { buildAgentContext, formatAgentSystemPrompt, getFewShotDialogues, getOpenAiToolDefinitions } from './agent';
+export {
+  buildAgentContext,
+  formatAgentSystemPrompt,
+  getFewShotDialogues,
+  getOpenAiToolDefinitions,
+  getMcpToolDefinitions,
+  executeAgentTool,
+  DarjaAIAgent,
+  LLM_PROVIDERS,
+} from './agent';
+export { handleMcpMessage, runMcpServer } from './mcp';
+export type { AgentContext, DialogueExample, AgentOptions, AgentReply } from './agent';
 export {
   detectCulturalReferences,
   getCulturalData,
@@ -30,7 +41,6 @@ export { DarjaChat } from './chat';
 export type { ChatMessage, ChatSlots, ChatTurnResult, DarjaChatOptions } from './chat';
 export { startServer } from './server';
 export type { ServerOptions } from './server';
-export type { AgentContext, DialogueExample } from './agent';
 export type {
   CulturalCategory,
   CulturalMatch,

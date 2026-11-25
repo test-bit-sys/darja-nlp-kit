@@ -7,6 +7,11 @@ in authentic Algerian Darja like a human merchant/representative.
 from __future__ import annotations
 
 import json
+import os
+import sys
+import urllib.error
+import urllib.request
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from .normalizer import normalize
@@ -17,6 +22,9 @@ from .dialect import detect_dialect
 from .intent import identify_intent, IntentType
 from .escalation import detect_escalation
 from .cultural import detect_cultural_references
+from .dialogue import respond_to_darja
+from .profanity import censor_profanity, detect_profanity
+from .chat import DarjaChat
 
 _DATA_DIR = Path(__file__).parent / 'data'
 _dialogues_cache: Optional[List[Dict[str, Any]]] = None
@@ -399,3 +407,319 @@ def get_openai_tool_definitions() -> List[Dict[str, Any]]:
             }
         }
     ]
+
+
+LLM_PROVIDERS: Dict[str, Dict[str, str]] = {
+    "openai": {"base_url": "https://api.openai.com/v1", "default_model": "gpt-4o-mini"},
+    "gemini": {"base_url": "https://generativelanguage.googleapis.com/v1beta/openai", "default_model": "gemini-2.5-flash"},
+    "groq": {"base_url": "https://api.groq.com/openai/v1", "default_model": "llama-3.3-70b-versatile"},
+    "deepseek": {"base_url": "https://api.deepseek.com/v1", "default_model": "deepseek-chat"},
+    "openrouter": {"base_url": "https://openrouter.ai/api/v1", "default_model": "meta-llama/llama-3.3-70b-instruct"},
+    "ollama": {"base_url": "http://127.0.0.1:11434/v1", "default_model": "qwen2.5:7b"},
+}
+
+
+def execute_agent_tool(name: str, arguments: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Execute any darja-nlp-kit AI Agent / MCP tool by name and return structured JSON dict."""
+    args = arguments or {}
+
+    if name == "parse_algerian_message":
+        text = str(args.get("text", ""))
+        ent = extract_entities(text)
+        dia = detect_dialect(text)
+        return {
+            "dialect": {"region": dia.region, "confidence": dia.confidence, "markers": dia.detected_markers},
+            "wilayas": [
+                {"code": w.code, "name_ar": w.name_ar, "name_fr": w.name_fr, "commune": w.commune}
+                for w in ent.wilayas
+            ],
+            "prices_dzd": [
+                {"amount": p.amount, "raw": p.raw}
+                for p in ent.prices if p.amount is not None
+            ],
+            "payments": [p.type for p in ent.payments],
+            "deliveries": [d.company for d in (ent.deliveries or [])],
+            "delivery_mode": ent.delivery_mode.mode if ent.delivery_mode else None,
+            "phones": [
+                {"normalized": ph.normalized, "operator": ph.operator, "whatsapp_url": ph.whatsapp_url}
+                for ph in ent.phones
+            ],
+            "quantities": [{"value": q.value, "unit": q.unit, "raw": q.raw} for q in (ent.quantities or [])],
+            "attributes": {
+                "colors": ent.attributes.colors if ent.attributes else [],
+                "sizes": ent.attributes.sizes if ent.attributes else [],
+            },
+        }
+
+    if name == "get_wilaya_details":
+        try:
+            code = int(args.get("code", 0))
+        except (TypeError, ValueError):
+            code = 0
+        w = get_wilaya_by_code(code)
+        if w:
+            return w
+        return {"error": f"Wilaya code {code} not found (valid range: 1..69)"}
+
+    if name == "check_human_escalation":
+        text = str(args.get("text", ""))
+        esc = detect_escalation(text)
+        return {
+            "needs_escalation": esc.needs_escalation,
+            "reason": esc.reason,
+            "urgency": esc.urgency,
+            "matched_triggers": esc.matched_triggers,
+            "guideline": esc.guideline,
+        }
+
+    if name == "detect_cultural_references":
+        text = str(args.get("text", ""))
+        cult = detect_cultural_references(text)
+        return {
+            "has_cultural_reference": cult.has_cultural_reference,
+            "cultural_summary": cult.cultural_summary,
+            "proverbs": [p.canonical_name for p in cult.proverbs],
+            "memes_and_trends": [m.canonical_name for m in cult.memes_and_trends],
+            "landmarks": [lm.canonical_name for lm in cult.landmarks],
+            "gastronomy": [g.canonical_name for g in cult.gastronomy],
+            "slang_expressions": [s.canonical_name for s in cult.slang_expressions],
+        }
+
+    if name == "respond_to_darja":
+        text = str(args.get("text", ""))
+        persona = str(args.get("persona", "casual"))
+        res = respond_to_darja(text, persona=persona)  # type: ignore[arg-type]
+        return {
+            "reply": res.reply,
+            "intent": res.intent,
+            "script": res.script,
+            "confidence": res.confidence,
+            "source": res.source,
+        }
+
+    if name == "moderate_darja_text":
+        text = str(args.get("text", ""))
+        prof = detect_profanity(text)
+        censored = censor_profanity(text)
+        return {
+            "is_profane": prof.is_profane,
+            "severity": prof.severity,
+            "matches": [{"term": m.term, "category": m.category, "severity": m.severity} for m in prof.matches],
+            "censored_text": censored,
+        }
+
+    if name == "analyze_darja_message":
+        from .pipeline import analyze
+        text = str(args.get("text", ""))
+        persona = str(args.get("persona", "merchant"))
+        mode = str(args.get("sentiment_mode", "hybrid"))
+        return analyze(text, persona=persona, sentiment_mode=mode).to_dict()  # type: ignore[arg-type]
+
+    if name == "build_agent_prompt":
+        text = str(args.get("text", ""))
+        store = str(args.get("store_name", "Bazar El Djazair"))
+        ctx = build_agent_context(text, store_name=store)
+        return {"context": ctx, "system_prompt": format_agent_system_prompt(ctx)}
+
+    return {"error": f"Unknown darja-nlp tool: {name}"}
+
+
+def get_mcp_tool_definitions() -> List[Dict[str, Any]]:
+    """Return MCP (Model Context Protocol) tool specifications covering all Algerian NLP tools."""
+    mcp_tools = [
+        {
+            "name": item["function"]["name"],
+            "description": item["function"]["description"],
+            "inputSchema": item["function"]["parameters"],
+        }
+        for item in get_openai_tool_definitions()
+    ]
+    mcp_tools.extend([
+        {
+            "name": "analyze_darja_message",
+            "description": "Run complete unified Algerian Darja analysis (sentiment, intent, dialect, entities, moderation, cultural references, and grounded reply).",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "text": {"type": "string", "description": "Algerian Darja, Arabic, or Arabizi text."},
+                    "persona": {"type": "string", "enum": ["casual", "merchant", "assistant"], "description": "Response persona."},
+                    "sentiment_mode": {"type": "string", "enum": ["hybrid", "ml", "lexicon"], "description": "Sentiment engine mode."},
+                },
+                "required": ["text"],
+            },
+        },
+        {
+            "name": "build_agent_prompt",
+            "description": "Extract structured grounded facts and generate an anti-hallucination Algerian Darja system prompt for an LLM.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "text": {"type": "string", "description": "Customer message."},
+                    "store_name": {"type": "string", "description": "Optional store name."},
+                },
+                "required": ["text"],
+            },
+        },
+    ])
+    return mcp_tools
+
+
+@dataclass
+class AgentReply:
+    """Structured response produced by DarjaAIAgent."""
+    reply: str
+    provider: str
+    model: str
+    intent: str
+    dialect: str
+    needs_escalation: bool
+    slots: Dict[str, Any]
+    ready_to_confirm: bool
+    missing_slots: List[str]
+    context: Dict[str, Any]
+    tool_calls_executed: List[str] = field(default_factory=list)
+
+
+class DarjaAIAgent:
+    """Zero-dependency plug-and-play AI Agent for Algerian Darja (Offline + OpenAI/Gemini/Groq/DeepSeek/Ollama)."""
+
+    def __init__(
+        self,
+        store_name: str = "Bazar El Djazair",
+        persona: str = "merchant",
+        provider: Optional[str] = None,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+        base_url: Optional[str] = None,
+        timeout: float = 30.0,
+    ) -> None:
+        self.store_name = store_name
+        self.persona = persona
+        self.api_key = api_key or os.environ.get("DARJA_API_KEY") or os.environ.get("OPENAI_API_KEY")
+        if provider:
+            self.provider = provider.lower()
+        elif self.api_key or base_url:
+            self.provider = "openai"
+        else:
+            self.provider = "offline"
+
+        provider_cfg = LLM_PROVIDERS.get(self.provider, {})
+        self.base_url = (base_url or provider_cfg.get("base_url", "")).rstrip("/")
+        self.model = model or provider_cfg.get("default_model", "local-darja-rules")
+        self.timeout = timeout
+        self.chat_session = DarjaChat(store_name=store_name, persona=persona)  # type: ignore[arg-type]
+        self.conversation_history: List[Dict[str, Any]] = []
+
+    @property
+    def slots(self) -> Dict[str, Any]:
+        return self.chat_session.slots
+
+    def reset(self) -> None:
+        self.chat_session.reset()
+        self.conversation_history.clear()
+
+    def _call_openai_compatible(self, system_prompt: str, user_message: str) -> tuple[str, List[str]]:
+        if self.provider != "ollama" and not self.api_key:
+            raise ValueError(f"API key is required for provider '{self.provider}'. Set api_key or DARJA_API_KEY, or use provider='offline'.")
+
+        messages: List[Dict[str, Any]] = [{"role": "system", "content": system_prompt}]
+        messages.extend(self.conversation_history[-8:])
+        messages.append({"role": "user", "content": user_message})
+        tools = get_openai_tool_definitions()
+        executed: List[str] = []
+
+        for _ in range(3):
+            payload = {
+                "model": self.model,
+                "messages": messages,
+                "tools": tools,
+                "tool_choice": "auto",
+                "temperature": 0.4,
+            }
+            req = urllib.request.Request(
+                f"{self.base_url}/chat/completions",
+                data=json.dumps(payload).encode("utf-8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.api_key or 'ollama'}",
+                },
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+
+            msg = data["choices"][0]["message"]
+            tool_calls = msg.get("tool_calls") or []
+            if not tool_calls:
+                return str(msg.get("content") or "").strip(), executed
+
+            messages.append(msg)
+            for tc in tool_calls:
+                fn = tc.get("function") or {}
+                t_name = fn.get("name", "")
+                try:
+                    t_args = json.loads(fn.get("arguments") or "{}")
+                except json.JSONDecodeError:
+                    t_args = {}
+                t_res = execute_agent_tool(t_name, t_args)
+                executed.append(t_name)
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tc.get("id", t_name),
+                    "content": json.dumps(t_res, ensure_ascii=False),
+                })
+
+        return str(messages[-1].get("content") or ""), executed
+
+    def ask(self, message: str) -> AgentReply:
+        """Process a customer message, update slots, and generate a grounded Darja response."""
+        turn = self.chat_session.send(message)
+        ctx = build_agent_context(message, store_name=self.store_name)
+        system_prompt = format_agent_system_prompt(ctx)
+
+        reply_text = turn.reply
+        used_provider = "offline"
+        executed_tools: List[str] = []
+
+        if self.provider != "offline" and not turn.escalation.needs_escalation:
+            reply_text, executed_tools = self._call_openai_compatible(system_prompt, message)
+            used_provider = self.provider
+
+        self.conversation_history.append({"role": "user", "content": message})
+        self.conversation_history.append({"role": "assistant", "content": reply_text})
+
+        return AgentReply(
+            reply=reply_text,
+            provider=used_provider,
+            model=self.model if used_provider != "offline" else "offline-darja-kb",
+            intent=turn.intent,
+            dialect=turn.dialect,
+            needs_escalation=turn.escalation.needs_escalation,
+            slots=turn.extracted_slots,
+            ready_to_confirm=turn.ready_to_confirm,
+            missing_slots=turn.missing_slots,
+            context=ctx,
+            tool_calls_executed=executed_tools,
+        )
+
+    @staticmethod
+    def get_mcp_config(runtime: str = "python") -> Dict[str, Any]:
+        """Generate plug-and-play MCP server configuration JSON for Claude Desktop, Cursor, VS Code, or Antigravity."""
+        if runtime == "node":
+            return {
+                "mcpServers": {
+                    "darja-nlp": {
+                        "command": "npx",
+                        "args": ["-y", "@dz-open-suite/darja-nlp-kit", "mcp"],
+                    }
+                }
+            }
+        return {
+            "mcpServers": {
+                "darja-nlp": {
+                    "command": sys.executable,
+                    "args": ["-m", "darja_nlp.cli", "mcp"],
+                }
+            }
+        }
+

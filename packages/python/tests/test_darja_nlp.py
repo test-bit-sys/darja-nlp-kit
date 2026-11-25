@@ -925,6 +925,61 @@ class TestHTTPServerIntegration:
             httpd.server_close()
 
 
+class TestDarjaAIAgentAndMCP:
+
+    def test_execute_agent_tools_and_offline_agent(self) -> None:
+        from darja_nlp import DarjaAIAgent, execute_agent_tool
+
+        parsed = execute_agent_tool("parse_algerian_message", {"text": "hab nchri b 500 doro aflou 0661234567"})
+        assert any(w["code"] == 59 for w in parsed["wilayas"])
+        assert any(p["amount"] == 2500.0 for p in parsed["prices_dzd"])
+
+        wil = execute_agent_tool("get_wilaya_details", {"code": 59})
+        assert wil["name_fr"] == "Aflou"
+
+        analyzed = execute_agent_tool("analyze_darja_message", {"text": "wach ya khoy"})
+        assert "reply" in analyzed and "sentiment" in analyzed
+
+        bot = DarjaAIAgent(store_name="DzTest")
+        r1 = bot.ask("hab nchri 2 hbat noir l aflou")
+        assert r1.provider == "offline"
+        assert r1.ready_to_confirm is False
+        assert "phone" in r1.missing_slots
+
+        r2 = bot.ask("0661234567")
+        assert r2.ready_to_confirm is True
+        assert r2.intent == "ORDER_CONFIRMED"
+        assert "mcpServers" in DarjaAIAgent.get_mcp_config()
+
+    def test_mcp_jsonrpc_lifecycle(self) -> None:
+        import json
+        from darja_nlp import handle_mcp_message
+
+        init_resp = handle_mcp_message({"jsonrpc": "2.0", "id": 1, "method": "initialize"})
+        assert init_resp is not None
+        assert init_resp["result"]["serverInfo"]["name"] == "darja-nlp-kit"
+
+        notif_resp = handle_mcp_message({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        assert notif_resp is None
+
+        list_resp = handle_mcp_message({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
+        assert list_resp is not None
+        tool_names = [t["name"] for t in list_resp["result"]["tools"]]
+        assert "analyze_darja_message" in tool_names
+        assert "parse_algerian_message" in tool_names
+
+        call_resp = handle_mcp_message({
+            "jsonrpc": "2.0",
+            "id": 3,
+            "method": "tools/call",
+            "params": {"name": "get_wilaya_details", "arguments": {"code": 16}},
+        })
+        assert call_resp is not None and call_resp["result"]["isError"] is False
+        payload = json.loads(call_resp["result"]["content"][0]["text"])
+        assert payload["name_fr"] == "Alger"
+
+
+
 
 
 

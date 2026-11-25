@@ -27,6 +27,8 @@ import { detectProfanity, isProfane, censorProfanity } from '../src/profanity';
 import { DarjaPipeline, analyze } from '../src/pipeline';
 import { DarjaClassifier } from '../src/classifier';
 import { DarjaChat } from '../src/chat';
+import { DarjaAIAgent, executeAgentTool } from '../src/agent';
+import { handleMcpMessage } from '../src/mcp';
 import { startServer } from '../src/server';
 
 describe('normalize', () => {
@@ -1014,5 +1016,55 @@ describe('HTTP Microservice Integration', () => {
     } finally {
       await new Promise<void>((resolve) => server.close(() => resolve()));
     }
+  });
+});
+
+describe('DarjaAIAgent & MCP Server', () => {
+  it('should execute agent tools and run multi-turn offline DarjaAIAgent', async () => {
+    const parsed = executeAgentTool('parse_algerian_message', {
+      text: 'hab nchri b 500 doro aflou 0661234567',
+    });
+    assert.ok(parsed.wilayas.some((w: any) => w.code === 59));
+    assert.ok(parsed.prices_dzd.some((p: any) => p.amount === 2500));
+
+    const wil = executeAgentTool('get_wilaya_details', { code: 59 });
+    assert.equal(wil.name_fr, 'Aflou');
+
+    const analyzed = executeAgentTool('analyze_darja_message', { text: 'wach ya khoy' });
+    assert.ok(analyzed.reply && analyzed.sentiment);
+
+    const bot = new DarjaAIAgent({ storeName: 'DzTest' });
+    const r1 = await bot.ask('hab nchri 2 hbat noir l aflou');
+    assert.equal(r1.provider, 'offline');
+    assert.equal(r1.readyToConfirm, false);
+    assert.ok(r1.missingSlots.includes('phone'));
+
+    const r2 = await bot.ask('0661234567');
+    assert.equal(r2.readyToConfirm, true);
+    assert.equal(r2.intent, 'ORDER_CONFIRMED');
+    assert.ok('mcpServers' in DarjaAIAgent.getMcpConfig('node'));
+  });
+
+  it('should handle MCP JSON-RPC 2.0 initialize, tools/list, and tools/call', () => {
+    const initResp = handleMcpMessage({ jsonrpc: '2.0', id: 1, method: 'initialize' });
+    assert.equal(initResp?.result.serverInfo.name, 'darja-nlp-kit');
+
+    const notifResp = handleMcpMessage({ jsonrpc: '2.0', method: 'notifications/initialized' });
+    assert.equal(notifResp, null);
+
+    const listResp = handleMcpMessage({ jsonrpc: '2.0', id: 2, method: 'tools/list' });
+    const names = listResp?.result.tools.map((t: any) => t.name) || [];
+    assert.ok(names.includes('analyze_darja_message'));
+    assert.ok(names.includes('parse_algerian_message'));
+
+    const callResp = handleMcpMessage({
+      jsonrpc: '2.0',
+      id: 3,
+      method: 'tools/call',
+      params: { name: 'get_wilaya_details', arguments: { code: 16 } },
+    });
+    assert.equal(callResp?.result.isError, false);
+    const payload = JSON.parse(callResp?.result.content[0].text);
+    assert.equal(payload.name_fr, 'Alger');
   });
 });

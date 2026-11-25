@@ -1,11 +1,14 @@
 import { normalize } from './normalizer';
 import { arabiziToArabic } from './arabizi';
 import { analyzeSentiment } from './sentiment';
-import { extractEntities } from './entities';
+import { extractEntities, getWilayaByCode } from './entities';
 import { detectDialect } from './dialect';
 import { identifyIntent } from './intent';
 import { detectEscalation } from './escalation';
 import { detectCulturalReferences } from './cultural';
+import { respondToDarja, DialoguePersona } from './dialogue';
+import { detectProfanity, censorProfanity } from './profanity';
+import { DarjaChat, ChatSlots } from './chat';
 import { CulturalAnalysisResult, DialectRegion, EscalationResult, IntentType, SentimentLabel } from './types';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -394,4 +397,322 @@ export function getOpenAiToolDefinitions(): Array<Record<string, unknown>> {
       },
     },
   ];
+}
+
+export const LLM_PROVIDERS: Record<string, { baseUrl: string; defaultModel: string }> = {
+  openai: { baseUrl: 'https://api.openai.com/v1', defaultModel: 'gpt-4o-mini' },
+  gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', defaultModel: 'gemini-2.5-flash' },
+  groq: { baseUrl: 'https://api.groq.com/openai/v1', defaultModel: 'llama-3.3-70b-versatile' },
+  deepseek: { baseUrl: 'https://api.deepseek.com/v1', defaultModel: 'deepseek-chat' },
+  openrouter: { baseUrl: 'https://openrouter.ai/api/v1', defaultModel: 'meta-llama/llama-3.3-70b-instruct' },
+  ollama: { baseUrl: 'http://127.0.0.1:11434/v1', defaultModel: 'qwen2.5:7b' },
+};
+
+export function executeAgentTool(name: string, args: Record<string, any> = {}): Record<string, any> {
+  if (name === 'parse_algerian_message') {
+    const text = String(args.text || '');
+    const ent = extractEntities(text);
+    const dia = detectDialect(text);
+    return {
+      dialect: { region: dia.region, confidence: dia.confidence, markers: dia.detectedMarkers },
+      wilayas: ent.wilayas.map((w) => ({
+        code: w.code,
+        name_ar: w.nameAr,
+        name_fr: w.nameFr,
+        commune: w.commune ?? null,
+      })),
+      prices_dzd: ent.prices.filter((p) => p.amount !== null).map((p) => ({ amount: p.amount, raw: p.raw })),
+      payments: ent.payments.map((p) => p.type),
+      deliveries: (ent.deliveries || []).map((d) => d.company),
+      delivery_mode: ent.deliveryMode ? ent.deliveryMode.mode : null,
+      phones: (ent.phones || []).map((ph) => ({
+        normalized: ph.normalized,
+        operator: ph.operator ?? null,
+        whatsapp_url: ph.whatsappUrl ?? null,
+      })),
+      quantities: (ent.quantities || []).map((q) => ({ value: q.value, unit: q.unit, raw: q.raw })),
+      attributes: ent.attributes || { colors: [], sizes: [] },
+    };
+  }
+
+  if (name === 'get_wilaya_details') {
+    const code = parseInt(String(args.code ?? '0'), 10) || 0;
+    const w = getWilayaByCode(code);
+    return w ? (w as unknown as Record<string, any>) : { error: `Wilaya code ${code} not found (valid range: 1..69)` };
+  }
+
+  if (name === 'check_human_escalation') {
+    const text = String(args.text || '');
+    const esc = detectEscalation(text);
+    return {
+      needs_escalation: esc.needsEscalation,
+      reason: esc.reason,
+      urgency: esc.urgency,
+      matched_triggers: esc.matchedTriggers,
+      guideline: esc.guideline,
+    };
+  }
+
+  if (name === 'detect_cultural_references') {
+    const text = String(args.text || '');
+    const cult = detectCulturalReferences(text);
+    return {
+      has_cultural_reference: cult.hasCulturalReference,
+      cultural_summary: cult.culturalSummary,
+      proverbs: cult.proverbs.map((p) => p.canonicalName),
+      memes_and_trends: cult.memesAndTrends.map((m) => m.canonicalName),
+      landmarks: cult.landmarks.map((lm) => lm.canonicalName),
+      gastronomy: cult.gastronomy.map((g) => g.canonicalName),
+      slang_expressions: cult.slangExpressions.map((s) => s.canonicalName),
+    };
+  }
+
+  if (name === 'respond_to_darja') {
+    const text = String(args.text || '');
+    const persona = (args.persona || 'casual') as DialoguePersona;
+    return respondToDarja(text, { persona }) as unknown as Record<string, any>;
+  }
+
+  if (name === 'moderate_darja_text') {
+    const text = String(args.text || '');
+    const prof = detectProfanity(text);
+    return {
+      is_profane: prof.isProfane,
+      severity: prof.severity,
+      matches: prof.matches.map((m) => ({ term: m.term, category: m.category, severity: m.severity })),
+      censored_text: censorProfanity(text),
+    };
+  }
+
+  if (name === 'analyze_darja_message') {
+    const { analyze } = require('./pipeline');
+    const text = String(args.text || '');
+    return analyze(text, {
+      persona: (args.persona || 'merchant') as DialoguePersona,
+      sentimentMode: args.sentiment_mode || 'hybrid',
+    });
+  }
+
+  if (name === 'build_agent_prompt') {
+    const text = String(args.text || '');
+    const store = String(args.store_name || 'Bazar El Djazair');
+    const ctx = buildAgentContext(text, store);
+    return { context: ctx, system_prompt: formatAgentSystemPrompt(ctx) };
+  }
+
+  return { error: `Unknown darja-nlp tool: ${name}` };
+}
+
+export function getMcpToolDefinitions(): Array<Record<string, any>> {
+  const mcpTools = getOpenAiToolDefinitions().map((item: any) => ({
+    name: item.function.name,
+    description: item.function.description,
+    inputSchema: item.function.parameters,
+  }));
+  mcpTools.push(
+    {
+      name: 'analyze_darja_message',
+      description: 'Run complete unified Algerian Darja analysis (sentiment, intent, dialect, entities, moderation, cultural references, and grounded reply).',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          text: { type: 'string', description: 'Algerian Darja, Arabic, or Arabizi text.' },
+          persona: { type: 'string', enum: ['casual', 'merchant', 'assistant'], description: 'Response persona.' },
+          sentiment_mode: { type: 'string', enum: ['hybrid', 'ml', 'lexicon'], description: 'Sentiment engine mode.' },
+        },
+        required: ['text'],
+      },
+    },
+    {
+      name: 'build_agent_prompt',
+      description: 'Extract structured grounded facts and generate an anti-hallucination Algerian Darja system prompt for an LLM.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          text: { type: 'string', description: 'Customer message.' },
+          store_name: { type: 'string', description: 'Optional store name.' },
+        },
+        required: ['text'],
+      },
+    }
+  );
+  return mcpTools;
+}
+
+export interface AgentOptions {
+  storeName?: string;
+  persona?: DialoguePersona;
+  provider?: string;
+  apiKey?: string;
+  model?: string;
+  baseUrl?: string;
+  timeoutMs?: number;
+}
+
+export interface AgentReply {
+  reply: string;
+  provider: string;
+  model: string;
+  intent: string;
+  dialect: DialectRegion;
+  needsEscalation: boolean;
+  slots: ChatSlots;
+  readyToConfirm: boolean;
+  missingSlots: string[];
+  context: AgentContext;
+  toolCallsExecuted: string[];
+}
+
+export class DarjaAIAgent {
+  public storeName: string;
+  public persona: DialoguePersona;
+  public provider: string;
+  public apiKey?: string;
+  public baseUrl: string;
+  public model: string;
+  public timeoutMs: number;
+  public chatSession: DarjaChat;
+  public conversationHistory: Array<Record<string, any>> = [];
+
+  constructor(options?: AgentOptions) {
+    this.storeName = options?.storeName ?? 'Bazar El Djazair';
+    this.persona = options?.persona ?? 'merchant';
+    this.apiKey = options?.apiKey || process.env.DARJA_API_KEY || process.env.OPENAI_API_KEY;
+    if (options?.provider) {
+      this.provider = options.provider.toLowerCase();
+    } else if (this.apiKey || options?.baseUrl) {
+      this.provider = 'openai';
+    } else {
+      this.provider = 'offline';
+    }
+
+    const cfg = LLM_PROVIDERS[this.provider] || {};
+    this.baseUrl = (options?.baseUrl || cfg.baseUrl || '').replace(/\/+$/, '');
+    this.model = options?.model || cfg.defaultModel || 'local-darja-rules';
+    this.timeoutMs = options?.timeoutMs ?? 30000;
+    this.chatSession = new DarjaChat({ storeName: this.storeName, persona: this.persona });
+  }
+
+  get slots(): ChatSlots {
+    return this.chatSession.slots;
+  }
+
+  reset(): void {
+    this.chatSession.reset();
+    this.conversationHistory = [];
+  }
+
+  askOffline(message: string): AgentReply {
+    const turn = this.chatSession.send(message);
+    const ctx = buildAgentContext(message, this.storeName);
+    this.conversationHistory.push({ role: 'user', content: message });
+    this.conversationHistory.push({ role: 'assistant', content: turn.reply });
+    return {
+      reply: turn.reply,
+      provider: 'offline',
+      model: 'offline-darja-kb',
+      intent: turn.intent,
+      dialect: turn.dialect,
+      needsEscalation: turn.escalation.needsEscalation,
+      slots: turn.extractedSlots,
+      readyToConfirm: turn.readyToConfirm,
+      missingSlots: turn.missingSlots,
+      context: ctx,
+      toolCallsExecuted: [],
+    };
+  }
+
+  async ask(message: string): Promise<AgentReply> {
+    if (this.provider === 'offline') {
+      return this.askOffline(message);
+    }
+    const turn = this.chatSession.send(message);
+    const ctx = buildAgentContext(message, this.storeName);
+    if (turn.escalation.needsEscalation) {
+      return {
+        reply: turn.reply,
+        provider: 'offline',
+        model: 'offline-darja-kb',
+        intent: turn.intent,
+        dialect: turn.dialect,
+        needsEscalation: true,
+        slots: turn.extractedSlots,
+        readyToConfirm: turn.readyToConfirm,
+        missingSlots: turn.missingSlots,
+        context: ctx,
+        toolCallsExecuted: [],
+      };
+    }
+    if (this.provider !== 'ollama' && !this.apiKey) {
+      throw new Error(`API key is required for provider '${this.provider}'. Set apiKey or DARJA_API_KEY, or use provider='offline'.`);
+    }
+
+    const systemPrompt = formatAgentSystemPrompt(ctx);
+    const messages: Array<Record<string, any>> = [
+      { role: 'system', content: systemPrompt },
+      ...this.conversationHistory.slice(-8),
+      { role: 'user', content: message },
+    ];
+    const tools = getOpenAiToolDefinitions();
+    const executed: string[] = [];
+
+    for (let hop = 0; hop < 3; hop++) {
+      const resp = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.apiKey || 'ollama'}`,
+        },
+        body: JSON.stringify({ model: this.model, messages, tools, tool_choice: 'auto', temperature: 0.4 }),
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+      if (!resp.ok) {
+        throw new Error(`LLM HTTP ${resp.status}: ${await resp.text()}`);
+      }
+      const data: any = await resp.json();
+      const msg = data.choices?.[0]?.message || {};
+      const toolCalls = msg.tool_calls || [];
+      if (!toolCalls.length) {
+        const replyText = String(msg.content || '').trim();
+        this.conversationHistory.push({ role: 'user', content: message });
+        this.conversationHistory.push({ role: 'assistant', content: replyText });
+        return {
+          reply: replyText,
+          provider: this.provider,
+          model: this.model,
+          intent: turn.intent,
+          dialect: turn.dialect,
+          needsEscalation: false,
+          slots: turn.extractedSlots,
+          readyToConfirm: turn.readyToConfirm,
+          missingSlots: turn.missingSlots,
+          context: ctx,
+          toolCallsExecuted: executed,
+        };
+      }
+
+      messages.push(msg);
+      for (const tc of toolCalls) {
+        const tName = tc.function?.name || '';
+        let tArgs: Record<string, any> = {};
+        try {
+          tArgs = JSON.parse(tc.function?.arguments || '{}');
+        } catch {
+          tArgs = {};
+        }
+        const tRes = executeAgentTool(tName, tArgs);
+        executed.push(tName);
+        messages.push({ role: 'tool', tool_call_id: tc.id || tName, content: JSON.stringify(tRes) });
+      }
+    }
+
+    return this.askOffline(message);
+  }
+
+  static getMcpConfig(runtime: 'python' | 'node' = 'python'): Record<string, any> {
+    if (runtime === 'node') {
+      return { mcpServers: { 'darja-nlp': { command: 'npx', args: ['-y', '@dz-open-suite/darja-nlp-kit', 'mcp'] } } };
+    }
+    return { mcpServers: { 'darja-nlp': { command: 'python', args: ['-m', 'darja_nlp.cli', 'mcp'] } } };
+  }
 }

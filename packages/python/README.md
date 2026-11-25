@@ -45,24 +45,45 @@ Handles Arabic script, Arabizi (Latin transliteration with numbers), and French/
 ### Python
 
 ```bash
+# Instant 1-command install directly from GitHub (works immediately, zero extra dependencies)
+pip install "git+https://github.com/test-bit-sys/darja-nlp-kit.git#subdirectory=packages/python"
+```
+
+Or from a local clone:
+```bash
 cd packages/python
 pip install -e .
 ```
 
-Or via PyPI:
+### AI Agent & MCP Server (1-Step Plug & Play)
+
+After installing the Python package above, run the interactive Darja AI Agent or connect it directly to Claude Desktop, Cursor, VS Code, Windsurf, or Antigravity via the built-in zero-dependency **MCP server**:
+
 ```bash
-pip install darja-nlp-kit
+# 1. Generate ready-to-paste MCP configuration for your AI client
+darja-nlp agent-setup
+
+# 2. Chat interactively in terminal (offline mode — no API key needed)
+darja-nlp agent
+
+# 3. Connect to OpenAI / Gemini / Groq / DeepSeek / local Ollama (uses stdlib urllib, zero extra packages)
+darja-nlp agent --provider gemini --api-key YOUR_KEY
+darja-nlp agent --provider ollama --model qwen2.5:7b
+
+# 4. Run the built-in MCP stdio server
+darja-nlp mcp
 ```
 
 ### TypeScript / JavaScript
 
 ```bash
-cd packages/js
+git clone https://github.com/test-bit-sys/darja-nlp-kit.git
+cd darja-nlp-kit/packages/js
 npm install
 npm run build
 ```
 
-Or via npm:
+Or install from npm (once published):
 ```bash
 npm install @dz-open-suite/darja-nlp-kit
 ```
@@ -649,11 +670,44 @@ const t2 = chat.send('l wahran 0661234567 b yalidine');
 console.log(t2.slots.wilaya); // 'وهران'
 ```
 
+### `DarjaAIAgent` & Built-In MCP Server — Plug-and-Play LLM & Offline Agent
+
+Combine multi-turn slot-filling (`DarjaChat`), grounded fact extraction (`buildAgentContext`), OpenAI tool execution (`executeAgentTool`), and optional LLM calls (OpenAI, Gemini, Groq, DeepSeek, Ollama — zero external dependencies) or expose all 8 tools natively over **Model Context Protocol (MCP)**:
+
+**Python:**
+```python
+from darja_nlp import DarjaAIAgent, execute_agent_tool
+
+# Works 100% offline with zero API keys, or pass provider="gemini"/"openai"/"ollama" + api_key
+bot = DarjaAIAgent(store_name="DzShop")
+res = bot.ask("hab nchri 2 hbat XL l aflou 0661234567")
+print(res.reply)           # Grounded Algerian Darja reply
+print(res.slots["wilayas"])
+
+# Or generate copy-paste MCP JSON config for Claude / Cursor / VS Code / Antigravity
+print(DarjaAIAgent.get_mcp_config())
+```
+
+**TypeScript:**
+```typescript
+import { DarjaAIAgent, executeAgentTool } from '@dz-open-suite/darja-nlp-kit';
+
+const bot = new DarjaAIAgent({ storeName: 'DzShop' });
+const res = await bot.ask('hab nchri 2 hbat XL l aflou 0661234567');
+console.log(res.reply, res.readyToConfirm);
+```
+
 ## Zero-Dependency CLI
 
 `darja-nlp-kit` comes with an instant command-line tool requiring zero extra dependencies:
 
 ```bash
+# Plug-and-play AI Agent REPL & MCP server setup
+darja-nlp agent
+darja-nlp agent "hab nchri 2 hbat l aflou 0661234567"
+darja-nlp agent-setup
+darja-nlp mcp
+
 # Unified full-pipeline analysis (entities, sentiment, dialect, intent, reply)
 darja-nlp analyze "salam kho hab nchri 2 hbat noir l wahran 0661234567"
 
@@ -789,11 +843,11 @@ darja-nlp-kit/
 ├── docs/                          # Standalone GitHub Pages interactive web playground
 ├── packages/
 │   ├── js/                        # TypeScript/JavaScript package (@dz-open-suite/darja-nlp-kit)
-│   │   ├── src/                   # pipeline, classifier, chat, sentiment, dialogue, entities, server, cli, ...
+│   │   ├── src/                   # pipeline, classifier, chat, agent, mcp, sentiment, dialogue, entities, server, cli, ...
 │   │   ├── tests/
 │   │   └── package.json
 │   └── python/                    # Python package (darja-nlp-kit)
-│       ├── darja_nlp/             # pipeline, classifier, chat, sentiment, dialogue, entities, server, cli, ...
+│       ├── darja_nlp/             # pipeline, classifier, chat, agent, mcp, sentiment, dialogue, entities, server, cli, ...
 │       ├── tests/
 │       └── pyproject.toml
 ├── scripts/
